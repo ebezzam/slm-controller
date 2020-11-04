@@ -1,15 +1,17 @@
-#!/usr/bin/env bash
-
-# create Python 3 virtual environment
-python -m pip install --user virtualenv
-virtualenv -p python3 venv3
-source venv3/bin/activate
+#!/bin/sh
 
 # OS requirements
 sudo apt-get -y install libatlas-base-dev
 sudo apt-get -y install ttf-dejavu
 
+
+# create Python 3 virtual environment
+python3 -m pip install --user virtualenv
+virtualenv -p python3 photonics_env
+source photonics_env/bin/activate
+
+
 # install dependencies
-pip install adafruit-circuitpython-rgb-display
-pip install pillow==5.4.1
-pip install numpy==1.16.2
+python3 -m pip install adafruit-circuitpython-rgb-display
+python3 -m pip install pillow==5.4.1
+python3 -m pip install numpy==1.16.2
