@@ -6,6 +6,7 @@ try:
     import board
     import digitalio
     import adafruit_rgb_display.st7735 as st7735
+
     board_available = True
 except:
     board_available = False
@@ -138,5 +139,3 @@ class RGBDisplay(object):
             self.clear_display()
             PIL_image = Image.fromarray(np.uint8(image)).convert("RGB")
             self._disp.image(PIL_image)
-
-
