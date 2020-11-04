@@ -1,2 +1,3 @@
-#!/usr/bin/env bash
-black *.py -l 79
+#!/bin/sh
+
+black *.py -l 100
