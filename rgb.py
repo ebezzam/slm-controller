@@ -1,11 +1,11 @@
 from PIL import Image, ImageDraw
 import warnings
 import numpy as np
+import digitalio
+import adafruit_rgb_display.st7735 as st7735
 
 try:
     import board
-    import digitalio
-    import adafruit_rgb_display.st7735 as st7735
 
     board_available = True
 except:
@@ -21,6 +21,10 @@ class RGBDisplay(object):
         rotation=90,
         baudrate=24000000,
     ):
+
+        import pudb
+
+        pudb.set_trace()
 
         if board_available:
             cs_pin = cs_pin if cs_pin is not None else board.CE0
