@@ -22,10 +22,6 @@ class RGBDisplay(object):
         baudrate=24000000,
     ):
 
-        import pudb
-
-        pudb.set_trace()
-
         if board_available:
             cs_pin = cs_pin if cs_pin is not None else board.CE0
             dc_pin = dc_pin if dc_pin is not None else board.D25
