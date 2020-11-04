@@ -25,13 +25,13 @@ source venv3/bin/activate
 ```
 You can exit the virtual environment by running `deactivate`.
 
-To display an image, try the following script:
+For displaying an image, check out the following script:
 
 ```python
 python rgb_display_image.py
 ```
 
-To display a numpy array, try the following script:
+For displaying a numpy array, check out the following script:
 
 ```python
 python rgb_display_numpy.py
