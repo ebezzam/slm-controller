@@ -25,14 +25,8 @@ source photonics_env/bin/activate
 ```
 You can exit the virtual environment by running `deactivate`.
 
-For displaying an image, check out the following script:
+For displaying an arbitrary numpy array, check out the following script:
 
 ```python
-python3 rgb_display_image.py
-```
-
-For displaying a numpy array, check out the following script:
-
-```python
-python3 rgb_display_numpy.py
+python example.py
 ```
