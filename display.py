@@ -4,6 +4,50 @@ import numpy as np
 import PIL
 
 
+def load_image(fname):
+    """
+    Load an image.
+
+    Parameters
+    ----------
+    fname : str, path-like
+        Valid image file (i.e. JPG, PNG, BMP, TIFF, etc.)
+
+    Returns
+    -------
+    I : :py:class:`~numpy.ndarray`
+        ([N_channel,] N_height, N_width) image.
+        Output dtype is format-dependent.
+    """
+    I_p = PIL.Image.open(fname, mode='r')
+    I = np.asarray(I_p)  # (N_height, N_width [, N_channel])
+    if I.ndim > 2:
+        I = I.transpose(2, 0, 1)
+    return I
+
+
+def save_image(I, fname):
+    """
+    Save image to a file.
+
+    Parameters
+    ----------
+    I : :py:class:`~numpy.ndarray`
+        (N_channel, N_height, N_width) image.
+    """
+    I_max = I.max()
+    I_max = 1 if np.isclose(I_max, 0) else I_max
+
+    I_f = I / I_max  # float64
+    I_u = np.uint8(255 * I_f)  # uint8
+
+    if I.ndim == 3:
+        I_u = I_u.transpose(1, 2, 0)
+
+    I_p = PIL.Image.fromarray(I_u)
+    I_p.save(fname)
+
+
 class Display:
     def __init__(self):
         pass
