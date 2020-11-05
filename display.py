@@ -1,7 +1,7 @@
 import abc
 
 import numpy as np
-import PIL
+from PIL import Image, ImageDraw
 
 
 def load_image(fname):
@@ -19,7 +19,7 @@ def load_image(fname):
         ([N_channel,] N_height, N_width) image.
         Output dtype is format-dependent.
     """
-    I_p = PIL.Image.open(fname, mode='r')
+    I_p = Image.open(fname, mode='r')
     I = np.asarray(I_p)  # (N_height, N_width [, N_channel])
     if I.ndim > 2:
         I = I.transpose(2, 0, 1)
@@ -44,7 +44,7 @@ def save_image(I, fname):
     if I.ndim == 3:
         I_u = I_u.transpose(1, 2, 0)
 
-    I_p = PIL.Image.fromarray(I_u)
+    I_p = Image.fromarray(I_u)
     I_p.save(fname)
 
 
@@ -139,10 +139,10 @@ class RGBDisplay(Display):
             raise IOError("Failed to load display.")
 
     def clear(self):
-        I = PIL.Image.new("RGB", (self.width, self.height))
+        I = Image.new("RGB", (self.width, self.height))
 
         # Get drawing object to draw on image.
-        draw = PIL.ImageDraw.Draw(I)
+        draw = ImageDraw.Draw(I)
 
         # Draw a black filled box to clear the image.
         draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
@@ -176,7 +176,7 @@ class RGBDisplay(Display):
             I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
             I_u = np.uint8(255 * I_f)  # uint8
 
-            I_p = PIL.Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
+            I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
             self._disp.image(I_p)
         except:
             raise ValueError("Parameter[I]: unsupported shape")
