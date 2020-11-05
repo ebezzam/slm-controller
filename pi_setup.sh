@@ -12,6 +12,6 @@ source photonics_env/bin/activate
 
 
 # install dependencies
-python3 -m pip install adafruit-circuitpython-rgb-display
-python3 -m pip install pillow==5.4.1
-python3 -m pip install numpy==1.16.2
+pip install adafruit-circuitpython-rgb-display
+pip install pillow==5.4.1
+pip install numpy==1.16.2
