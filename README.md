@@ -20,25 +20,25 @@ The script will:
 
 Activate the virtual environment:
 
-```python
+```sh
 source photonics_env/bin/activate
 ```
 You can exit the virtual environment by running `deactivate`.
 
 To display a randomly generated grayscale image, run the following command:
 
-```python
+```sh
 python example.py
 ```
 
 For a randomly generated RBG image:
 
-```python
+```sh
 python example.py --rgb
 ```
 
 For an image, you can pass the file path:
 
-```python
+```sh
 python example.py --file_path blinka.jpg
 ```
