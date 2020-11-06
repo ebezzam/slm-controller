@@ -3,19 +3,30 @@ Data cube display.
 """
 
 import numpy as np
-
+import click
 import display
 
 
-### instantiate display object
-D = display.RGBDisplay()
+@click.command()
+@click.option("--file_path", type=str, default=None)
+@click.option("--rgb", is_flag=True)
+def rgb_display_example(file_path, rgb):
 
-### create image data
-I_bw = np.random.rand(*D.shape)
-# I_rgb = np.random.rand(3, *D.shape)
-# I_file = display.load_image('./blinka.jpg')
+    # instantiate display object
+    D = display.RGBDisplay()
 
-### display
-D.imshow(I_bw)
-# D.imshow(I_rgb)
-# D.imshow(I_file)
+    # prepare image data
+    if file_path is not None:
+        image = display.load_image(file_path, width=D.width, height=D.height)
+    else:
+        if rgb:
+            image = np.random.rand(3, *D.shape)
+        else:
+            image = np.random.rand(*D.shape)
+
+    # display
+    D.imshow(image)
+
+
+if __name__ == "__main__":
+    rgb_display_example()
