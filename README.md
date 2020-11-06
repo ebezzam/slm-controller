@@ -25,8 +25,20 @@ source photonics_env/bin/activate
 ```
 You can exit the virtual environment by running `deactivate`.
 
-For displaying an arbitrary numpy array, check out the following script:
+To display a randomly generated grayscale image, run the following command:
 
 ```python
 python example.py
+```
+
+For a randomly generated RBG image:
+
+```python
+python example.py --rgb
+```
+
+For an image, you can pass the file path:
+
+```python
+python example.py --file_path blinka.jpg
 ```
