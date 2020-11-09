@@ -31,7 +31,7 @@ To display a randomly generated grayscale image, run the following command:
 python example.py
 ```
 
-For a randomly generated RBG image:
+For a randomly generated RGB image:
 
 ```sh
 python example.py --rgb
