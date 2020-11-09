@@ -2,7 +2,7 @@
 
 Scripts and modules to control displays with Python.
 
-Note that our convention for dimension order is (# channels x height x width).
+Note that our convention for dimension order is (channels, height, width).
 
 ## Installation
 
@@ -17,6 +17,16 @@ The script will:
 1. Install OS dependencies.
 2. Create a Python3 virtual environment called `photonics_env`.
 3. Install Python dependencies in the virtual environment.
+
+
+#### No Raspberry Pi?
+
+You can still try out some features of this library by running:
+```sh
+pip install -e .
+```
+
+You won't be able to run any examples that use the display.
 
 ## Example scripts
 
@@ -45,3 +55,8 @@ For an image, you can pass the file path:
 python examples/rgb_display.py --file_path examples/blinka.jpg
 ```
 The original image will be rescaled and cropped to match the original aspect ratio.
+
+To set a defined aperture shape, try out the following script:
+```sh
+python examples/set_rgb_aperture.py
+```
