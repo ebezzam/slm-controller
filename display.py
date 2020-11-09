@@ -1,51 +1,7 @@
 import abc
 
 import numpy as np
-import PIL
-
-
-def load_image(fname):
-    """
-    Load an image.
-
-    Parameters
-    ----------
-    fname : str, path-like
-        Valid image file (i.e. JPG, PNG, BMP, TIFF, etc.)
-
-    Returns
-    -------
-    I : :py:class:`~numpy.ndarray`
-        ([N_channel,] N_height, N_width) image.
-        Output dtype is format-dependent.
-    """
-    I_p = PIL.Image.open(fname, mode='r')
-    I = np.asarray(I_p)  # (N_height, N_width [, N_channel])
-    if I.ndim > 2:
-        I = I.transpose(2, 0, 1)
-    return I
-
-
-def save_image(I, fname):
-    """
-    Save image to a file.
-
-    Parameters
-    ----------
-    I : :py:class:`~numpy.ndarray`
-        (N_channel, N_height, N_width) image.
-    """
-    I_max = I.max()
-    I_max = 1 if np.isclose(I_max, 0) else I_max
-
-    I_f = I / I_max  # float64
-    I_u = np.uint8(255 * I_f)  # uint8
-
-    if I.ndim == 3:
-        I_u = I_u.transpose(1, 2, 0)
-
-    I_p = PIL.Image.fromarray(I_u)
-    I_p.save(fname)
+from PIL import Image, ImageDraw
 
 
 class Display:
@@ -100,7 +56,27 @@ class RGBDisplay(Display):
         rotation=90,
         baudrate=24000000,
     ):
+        """
+        Object to display images on the Adafruit 1.8" TFT Display Breakout with a Raspberry Pi:
+        https://learn.adafruit.com/1-8-tft-display/overview
+
+        Parameters
+        ----------
+        cs_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
+            Raspberry Pi pin connected to TFT_CS pin on the display breakout.
+        dc_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
+            Raspberry Pi pin connected to D/C pin on the display breakout.
+        reset_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
+            Raspberry Pi pin connected to RESET pin on the display breakout.
+        rotation : 0, 90, 180, or 270
+            Rotation of image on the display.
+        baudrate : int
+            Baud rate
+        """
         super().__init__()
+
+        if rotation not in (0, 90, 180, 270):
+            raise ValueError("Rotation must be 0/90/180/270")
 
         try:
             import board
@@ -139,10 +115,13 @@ class RGBDisplay(Display):
             raise IOError("Failed to load display.")
 
     def clear(self):
-        I = PIL.Image.new("RGB", (self.width, self.height))
+        """
+        Clear display.
+        """
+        I = Image.new("RGB", (self.width, self.height))
 
         # Get drawing object to draw on image.
-        draw = PIL.ImageDraw.Draw(I)
+        draw = ImageDraw.Draw(I)
 
         # Draw a black filled box to clear the image.
         draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
@@ -176,7 +155,7 @@ class RGBDisplay(Display):
             I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
             I_u = np.uint8(255 * I_f)  # uint8
 
-            I_p = PIL.Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
+            I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
             self._disp.image(I_p)
         except:
             raise ValueError("Parameter[I]: unsupported shape")
