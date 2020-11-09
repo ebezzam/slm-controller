@@ -42,3 +42,4 @@ For an image, you can pass the file path:
 ```sh
 python example.py --file_path blinka.jpg
 ```
+The original image will be rescaled and cropped to match the original aspect ratio.
