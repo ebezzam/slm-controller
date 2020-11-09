@@ -1,25 +1,32 @@
-import abc
 import numpy as np
 
 
 class DigitalAperture:
-    def __init__(self, slm_dim):
+    def __init__(self, mask, pixel_shape):
         """
         Abstract class for digital apertures with a spatial light modulator.
 
         Parameters
         ----------
-        slm_dim : tuple(int)
-            Dimensions (height, width) of the spatial light modulator.
+        mask : :py:class:`~numpy.ndarray`
+            ([3,] N_height, N_width) non-negative reals.
+        pixel_shape : tuple(float)
+            Pixel dimensions (height, width) in meters.
         """
-        assert slm_dim[0] > 0
-        assert slm_dim[1] > 1
-        self._slm_dim = slm_dim
-        self._mask = None
+        self._mask = mask
+        self._slm_dim = (mask.shape[-2], mask.shape[-1])
+        assert len(pixel_shape) == 2
+        assert pixel_shape[0] > 0
+        assert pixel_shape[1] > 0
+        self._pixel_shape = pixel_shape
 
     @property
-    def n_slm_pixels(self):
-        return self._slm_dim[0] * self._slm_dim[1]
+    def size(self):
+        return np.prod(self._slm_dim)
+
+    @property
+    def shape(self):
+        return self._slm_dim
 
     @property
     def mask(self):
@@ -28,11 +35,7 @@ class DigitalAperture:
         """
         return self._mask
 
-    @abc.abstractmethod
-    def _compute_mask(self):
-        pass
-
-    def plot(self):
+    def plot(self, show_tick_labels=False):
 
         import matplotlib.pyplot as plt
 
@@ -41,19 +44,35 @@ class DigitalAperture:
 
         # plot
         fig, ax = plt.subplots()
-        ax.imshow(Z)
+        # ax.imshow(Z)
+        extent = [
+            -0.5 * self._pixel_shape[1],
+            (self._slm_dim[1] - 0.5) * self._pixel_shape[1],
+            (self._slm_dim[0] - 0.5) * self._pixel_shape[0],
+            -0.5 * self._pixel_shape[0],
+        ]
+        ax.imshow(Z, extent=extent)
         ax.grid(which="major", axis="both", linestyle="-", color="0.5", linewidth=0.25)
 
-        x_ticks = np.arange(-0.5, self._slm_dim[1], 1)
-        labels_x = [None] * len(x_ticks)
-        plt.xticks(x_ticks, labels=labels_x)
-        y_ticks = np.arange(-0.5, self._slm_dim[0], 1)
-        labels_y = [None] * len(y_ticks)
-        plt.yticks(y_ticks, labels=labels_y)
+        x_ticks = np.arange(-0.5, self._slm_dim[1], 1) * self._pixel_shape[1]
+        ax.set_xticks(x_ticks)
+        if show_tick_labels:
+            x_tick_labels = (np.arange(-0.5, self._slm_dim[1], 1) + 0.5).astype(int)
+        else:
+            x_tick_labels = [None] * len(x_ticks)
+        ax.set_xticklabels(x_tick_labels)
+
+        y_ticks = np.arange(-0.5, self._slm_dim[0], 1) * self._pixel_shape[0]
+        ax.set_yticks(y_ticks)
+        if show_tick_labels:
+            y_tick_labels = (np.arange(-0.5, self._slm_dim[0], 1) + 0.5).astype(int)
+        else:
+            y_tick_labels = [None] * len(y_ticks)
+        ax.set_yticklabels(y_tick_labels)
 
 
 class RectAperture(DigitalAperture):
-    def __init__(self, apert_dim, slm_dim, center=None):
+    def __init__(self, apert_dim, slm_dim, pixel_shape, center=None):
         """
         Object to create rectangular aperture.
 
@@ -63,12 +82,14 @@ class RectAperture(DigitalAperture):
             Dimensions (height, width) of aperture.
         slm_dim : tuple(int)
             Dimensions (height, width) of the spatial light modulator (SLM).
+        pixel_shape : tuple(float)
+            Pixel dimensions (height, width) in meters.
         center : tuple(int)
             [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left
             corner. Default is to place center of aperture at center of SLM.
         """
 
-        super().__init__(slm_dim=slm_dim)
+        # check input values
         assert apert_dim[0] > 0
         assert apert_dim[1] > 1
         self._apert_dim = apert_dim
@@ -82,11 +103,8 @@ class RectAperture(DigitalAperture):
                 0 <= center[1] < slm_dim[1]
             ), f"Center {center} must lie within SLM dimensions {slm_dim}."
         self._center = center
-        self._compute_mask()
 
-    def _compute_mask(self):
-
-        # determine position of aperture
+        # compute mask
         top_left = (
             self._center[0] - self._apert_dim[0] // 2,
             self._center[1] - self._apert_dim[1] // 2,
@@ -95,15 +113,16 @@ class RectAperture(DigitalAperture):
         if (
             top_left[0] < 0
             or top_left[1] < 0
-            or bottom_right[0] >= self._slm_dim[0]
-            or bottom_right[1] >= self._slm_dim[1]
+            or bottom_right[0] >= slm_dim[0]
+            or bottom_right[1] >= slm_dim[1]
         ):
             raise ValueError(
                 f"Aperture ({top_left[0]}:{bottom_right[0]}, "
                 f"{top_left[1]}:{bottom_right[1]}) extends past valid "
-                f"SLM indices (0:{self._slm_dim[0] - 1}, 0:{self._slm_dim[1] - 1})"
+                f"SLM indices (0:{slm_dim[0] - 1}, 0:{slm_dim[1] - 1})"
             )
+        mask = np.zeros((3,) + slm_dim)
+        mask[:, top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]] = 1
 
-        # create mask
-        self._mask = np.zeros((3,) + self._slm_dim)
-        self._mask[:, top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]] = 1
+        # call parent constructor
+        super().__init__(mask=mask, pixel_shape=pixel_shape)
