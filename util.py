@@ -65,6 +65,8 @@ def save_image(I, fname):
     ----------
     I : :py:class:`~numpy.ndarray`
         (N_channel, N_height, N_width) image.
+    fname : str, path-like
+        Valid image file (i.e. JPG, PNG, BMP, TIFF, etc.).
     """
     I_max = I.max()
     I_max = 1 if np.isclose(I_max, 0) else I_max
