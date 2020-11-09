@@ -18,9 +18,8 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
-    install_requires=[
-        "adafruit-circuitpython-rgb-display",
-        "pillow==5.4.1",
-        "numpy==1.16.2"
-    ]
+    install_requires=["adafruit-circuitpython-rgb-display", "pillow==5.4.1", "numpy==1.16.2"],
+    extra_requires={
+        "dev": ["click", "matplotlib", "pytest"],
+    },
 )

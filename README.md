@@ -23,7 +23,7 @@ The script will:
 
 You can still try out some features of this library by running:
 ```sh
-pip install -e .
+pip install -e .[dev]
 ```
 
 You won't be able to run any examples that use the display.

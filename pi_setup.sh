@@ -13,4 +13,4 @@ source photonics_env/bin/activate
 
 # install dependencies
 pip install click
-pip install -e .
+pip install -e .[dev]
