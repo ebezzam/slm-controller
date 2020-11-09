@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 
-def load_image(fname, width=None, height=None):
+def load_image(fname, output_shape=None):
     """
     Load an image.
 
@@ -12,8 +12,8 @@ def load_image(fname, width=None, height=None):
     ----------
     fname : str, path-like
         Valid image file (i.e. JPG, PNG, BMP, TIFF, etc.)
-    width : int, optional
-    height : int, optional
+    output_shape : tuple(int)
+        [Optional] rescale image to (height, width) pixels.
 
     Returns
     -------
@@ -24,12 +24,9 @@ def load_image(fname, width=None, height=None):
     I_p = Image.open(fname, mode="r")
 
     # rescale and resize if need be
-    if width is not None or height is not None:
-        if width is None:
-            width = I_p.width
-        if height is None:
-            height = I_p.height
-
+    if output_shape is not None:
+        height = output_shape[0]
+        width = output_shape[1]
         image_ratio = I_p.width / I_p.height
         screen_ratio = width / height
         if screen_ratio < image_ratio:

@@ -17,7 +17,7 @@ def rgb_display_example(file_path, rgb):
 
     # prepare image data
     if file_path is not None:
-        image = display.load_image(file_path, width=D.width, height=D.height)
+        image = display.load_image(file_path, output_shape=D.shape)
     else:
         if rgb:
             image = np.random.rand(3, *D.shape)
