@@ -16,3 +16,4 @@ pip install adafruit-circuitpython-rgb-display
 pip install pillow==5.4.1
 pip install numpy==1.16.2
 pip install click
+pip install -e .
