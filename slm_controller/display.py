@@ -71,7 +71,7 @@ class RGBDisplay(Display):
         rotation : 0, 90, 180, or 270
             Rotation of image on the display.
         baudrate : int
-            Baud rate
+            Baud rate.
         """
         super().__init__()
 

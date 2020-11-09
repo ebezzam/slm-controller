@@ -2,6 +2,8 @@
 
 Scripts and modules to control displays with Python.
 
+Note that our convention for dimension order is (# channels x height x width).
+
 ## Installation
 
 The target platform is a Raspberry Pi. After cloning this repository, you can
@@ -28,18 +30,18 @@ You can exit the virtual environment by running `deactivate`.
 To display a randomly generated grayscale image, run the following command:
 
 ```sh
-python example.py
+python examples/rgb_display.py
 ```
 
 For a randomly generated RGB image:
 
 ```sh
-python example.py --rgb
+python examples/rgb_display.py --rgb
 ```
 
 For an image, you can pass the file path:
 
 ```sh
-python example.py --file_path blinka.jpg
+python examples/rgb_display.py--file_path examples/blinka.jpg
 ```
 The original image will be rescaled and cropped to match the original aspect ratio.
