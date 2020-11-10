@@ -1,13 +1,18 @@
 import matplotlib.pyplot as plt
 import click
-from slm_controller.aperture import RectAperture, LineAperture, SquareAperture, CircAperture
-
-
-aperture_options = ["rect", "square", "circ", "line"]
+from slm_controller.aperture import (
+    ApertureOptions,
+    RectAperture,
+    LineAperture,
+    SquareAperture,
+    CircAperture,
+)
 
 
 @click.command()
-@click.option("--shape", default="rect", type=click.Choice(aperture_options))
+@click.option(
+    "--shape", default=ApertureOptions.RECT.value, type=click.Choice(ApertureOptions.values())
+)
 def plot_aperture(shape):
 
     pixel_shape = (0.36e-3, 0.18e-3)
@@ -16,13 +21,13 @@ def plot_aperture(shape):
     # create aperture
     ap = None
     show_tick_labels = True
-    if shape == "rect":
+    if shape == ApertureOptions.RECT.value:
         ap = RectAperture(apert_dim=(2, 4), slm_dim=slm_dim, pixel_shape=pixel_shape)
-    elif shape == "line":
+    elif shape == ApertureOptions.LINE.value:
         ap = LineAperture(n_pixels=6, slm_dim=slm_dim, pixel_shape=pixel_shape, vertical=False)
-    elif shape == "square":
+    elif shape == ApertureOptions.SQUARE.value:
         ap = SquareAperture(side=4, slm_dim=slm_dim, pixel_shape=pixel_shape)
-    elif shape == "circ":
+    elif shape == ApertureOptions.CIRC.value:
         pixel_shape = (0.18e-3, 0.18e-3)
         slm_dim = (100, 120)
         show_tick_labels = False

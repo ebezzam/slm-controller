@@ -1,4 +1,16 @@
 import numpy as np
+from enum import Enum
+
+
+class ApertureOptions(Enum):
+    RECT = "rect"
+    SQUARE = "square"
+    LINE = "line"
+    CIRC = "circ"
+
+    @staticmethod
+    def values():
+        return [shape.value for shape in ApertureOptions]
 
 
 class DigitalAperture:
