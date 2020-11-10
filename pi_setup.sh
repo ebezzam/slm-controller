@@ -11,6 +11,5 @@ virtualenv -p python3 photonics_env
 source photonics_env/bin/activate
 
 
-# install dependencies
-pip install click
+# install package
 pip install -e .[dev]
