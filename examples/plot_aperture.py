@@ -1,28 +1,36 @@
 import matplotlib.pyplot as plt
 import click
-from slm_controller.aperture import RectAperture
+from slm_controller.aperture import RectAperture, LineAperture, SquareAperture, CircAperture
 
 
-aperture_options = ["rect", "square", "circle", "line"]
+aperture_options = ["rect", "square", "circ", "line"]
 
 
 @click.command()
 @click.option("--shape", default="rect", type=click.Choice(aperture_options))
 def plot_aperture(shape):
 
-    # 1.8'' RGB display by Adafruit: https://cdn-shop.adafruit.co3m/datasheets/JD-T1800.pdf
-    # pixel_shape = (0.18e-3, 0.18e-3)
     pixel_shape = (0.36e-3, 0.18e-3)
     slm_dim = (10, 16)
 
     # create aperture
     ap = None
+    show_tick_labels = True
     if shape == "rect":
-        apert_dim = (2, 4)
-        ap = RectAperture(apert_dim=apert_dim, slm_dim=slm_dim, pixel_shape=pixel_shape)
+        ap = RectAperture(apert_dim=(2, 4), slm_dim=slm_dim, pixel_shape=pixel_shape)
+    elif shape == "line":
+        ap = LineAperture(n_pixels=6, slm_dim=slm_dim, pixel_shape=pixel_shape, vertical=False)
+    elif shape == "square":
+        ap = SquareAperture(side=4, slm_dim=slm_dim, pixel_shape=pixel_shape)
+    elif shape == "circ":
+        pixel_shape = (0.18e-3, 0.18e-3)
+        slm_dim = (100, 120)
+        show_tick_labels = False
+        ap = CircAperture(radius=20, slm_dim=slm_dim, pixel_shape=pixel_shape)
+    assert ap is not None
 
     # plot
-    ap.plot(show_tick_labels=True)
+    ap.plot(show_tick_labels=show_tick_labels)
     plt.show()
 
 
