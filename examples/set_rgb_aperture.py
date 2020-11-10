@@ -26,7 +26,7 @@ def set_rgb_aperture(shape, n_pixels, rect_shape, vertical):
         raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
     # prepare display
-    D = display.RGBDisplay()
+    D = display.RGBDisplay(rotation=0)
 
     # print device info
     pixel_shape = devices[DeviceOptions.ADAFRUIT_RGB][DeviceParam.PIXEL_SHAPE]
