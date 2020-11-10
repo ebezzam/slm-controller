@@ -26,24 +26,38 @@ def set_rgb_aperture(shape, n_pixels, rect_shape, horizontal):
         raise ValueError("Received [horizontal] flag, but [shape] parameters is not 'line'.")
 
     # prepare display
-    pixel_shape = devices[DeviceOptions.ADAFRUIT_RGB][DeviceParam.PIXEL_SHAPE]
-    print(f"Pixel shape (m) : {pixel_shape}")
     D = display.RGBDisplay()
 
     # print device info
+    pixel_shape = devices[DeviceOptions.ADAFRUIT_RGB][DeviceParam.PIXEL_SHAPE]
     print(f"SLM dimension : {D.shape}")
+    print(f"Pixel shape (m) : {pixel_shape}")
+    if shape == ApertureOptions.LINE.value:
+        if horizontal:
+            print("Aperture shape : horizontal line")
+        else:
+            print("Aperture shape : vertical line")
+    else:
+        print(f"Aperture shape : {shape}")
 
     # create aperture mask
     ap = None
     if shape == ApertureOptions.LINE.value:
+        print(f"Length : {n_pixels}")
         ap = LineAperture(
-            n_pixels=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape, vertical=False
+            n_pixels=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape, vertical=(not horizontal)
         )
     elif shape == ApertureOptions.SQUARE.value:
+        print(f"Side length : {n_pixels}")
         ap = SquareAperture(side=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape)
     elif shape == ApertureOptions.CIRC.value:
+        print(f"Radius : {n_pixels}")
         ap = CircAperture(radius=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape)
     elif shape == ApertureOptions.RECT.value:
+        if len(rect_shape) == 0:
+            # not provided
+            rect_shape = (n_pixels, n_pixels)
+        print(f"Shape : {rect_shape}")
         ap = RectAperture(apert_dim=rect_shape, slm_dim=D.shape, pixel_shape=pixel_shape)
     assert ap is not None
 
