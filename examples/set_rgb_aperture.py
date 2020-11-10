@@ -1,17 +1,18 @@
 import click
-from slm_controller import display, hardware
+from slm_controller import display
 from slm_controller.aperture import LineAperture, SquareAperture, CircAperture
+from slm_controller.hardware import devices
 
 
 aperture_options = ["square", "circ", "line"]
 
 
 @click.command()
-@click.option("--shape", default="rect", type=click.Choice(aperture_options))
+@click.option("--shape", default=aperture_options[0], type=click.Choice(aperture_options))
 @click.option("--n_pixels", default=10, type=int)
 def set_rgb_aperture(shape, n_pixels):
 
-    pixel_shape = hardware["adafruit_1p8_tft_rgb"]["pixel_shape"]
+    pixel_shape = devices["adafruit_1p8_tft_rgb"]["pixel_shape"]
 
     # instantiate display object
     D = display.RGBDisplay()
