@@ -16,14 +16,14 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
 )
 @click.option("--n_pixels", default=10, type=int)
 @click.option("--rect_shape", default=None, nargs=2, type=int)
-@click.option("--horizontal", is_flag=True)
-def set_rgb_aperture(shape, n_pixels, rect_shape, horizontal):
+@click.option("--vertical", is_flag=True)
+def set_rgb_aperture(shape, n_pixels, rect_shape, vertical):
 
     # check input parameters
     if len(rect_shape) > 0 and shape is not ApertureOptions.RECT.value:
         raise ValueError("Received [rect_shape], but [shape] parameters is not 'rect'.")
-    if horizontal and shape is not ApertureOptions.LINE.value:
-        raise ValueError("Received [horizontal] flag, but [shape] parameters is not 'line'.")
+    if vertical and shape is not ApertureOptions.LINE.value:
+        raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
     # prepare display
     D = display.RGBDisplay()
@@ -33,10 +33,10 @@ def set_rgb_aperture(shape, n_pixels, rect_shape, horizontal):
     print(f"SLM dimension : {D.shape}")
     print(f"Pixel shape (m) : {pixel_shape}")
     if shape == ApertureOptions.LINE.value:
-        if horizontal:
-            print("Aperture shape : horizontal line")
-        else:
+        if vertical:
             print("Aperture shape : vertical line")
+        else:
+            print("Aperture shape : horizontal line")
     else:
         print(f"Aperture shape : {shape}")
 
@@ -45,7 +45,7 @@ def set_rgb_aperture(shape, n_pixels, rect_shape, horizontal):
     if shape == ApertureOptions.LINE.value:
         print(f"Length : {n_pixels}")
         ap = LineAperture(
-            n_pixels=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape, vertical=(not horizontal)
+            n_pixels=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape, vertical=vertical
         )
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_pixels}")
