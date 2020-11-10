@@ -91,8 +91,11 @@ class RectAperture(DigitalAperture):
 
         # check input values
         assert apert_dim[0] > 0
-        assert apert_dim[1] > 1
-        self._apert_dim = apert_dim
+        assert apert_dim[1] > 0
+        assert slm_dim[0] > 0
+        assert slm_dim[1] > 0
+
+        # check / compute center
         if center is None:
             center = (slm_dim[0] // 2, slm_dim[1] // 2)
         else:
@@ -105,6 +108,7 @@ class RectAperture(DigitalAperture):
         self._center = center
 
         # compute mask
+        self._apert_dim = apert_dim
         top_left = (
             self._center[0] - self._apert_dim[0] // 2,
             self._center[1] - self._apert_dim[1] // 2,
@@ -125,4 +129,104 @@ class RectAperture(DigitalAperture):
         mask[:, top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]] = 1
 
         # call parent constructor
+        super().__init__(mask=mask, pixel_shape=pixel_shape)
+
+
+class LineAperture(RectAperture):
+    def __init__(self, n_pixels, slm_dim, pixel_shape, vertical=True, center=None):
+        """
+        Object to create line aperture.
+
+        Parameters
+        ----------
+        n_pixels : int
+            Number of pixels for aperture.
+        slm_dim : tuple(int)
+            Dimensions (height, width) of the spatial light modulator (SLM).
+        pixel_shape : tuple(float)
+            Pixel dimensions (height, width) in meters.
+        vertical : bool
+            Whether apertude should be vertical line (True), or horizontal line (False).
+        center : tuple(int)
+            [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left
+            corner. Default is to place center of aperture at center of SLM.
+        """
+        if vertical:
+            apert_dim = (n_pixels, 1)
+        else:
+            apert_dim = (1, n_pixels)
+        super().__init__(
+            apert_dim=apert_dim, slm_dim=slm_dim, pixel_shape=pixel_shape, center=center
+        )
+
+
+class SquareAperture(RectAperture):
+    def __init__(self, side, slm_dim, pixel_shape, center=None):
+        """
+        Object to create line aperture.
+
+        Parameters
+        ----------
+        side : int
+            Number of pixels for each side length.
+        slm_dim : tuple(int)
+            Dimensions (height, width) of the spatial light modulator (SLM).
+        pixel_shape : tuple(float)
+            Pixel dimensions (height, width) in meters.
+        center : tuple(int)
+            [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left
+            corner. Default is to place center of aperture at center of SLM.
+        """
+        super().__init__(
+            apert_dim=(side, side), slm_dim=slm_dim, pixel_shape=pixel_shape, center=center
+        )
+
+
+class CircAperture(DigitalAperture):
+    def __init__(self, radius, slm_dim, pixel_shape, center=None):
+        """
+        Object to create line aperture.
+
+        Parameters
+        ----------
+        radius : int
+            Radius in number of pixels.
+        slm_dim : tuple(int)
+            Dimensions (height, width) of the spatial light modulator (SLM).
+        pixel_shape : tuple(float)
+            Pixel dimensions (height, width) in meters.
+        center : tuple(int)
+            [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left
+            corner. Default is to place center of aperture at center of SLM.
+        """
+        # check input values
+        assert radius > 0
+        assert slm_dim[0] > 0
+        assert slm_dim[1] > 0
+
+        # check / compute center
+        if center is None:
+            center = (slm_dim[0] // 2, slm_dim[1] // 2)
+        else:
+            assert (
+                0 <= center[0] < slm_dim[0]
+            ), f"Center {center} must lie within SLM dimensions {slm_dim}."
+            assert (
+                0 <= center[1] < slm_dim[1]
+            ), f"Center {center} must lie within SLM dimensions {slm_dim}."
+        self._center = center
+
+        # compute mask
+        self._radius = radius
+        mask = np.zeros((3,) + slm_dim)
+        top_left = (self._center[0] - self._radius, self._center[1] - self._radius)
+        bottom_right = (top_left[0] + 2 * self._radius, top_left[1] + 2 * self._radius)
+        r2 = self._radius ** 2
+        for i in range(top_left[0], bottom_right[0] + 1):
+            x2 = (i - self._center[0]) ** 2
+            for j in range(top_left[1], bottom_right[1] + 1):
+                y2 = (j - self._center[1]) ** 2
+                if np.floor(x2 + y2) < r2:
+                    mask[:, i, j] = 1
+
         super().__init__(mask=mask, pixel_shape=pixel_shape)
