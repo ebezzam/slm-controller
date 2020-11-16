@@ -234,11 +234,13 @@ class CircAperture(DigitalAperture):
         top_left = (self._center[0] - self._radius, self._center[1] - self._radius)
         bottom_right = (top_left[0] + 2 * self._radius, top_left[1] + 2 * self._radius)
         r2 = self._radius ** 2
-        for i in range(top_left[0], bottom_right[0] + 1):
-            x2 = (i - self._center[0]) ** 2
-            for j in range(top_left[1], bottom_right[1] + 1):
-                y2 = (j - self._center[1]) ** 2
-                if np.floor(x2 + y2) < r2:
-                    mask[:, i, j] = 1
-
+        i, j = np.meshgrid(
+            np.arange(top_left[0], bottom_right[0] + 1),
+            np.arange(top_left[1], bottom_right[1] + 1),
+            sparse=True,
+            indexing="ij",
+        )
+        x2 = (i - self._center[0]) ** 2
+        y2 = (j - self._center[1]) ** 2
+        mask[:, i, j] = np.floor(x2 + y2) < r2
         super().__init__(mask=mask, pixel_shape=pixel_shape)
