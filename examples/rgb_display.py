@@ -4,8 +4,7 @@ Data cube display.
 
 import numpy as np
 import click
-import display
-import util
+from slm_controller import display, util
 
 
 @click.command()
