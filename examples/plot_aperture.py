@@ -13,25 +13,59 @@ from slm_controller.aperture import (
 @click.option(
     "--shape", default=ApertureOptions.RECT.value, type=click.Choice(ApertureOptions.values())
 )
-def plot_aperture(shape):
+@click.option("--n_pixels", default=10, type=int)
+@click.option("--rect_shape", default=None, nargs=2, type=int)
+@click.option("--vertical", is_flag=True)
+@click.option("--show_tick_labels", is_flag=True)
+@click.option("--pixel_shape", default=None, nargs=2, type=float)
+@click.option("--slm_dim", default=None, nargs=2, type=int)
+def plot_aperture(shape, n_pixels, rect_shape, vertical, show_tick_labels, pixel_shape, slm_dim):
+    """
+    Plot SLM aperture.
 
-    pixel_shape = (0.36e-3, 0.18e-3)
-    slm_dim = (10, 16)
+    Parameters
+    ----------
+    shape : "rect", "square", "line", or "circ"
+        Shape of aperture.
+    n_pixels : int
+        Side length for "square", length for "line", radius for "circ". To set shape for "rect", use
+        `rect_shape`.
+    rect_shape : tuple
+        Shape for "rect"; `shape` must be set to "rect".
+    vertical : bool
+        Whether line should be vertical (True) or horizontal (False).
+    show_tick_labels : bool
+        Whether or not to show pixel values along axes.
+    pixel_shape : tuple
+        Shape of pixel in meters (height, width).
+    slm_dim : tuple
+        Dimension of SLM in number of pixels (height, width).
+    """
+
+    if len(pixel_shape) == 0:
+        pixel_shape = (0.18e-3, 0.18e-3)
+    if len(slm_dim) == 0:
+        slm_dim = (160, 128)
 
     # create aperture
     ap = None
-    show_tick_labels = True
     if shape == ApertureOptions.RECT.value:
-        ap = RectAperture(apert_dim=(2, 4), slm_dim=slm_dim, pixel_shape=pixel_shape)
+        if len(rect_shape) == 0:
+            # not provided
+            rect_shape = (n_pixels, n_pixels)
+        print(f"Shape : {rect_shape}")
+        ap = RectAperture(apert_dim=rect_shape, slm_dim=slm_dim, pixel_shape=pixel_shape)
     elif shape == ApertureOptions.LINE.value:
-        ap = LineAperture(n_pixels=6, slm_dim=slm_dim, pixel_shape=pixel_shape, vertical=False)
+        print(f"Length : {n_pixels}")
+        ap = LineAperture(
+            n_pixels=n_pixels, slm_dim=slm_dim, pixel_shape=pixel_shape, vertical=vertical
+        )
     elif shape == ApertureOptions.SQUARE.value:
-        ap = SquareAperture(side=4, slm_dim=slm_dim, pixel_shape=pixel_shape)
+        print(f"Side length : {n_pixels}")
+        ap = SquareAperture(side=n_pixels, slm_dim=slm_dim, pixel_shape=pixel_shape)
     elif shape == ApertureOptions.CIRC.value:
-        pixel_shape = (0.18e-3, 0.18e-3)
-        slm_dim = (100, 120)
-        show_tick_labels = False
-        ap = CircAperture(radius=20, slm_dim=slm_dim, pixel_shape=pixel_shape)
+        print(f"Radius : {n_pixels}")
+        ap = CircAperture(radius=n_pixels, slm_dim=slm_dim, pixel_shape=pixel_shape)
     assert ap is not None
 
     # plot

@@ -18,6 +18,21 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
 @click.option("--rect_shape", default=None, nargs=2, type=int)
 @click.option("--vertical", is_flag=True)
 def set_rgb_aperture(shape, n_pixels, rect_shape, vertical):
+    """
+    Set aperture for the 1.8'' RGB display by Adafruit.
+
+    Parameters
+    ----------
+    shape : "rect", "square", "line", or "circ"
+        Shape of aperture.
+    n_pixels : int
+        Side length for "square", length for "line", radius for "circ". To set shape for "rect", use
+        `rect_shape`.
+    rect_shape : tuple
+        Shape for "rect"; `shape` must be set to "rect".
+    vertical : bool
+        Whether line should be vertical (True) or horizontal (False).
+    """
 
     # check input parameters
     if len(rect_shape) > 0 and shape is not ApertureOptions.RECT.value:
