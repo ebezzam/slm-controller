@@ -52,10 +52,6 @@ class SLM:
         return np.array([self.height / 2, self.width / 2])
 
     @property
-    def center_cell(self):
-        return np.array([self._shape[0] // 2, self._shape[1] // 2])
-
-    @property
     def values(self):
         return self._values
 
