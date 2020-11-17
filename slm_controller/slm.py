@@ -36,6 +36,10 @@ class SLM:
         return self._cell_dim
 
     @property
+    def center(self):
+        return np.array([self.height / 2, self.width / 2])
+
+    @property
     def dim(self):
         return np.array(self._shape) * np.array(self._cell_dim)
 
@@ -48,10 +52,6 @@ class SLM:
         return self._shape[1] * self._cell_dim[1]
 
     @property
-    def center(self):
-        return np.array([self.height / 2, self.width / 2])
-
-    @property
     def values(self):
         return self._values
 
@@ -62,3 +62,45 @@ class SLM:
     def __setitem__(self, key, value):
         idx = _prepare_index_vals(key, self._cell_dim)
         self._values[idx] = value
+
+    def plot(self, show_tick_labels=False):
+        """
+        Plot SLM pattern.
+
+        Parameters
+        ----------
+        show_tick_labels : bool
+            Whether to show cell number along x- and y-axis.
+        """
+
+        import matplotlib.pyplot as plt
+
+        # prepare mask data for `imshow`, expects the input data array size to be (width, height, 3)
+        Z = self._values.transpose(1, 2, 0)
+
+        # plot
+        fig, ax = plt.subplots()
+        extent = [
+            -0.5 * self._cell_dim[1],
+            (self._shape[1] - 0.5) * self._cell_dim[1],
+            (self._shape[0] - 0.5) * self._cell_dim[0],
+            -0.5 * self._cell_dim[0],
+        ]
+        ax.imshow(Z, extent=extent)
+        ax.grid(which="major", axis="both", linestyle="-", color="0.5", linewidth=0.25)
+
+        x_ticks = np.arange(-0.5, self._shape[1], 1) * self._cell_dim[1]
+        ax.set_xticks(x_ticks)
+        if show_tick_labels:
+            x_tick_labels = (np.arange(-0.5, self._shape[1], 1) + 0.5).astype(int)
+        else:
+            x_tick_labels = [None] * len(x_ticks)
+        ax.set_xticklabels(x_tick_labels)
+
+        y_ticks = np.arange(-0.5, self._shape[0], 1) * self._cell_dim[0]
+        ax.set_yticks(y_ticks)
+        if show_tick_labels:
+            y_tick_labels = (np.arange(-0.5, self._shape[0], 1) + 0.5).astype(int)
+        else:
+            y_tick_labels = [None] * len(y_ticks)
+        ax.set_yticklabels(y_tick_labels)

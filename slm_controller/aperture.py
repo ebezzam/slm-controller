@@ -47,38 +47,7 @@ class DigitalAperture:
         show_tick_labels : bool
             Whether to show cell number along x- and y-axis.
         """
-
-        import matplotlib.pyplot as plt
-
-        # prepare mask data for `imshow`, expects the input data array size to be (width, height, 3)
-        Z = self.mask.transpose(1, 2, 0)
-
-        # plot
-        fig, ax = plt.subplots()
-        extent = [
-            -0.5 * self._slm.cell_dim[1],
-            (self._slm.shape[1] - 0.5) * self._slm.cell_dim[1],
-            (self._slm.shape[0] - 0.5) * self._slm.cell_dim[0],
-            -0.5 * self._slm.cell_dim[0],
-        ]
-        ax.imshow(Z, extent=extent)
-        ax.grid(which="major", axis="both", linestyle="-", color="0.5", linewidth=0.25)
-
-        x_ticks = np.arange(-0.5, self._slm.shape[1], 1) * self._slm.cell_dim[1]
-        ax.set_xticks(x_ticks)
-        if show_tick_labels:
-            x_tick_labels = (np.arange(-0.5, self._slm.shape[1], 1) + 0.5).astype(int)
-        else:
-            x_tick_labels = [None] * len(x_ticks)
-        ax.set_xticklabels(x_tick_labels)
-
-        y_ticks = np.arange(-0.5, self._slm.shape[0], 1) * self._slm.cell_dim[0]
-        ax.set_yticks(y_ticks)
-        if show_tick_labels:
-            y_tick_labels = (np.arange(-0.5, self._slm.shape[0], 1) + 0.5).astype(int)
-        else:
-            y_tick_labels = [None] * len(y_ticks)
-        ax.set_yticklabels(y_tick_labels)
+        self._slm.plot(show_tick_labels=show_tick_labels)
 
 
 class RectAperture(DigitalAperture):
