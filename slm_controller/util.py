@@ -79,3 +79,83 @@ def save_image(I, fname):
 
     I_p = Image.fromarray(I_u)
     I_p.save(fname)
+
+
+def _pixel_slice(_slice, pixel_m):
+    """
+    Convert slice indexing in meters to slice indexing in pixels.
+
+    Parameters
+    ----------
+    _slice : slice
+        Original slice in meters.
+    pixel_m : float
+        Pixel dimension in meters.
+    """
+    if _slice.start is not None:
+        start = _m_to_pixel(_slice.start, pixel_m)
+    else:
+        start = None
+    if _slice.stop is not None:
+        stop = _m_to_pixel(_slice.stop, pixel_m)
+    else:
+        stop = None
+    if _slice.step is not None:
+        step = _m_to_pixel(_slice.step, pixel_m)
+    else:
+        step = None
+    return slice(start, stop, step)
+
+
+def _m_to_pixel(val, pixel_m):
+    """
+    Convert location to pixel index.
+
+    Parameters
+    ----------
+    val : float
+        Location in meters.
+    pixel_m : float
+        Dimension of pixel in meters.
+    """
+    return int(val / pixel_m)
+
+
+def _prepare_index_vals(key, pixel_shape):
+    """
+    Convert indexing object in meters to indexing object in pixels.
+
+    Parameters
+    ----------
+    key : int, float, slice, or list
+        Indexing operation in meters.
+    pixel_shape : tuple(float)
+        Pixel dimensions (height, width) in meters.
+    """
+
+    if isinstance(key, float) or isinstance(key, int):
+        idx = tuple([slice(None), _m_to_pixel(key, pixel_shape[0])])
+
+    elif isinstance(key, slice):
+        idx = tuple([slice(None), _pixel_slice(key, pixel_shape[0])])
+
+    elif len(key) == 2:
+        idx = [slice(None)]
+        for k, _slice in enumerate(key):
+
+            if isinstance(_slice, slice):
+                idx.append(_pixel_slice(_slice, pixel_shape[k]))
+
+            elif isinstance(_slice, float) or isinstance(_slice, int):
+                idx.append(_m_to_pixel(_slice, pixel_shape[k]))
+
+            else:
+                raise ValueError("Invalid key.")
+        idx = tuple(idx)
+
+    elif len(key) == 3:
+        raise NotImplementedError("Cannot index individual channels.")
+
+    else:
+        raise ValueError("Invalid key.")
+    return idx
