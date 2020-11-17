@@ -14,40 +14,55 @@ class ApertureOptions(Enum):
 
 
 class DigitalAperture:
-    def __init__(self, mask, pixel_shape):
+    def __init__(self, slm):
         """
-        Abstract class for digital apertures with a spatial light modulator.
+        Digital aperture with a spatial light modulator.
 
         Parameters
         ----------
-        mask : :py:class:`~numpy.ndarray`
-            ([3,] N_height, N_width) non-negative reals.
-        pixel_shape : tuple(float)
-            Pixel dimensions (height, width) in meters.
+        slm : :py:class:`~slm_controller.slm.SLM`
+            SLM object on which to program aperture.
         """
-        self._mask = mask
-        self._slm_dim = (mask.shape[-2], mask.shape[-1])
-        assert len(pixel_shape) == 2
-        assert pixel_shape[0] > 0
-        assert pixel_shape[1] > 0
-        self._pixel_shape = pixel_shape
+        self._slm = slm
 
     @property
-    def size(self):
-        return np.prod(self._slm_dim)
+    def n_active_pixels(self):
+        return np.sum(self.mask)
 
     @property
-    def shape(self):
-        return self._slm_dim
+    def area(self):
+        """ Area of active pixels. """
+        return self.n_active_pixels * self._slm.pixel_area
+
+    @property
+    def slm_size(self):
+        return self._slm.size
+
+    @property
+    def slm_shape(self):
+        return self._slm.shape
+
+    @property
+    def slm_dim(self):
+        return self._slm.dim
 
     @property
     def mask(self):
         """
-        Return mask as an :py:class:`~numpy.ndarray` object with shape (3, height, width).
+        Return mask as an :py:class:`~numpy.ndarray` object with shape (3, height, width) for RGB
+        or (3, height, width) for grayscale.
         """
-        return self._mask
+        return self._slm.values
 
     def plot(self, show_tick_labels=False):
+        """
+        Plot aperture.
+
+        Parameters
+        ----------
+        show_tick_labels : bool
+            Whether to show pixel number along x- and y-axis.
+        """
 
         import matplotlib.pyplot as plt
 
@@ -56,46 +71,43 @@ class DigitalAperture:
 
         # plot
         fig, ax = plt.subplots()
-        # ax.imshow(Z)
         extent = [
-            -0.5 * self._pixel_shape[1],
-            (self._slm_dim[1] - 0.5) * self._pixel_shape[1],
-            (self._slm_dim[0] - 0.5) * self._pixel_shape[0],
-            -0.5 * self._pixel_shape[0],
+            -0.5 * self._slm.pixel_shape[1],
+            (self._slm.shape[1] - 0.5) * self._slm.pixel_shape[1],
+            (self.shape[0] - 0.5) * self._slm.pixel_shape[0],
+            -0.5 * self._slm.pixel_shape[0],
         ]
         ax.imshow(Z, extent=extent)
         ax.grid(which="major", axis="both", linestyle="-", color="0.5", linewidth=0.25)
 
-        x_ticks = np.arange(-0.5, self._slm_dim[1], 1) * self._pixel_shape[1]
+        x_ticks = np.arange(-0.5, self._slm.shape[1], 1) * self._slm.pixel_shape[1]
         ax.set_xticks(x_ticks)
         if show_tick_labels:
-            x_tick_labels = (np.arange(-0.5, self._slm_dim[1], 1) + 0.5).astype(int)
+            x_tick_labels = (np.arange(-0.5, self._slm.shape[1], 1) + 0.5).astype(int)
         else:
             x_tick_labels = [None] * len(x_ticks)
         ax.set_xticklabels(x_tick_labels)
 
-        y_ticks = np.arange(-0.5, self._slm_dim[0], 1) * self._pixel_shape[0]
+        y_ticks = np.arange(-0.5, self._slm.shape[0], 1) * self._slm.pixel_shape[0]
         ax.set_yticks(y_ticks)
         if show_tick_labels:
-            y_tick_labels = (np.arange(-0.5, self._slm_dim[0], 1) + 0.5).astype(int)
+            y_tick_labels = (np.arange(-0.5, self._slm.shape[0], 1) + 0.5).astype(int)
         else:
             y_tick_labels = [None] * len(y_ticks)
         ax.set_yticklabels(y_tick_labels)
 
 
 class RectAperture(DigitalAperture):
-    def __init__(self, apert_dim, slm_dim, pixel_shape, center=None):
+    def __init__(self, apert_dim, slm, center=None):
         """
         Object to create rectangular aperture.
 
         Parameters
         ----------
-        apert_dim : tuple(int)
-            Dimensions (height, width) of aperture.
-        slm_dim : tuple(int)
-            Dimensions (height, width) of the spatial light modulator (SLM).
-        pixel_shape : tuple(float)
-            Pixel dimensions (height, width) in meters.
+        apert_dim : tuple(float)
+            Dimensions (height, width) in meters of aperture.
+        slm : :py:class:`~slm_controller.slm.SLM`
+            SLM object on which to program aperture.
         center : tuple(int)
             [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left
             corner. Default is to place center of aperture at center of SLM.
@@ -104,59 +116,49 @@ class RectAperture(DigitalAperture):
         # check input values
         assert apert_dim[0] > 0
         assert apert_dim[1] > 0
-        assert slm_dim[0] > 0
-        assert slm_dim[1] > 0
 
         # check / compute center
         if center is None:
-            center = (slm_dim[0] // 2, slm_dim[1] // 2)
+            center = slm.center
         else:
             assert (
-                0 <= center[0] < slm_dim[0]
-            ), f"Center {center} must lie within SLM dimensions {slm_dim}."
+                0 <= center[0] < slm.height
+            ), f"Center {center} must lie within SLM dimensions {slm.dim}."
             assert (
-                0 <= center[1] < slm_dim[1]
-            ), f"Center {center} must lie within SLM dimensions {slm_dim}."
+                0 <= center[1] < slm.width
+            ), f"Center {center} must lie within SLM dimensions {slm.dim}."
         self._center = center
 
         # compute mask
-        self._apert_dim = apert_dim
-        top_left = (
-            self._center[0] - self._apert_dim[0] // 2,
-            self._center[1] - self._apert_dim[1] // 2,
-        )
-        bottom_right = (top_left[0] + self._apert_dim[0], top_left[1] + self._apert_dim[1])
+        self._apert_dim = np.array(apert_dim)
+        top_left = self._center - self._apert_dim / 2
+        bottom_right = top_left + self._apert_dim
         if (
             top_left[0] < 0
             or top_left[1] < 0
-            or bottom_right[0] >= slm_dim[0]
-            or bottom_right[1] >= slm_dim[1]
+            or bottom_right[0] >= slm.dim[0]
+            or bottom_right[1] >= slm.dim[1]
         ):
             raise ValueError(
                 f"Aperture ({top_left[0]}:{bottom_right[0]}, "
                 f"{top_left[1]}:{bottom_right[1]}) extends past valid "
-                f"SLM indices (0:{slm_dim[0] - 1}, 0:{slm_dim[1] - 1})"
+                f"SLM dimensions {slm.dim}"
             )
-        mask = np.zeros((3,) + slm_dim)
-        mask[:, top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]] = 1
-
-        # call parent constructor
-        super().__init__(mask=mask, pixel_shape=pixel_shape)
+        slm[top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]] = 1
+        super().__init__(slm=slm)
 
 
 class LineAperture(RectAperture):
-    def __init__(self, n_pixels, slm_dim, pixel_shape, vertical=True, center=None):
+    def __init__(self, length, slm, vertical=True, center=None):
         """
         Object to create line aperture.
 
         Parameters
         ----------
-        n_pixels : int
-            Number of pixels for aperture.
-        slm_dim : tuple(int)
-            Dimensions (height, width) of the spatial light modulator (SLM).
-        pixel_shape : tuple(float)
-            Pixel dimensions (height, width) in meters.
+        length : float
+            Length of aperture in meters.
+        slm : :py:class:`~slm_controller.slm.SLM`
+            SLM object on which to program aperture.
         vertical : bool
             Whether apertude should be vertical line (True), or horizontal line (False).
         center : tuple(int)
@@ -164,83 +166,73 @@ class LineAperture(RectAperture):
             corner. Default is to place center of aperture at center of SLM.
         """
         if vertical:
-            apert_dim = (n_pixels, 1)
+            apert_dim = (length, slm.pixel_shape[1])
         else:
-            apert_dim = (1, n_pixels)
-        super().__init__(
-            apert_dim=apert_dim, slm_dim=slm_dim, pixel_shape=pixel_shape, center=center
-        )
+            apert_dim = (slm.pixel_shape[0], length)
+        super().__init__(apert_dim=apert_dim, slm=slm, center=center)
 
 
 class SquareAperture(RectAperture):
-    def __init__(self, side, slm_dim, pixel_shape, center=None):
+    def __init__(self, side, slm, center=None):
         """
         Object to create line aperture.
 
         Parameters
         ----------
-        side : int
-            Number of pixels for each side length.
-        slm_dim : tuple(int)
-            Dimensions (height, width) of the spatial light modulator (SLM).
-        pixel_shape : tuple(float)
-            Pixel dimensions (height, width) in meters.
+        side : float
+            Side length of square in meters.
+        slm : :py:class:`~slm_controller.slm.SLM`
+            SLM object on which to program aperture.
         center : tuple(int)
             [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left
             corner. Default is to place center of aperture at center of SLM.
         """
-        super().__init__(
-            apert_dim=(side, side), slm_dim=slm_dim, pixel_shape=pixel_shape, center=center
-        )
+        super().__init__(apert_dim=(side, side), slm=slm, center=center)
 
 
 class CircAperture(DigitalAperture):
-    def __init__(self, radius, slm_dim, pixel_shape, center=None):
+    def __init__(self, radius, slm, center=None):
         """
-        Object to create line aperture.
+        Object to create circle aperture.
 
         Parameters
         ----------
-        radius : int
-            Radius in number of pixels.
-        slm_dim : tuple(int)
-            Dimensions (height, width) of the spatial light modulator (SLM).
-        pixel_shape : tuple(float)
-            Pixel dimensions (height, width) in meters.
-        center : tuple(int)
+        radius : float
+            Radius in meters.
+        slm : :py:class:`~slm_controller.slm.SLM`
+            SLM object on which to program aperture.
+        center : tuple(float)
             [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left
             corner. Default is to place center of aperture at center of SLM.
         """
         # check input values
         assert radius > 0
-        assert slm_dim[0] > 0
-        assert slm_dim[1] > 0
 
         # check / compute center
         if center is None:
-            center = (slm_dim[0] // 2, slm_dim[1] // 2)
+            center = slm.center
         else:
             assert (
-                0 <= center[0] < slm_dim[0]
-            ), f"Center {center} must lie within SLM dimensions {slm_dim}."
+                0 <= center[0] < slm.height
+            ), f"Center {center} must lie within SLM dimensions {slm.dim}."
             assert (
-                0 <= center[1] < slm_dim[1]
-            ), f"Center {center} must lie within SLM dimensions {slm_dim}."
+                0 <= center[1] < slm.width
+            ), f"Center {center} must lie within SLM dimensions {slm.dim}."
         self._center = center
 
         # compute mask
         self._radius = radius
-        mask = np.zeros((3,) + slm_dim)
-        top_left = (self._center[0] - self._radius, self._center[1] - self._radius)
-        bottom_right = (top_left[0] + 2 * self._radius, top_left[1] + 2 * self._radius)
+        top_left = self._center - radius
+        bottom_right = top_left + 2 * self._radius + slm.pixel_shape
         r2 = self._radius ** 2
         i, j = np.meshgrid(
-            np.arange(top_left[0], bottom_right[0] + 1),
-            np.arange(top_left[1], bottom_right[1] + 1),
+            np.arange(top_left[0], bottom_right[0], slm.pixel_shape[0]),
+            np.arange(top_left[1], bottom_right[1], slm.pixel_shape[1]),
             sparse=True,
             indexing="ij",
         )
         x2 = (i - self._center[0]) ** 2
         y2 = (j - self._center[1]) ** 2
-        mask[:, i, j] = np.floor(x2 + y2) < r2
-        super().__init__(mask=mask, pixel_shape=pixel_shape)
+
+        slm[top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]] = x2 + y2 < r2
+        super().__init__(slm=slm)

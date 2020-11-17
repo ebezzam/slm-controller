@@ -8,6 +8,7 @@ from slm_controller.aperture import (
     ApertureOptions,
 )
 from slm_controller.hardware import devices, DeviceOptions, DeviceParam
+from slm_controller.slm import SLM
 
 
 @click.command()
@@ -28,8 +29,8 @@ def set_rgb_aperture(shape, n_pixels, rect_shape, vertical):
     n_pixels : int
         Side length for "square", length for "line", radius for "circ". To set shape for "rect", use
         `rect_shape`.
-    rect_shape : tuple
-        Shape for "rect"; `shape` must be set to "rect".
+    rect_shape : tuple(int)
+        Shape for "rect" in number of pixels; `shape` must be set to "rect".
     vertical : bool
         Whether line should be vertical (True) or horizontal (False).
     """
@@ -41,10 +42,11 @@ def set_rgb_aperture(shape, n_pixels, rect_shape, vertical):
         raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
     # prepare display
+    rgb_device = DeviceOptions.ADAFRUIT_RGB
     D = display.RGBDisplay(rotation=0)
 
     # print device info
-    pixel_shape = devices[DeviceOptions.ADAFRUIT_RGB][DeviceParam.PIXEL_SHAPE]
+    pixel_shape = devices[rgb_device][DeviceParam.PIXEL_SHAPE]
     print(f"SLM dimension : {D.shape}")
     print(f"Pixel shape (m) : {pixel_shape}")
     if shape == ApertureOptions.LINE.value:
@@ -55,25 +57,29 @@ def set_rgb_aperture(shape, n_pixels, rect_shape, vertical):
     else:
         print(f"Aperture shape : {shape}")
 
+    # create slm
+    slm = SLM(shape=D.shape, pixel_shape=pixel_shape)
+
     # create aperture mask
     ap = None
     if shape == ApertureOptions.LINE.value:
         print(f"Length : {n_pixels}")
-        ap = LineAperture(
-            n_pixels=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape, vertical=vertical
-        )
+        length = n_pixels * pixel_shape[0] if vertical else n_pixels * pixel_shape[1]
+        ap = LineAperture(length=length, slm=slm, vertical=vertical)
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_pixels}")
-        ap = SquareAperture(side=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape)
+        ap = SquareAperture(side=n_pixels * pixel_shape[0], slm=slm)
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_pixels}")
-        ap = CircAperture(radius=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape)
+        ap = CircAperture(radius=n_pixels * pixel_shape[0], slm=slm)
     elif shape == ApertureOptions.RECT.value:
         if len(rect_shape) == 0:
             # not provided
             rect_shape = (n_pixels, n_pixels)
         print(f"Shape : {rect_shape}")
-        ap = RectAperture(apert_dim=rect_shape, slm_dim=D.shape, pixel_shape=pixel_shape)
+        ap = RectAperture(
+            apert_dim=(rect_shape[0] * pixel_shape[0], rect_shape[1] * pixel_shape[1]), slm=slm
+        )
     assert ap is not None
 
     # set aperture
