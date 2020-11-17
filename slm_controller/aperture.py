@@ -26,25 +26,9 @@ class DigitalAperture:
         self._slm = slm
 
     @property
-    def n_active_pixels(self):
-        return np.sum(self.mask)
-
-    @property
     def area(self):
-        """ Area of active pixels. """
-        return self.n_active_pixels * self._slm.pixel_area
-
-    @property
-    def slm_size(self):
-        return self._slm.size
-
-    @property
-    def slm_shape(self):
-        return self._slm.shape
-
-    @property
-    def slm_dim(self):
-        return self._slm.dim
+        """ Area of active cells. """
+        return np.sum(self.mask) * np.prod(self._slm.cell_dim)
 
     @property
     def mask(self):
@@ -61,7 +45,7 @@ class DigitalAperture:
         Parameters
         ----------
         show_tick_labels : bool
-            Whether to show pixel number along x- and y-axis.
+            Whether to show cell number along x- and y-axis.
         """
 
         import matplotlib.pyplot as plt
@@ -72,15 +56,15 @@ class DigitalAperture:
         # plot
         fig, ax = plt.subplots()
         extent = [
-            -0.5 * self._slm.pixel_shape[1],
-            (self._slm.shape[1] - 0.5) * self._slm.pixel_shape[1],
-            (self._slm.shape[0] - 0.5) * self._slm.pixel_shape[0],
-            -0.5 * self._slm.pixel_shape[0],
+            -0.5 * self._slm.cell_dim[1],
+            (self._slm.shape[1] - 0.5) * self._slm.cell_dim[1],
+            (self._slm.shape[0] - 0.5) * self._slm.cell_dim[0],
+            -0.5 * self._slm.cell_dim[0],
         ]
         ax.imshow(Z, extent=extent)
         ax.grid(which="major", axis="both", linestyle="-", color="0.5", linewidth=0.25)
 
-        x_ticks = np.arange(-0.5, self._slm.shape[1], 1) * self._slm.pixel_shape[1]
+        x_ticks = np.arange(-0.5, self._slm.shape[1], 1) * self._slm.cell_dim[1]
         ax.set_xticks(x_ticks)
         if show_tick_labels:
             x_tick_labels = (np.arange(-0.5, self._slm.shape[1], 1) + 0.5).astype(int)
@@ -88,7 +72,7 @@ class DigitalAperture:
             x_tick_labels = [None] * len(x_ticks)
         ax.set_xticklabels(x_tick_labels)
 
-        y_ticks = np.arange(-0.5, self._slm.shape[0], 1) * self._slm.pixel_shape[0]
+        y_ticks = np.arange(-0.5, self._slm.shape[0], 1) * self._slm.cell_dim[0]
         ax.set_yticks(y_ticks)
         if show_tick_labels:
             y_tick_labels = (np.arange(-0.5, self._slm.shape[0], 1) + 0.5).astype(int)
@@ -166,9 +150,9 @@ class LineAperture(RectAperture):
             corner. Default is to place center of aperture at center of SLM.
         """
         if vertical:
-            apert_dim = (length, slm.pixel_shape[1])
+            apert_dim = (length, slm.cell_dim[1])
         else:
-            apert_dim = (slm.pixel_shape[0], length)
+            apert_dim = (slm.cell_dim[0], length)
         super().__init__(apert_dim=apert_dim, slm=slm, center=center)
 
 
@@ -223,11 +207,11 @@ class CircAperture(DigitalAperture):
         # compute mask
         self._radius = radius
         top_left = self._center - radius
-        bottom_right = top_left + 2 * self._radius + slm.pixel_shape
+        bottom_right = top_left + 2 * self._radius + slm.cell_dim
         r2 = self._radius ** 2
         i, j = np.meshgrid(
-            np.arange(top_left[0], bottom_right[0], slm.pixel_shape[0]),
-            np.arange(top_left[1], bottom_right[1], slm.pixel_shape[1]),
+            np.arange(top_left[0], bottom_right[0], slm.cell_dim[0]),
+            np.arange(top_left[1], bottom_right[1], slm.cell_dim[1]),
             sparse=True,
             indexing="ij",
         )

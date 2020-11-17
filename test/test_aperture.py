@@ -14,7 +14,7 @@ class TestAperture:
         apert_dim = (2 * pixel_shape[0], 2 * pixel_shape[1])
 
         # create SLM
-        slm = SLM(shape=slm_dim, pixel_shape=pixel_shape)
+        slm = SLM(shape=slm_dim, cell_dim=pixel_shape)
 
         # valid
         RectAperture(apert_dim=apert_dim, slm=slm)
