@@ -158,7 +158,7 @@ class RGBDisplay(Display):
             I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
             self._disp.image(I_p)
         except:
-            raise ValueError("Parameter[I]: unsupported shape")
+            raise ValueError("Parameter[I]: unsupported data")
 
 
 class MonochromeDisplay(Display):
@@ -212,3 +212,30 @@ class MonochromeDisplay(Display):
         """
         self._disp.fill(1)
         self._disp.show()
+
+    def imshow(self, I):
+        """
+        Display monochrome data.
+
+        Parameters
+        ----------
+        I : :py:class:`~numpy.ndarray`
+            (N_height, N_width) binary data
+
+            2D inputs are interpreted as grayscale.
+            3D inputs are interpreted as RGB.
+        """
+        assert I.shape == self.shape
+        assert np.all(np.logical_or(I == 0, I == 1))
+
+        I_p = Image.fromarray(I, mode="1")
+
+        self.clear()
+
+        try:
+
+            self._disp.image(I_p)
+            self._disp.show()
+
+        except:
+            raise ValueError("Parameter[I]: unsupported data")
