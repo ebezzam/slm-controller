@@ -74,7 +74,7 @@ class DigitalAperture:
         extent = [
             -0.5 * self._slm.pixel_shape[1],
             (self._slm.shape[1] - 0.5) * self._slm.pixel_shape[1],
-            (self.shape[0] - 0.5) * self._slm.pixel_shape[0],
+            (self._slm.shape[0] - 0.5) * self._slm.pixel_shape[0],
             -0.5 * self._slm.pixel_shape[0],
         ]
         ax.imshow(Z, extent=extent)
