@@ -1,14 +1,13 @@
 import click
 from slm_controller import display
 from slm_controller.aperture import (
-    LineAperture,
-    SquareAperture,
-    CircAperture,
-    RectAperture,
+    create_rect_aperture,
+    create_line_aperture,
+    create_square_aperture,
+    create_circ_aperture,
     ApertureOptions,
 )
 from slm_controller.hardware import devices, DeviceOptions, DeviceParam
-from slm_controller.slm import SLM
 
 
 @click.command()
@@ -46,9 +45,10 @@ def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
     D = display.RGBDisplay(rotation=0)
 
     # print device info
-    cell_shape = devices[rgb_device][DeviceParam.CELL_SHAPE]
-    print(f"SLM dimension : {D.shape}")
-    print(f"Cell shape (m) : {cell_shape}")
+    cell_dim = devices[rgb_device][DeviceParam.CELL_DIM]
+    slm_shape = D.shape
+    print(f"SLM dimension : {slm_shape}")
+    print(f"Cell dim (m) : {cell_dim}")
     if shape == ApertureOptions.LINE.value:
         if vertical:
             print("Aperture shape : vertical line")
@@ -57,33 +57,35 @@ def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
     else:
         print(f"Aperture shape : {shape}")
 
-    # create slm
-    slm = SLM(shape=D.shape, cell_dim=cell_shape)
-
     # create aperture mask
     ap = None
     if shape == ApertureOptions.LINE.value:
         print(f"Length : {n_cells}")
-        length = n_cells * cell_shape[0] if vertical else n_cells * cell_shape[1]
-        ap = LineAperture(length=length, slm=slm, vertical=vertical)
+        length = n_cells * cell_dim[0] if vertical else n_cells * cell_dim[1]
+        ap = create_line_aperture(
+            slm_shape=slm_shape, cell_dim=cell_dim, length=length, vertical=vertical
+        )
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
-        ap = SquareAperture(side=n_cells * cell_shape[0], slm=slm)
+        ap = create_square_aperture(
+            slm_shape=slm_shape, cell_dim=cell_dim, side=n_cells * cell_dim[0]
+        )
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
-        ap = CircAperture(radius=n_cells * cell_shape[0], slm=slm)
+        ap = create_circ_aperture(
+            slm_shape=slm_shape, cell_dim=cell_dim, radius=n_cells * cell_dim[0]
+        )
     elif shape == ApertureOptions.RECT.value:
         if len(rect_shape) == 0:
             # not provided
             rect_shape = (n_cells, n_cells)
         print(f"Shape : {rect_shape}")
-        ap = RectAperture(
-            apert_dim=(rect_shape[0] * cell_shape[0], rect_shape[1] * cell_shape[1]), slm=slm
-        )
+        apert_dim = rect_shape[0] * cell_dim[0], rect_shape[1] * cell_dim[1]
+        ap = create_rect_aperture(slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim)
     assert ap is not None
 
     # set aperture
-    D.imshow(ap.mask)
+    D.imshow(ap.values)
 
 
 if __name__ == "__main__":

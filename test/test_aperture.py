@@ -1,6 +1,6 @@
 import pytest
 from slm_controller.slm import SLM
-from slm_controller.aperture import RectAperture
+from slm_controller.aperture import create_rect_aperture
 
 
 class TestAperture:
@@ -9,24 +9,28 @@ class TestAperture:
     """
 
     def test_rect_aperture(self):
-        slm_dim = (10, 10)
-        pixel_shape = (0.18e-3, 0.18e-3)
-        apert_dim = (2 * pixel_shape[0], 2 * pixel_shape[1])
-
-        # create SLM
-        slm = SLM(shape=slm_dim, cell_dim=pixel_shape)
+        slm_shape = (10, 10)
+        cell_dim = (0.18e-3, 0.18e-3)
+        apert_dim = (2 * cell_dim[0], 2 * cell_dim[1])
 
         # valid
-        RectAperture(apert_dim=apert_dim, slm=slm)
+        create_rect_aperture(slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim)
 
         # invalid, outside SLM
+        slm = SLM(shape=slm_shape, cell_dim=cell_dim)
         with pytest.raises(AssertionError, match="must lie within SLM dimensions"):
-            RectAperture(apert_dim=apert_dim, slm=slm, center=(slm.height, slm.width))
+            create_rect_aperture(
+                slm_shape=slm_shape,
+                cell_dim=cell_dim,
+                apert_dim=apert_dim,
+                center=(slm.height, slm.width),
+            )
 
         # aperture extends beyond
         with pytest.raises(ValueError, match="extends past valid SLM dimensions"):
-            RectAperture(
+            create_rect_aperture(
+                slm_shape=slm_shape,
+                cell_dim=cell_dim,
                 apert_dim=apert_dim,
-                slm=slm,
-                center=(slm.height - pixel_shape[0], slm.width - pixel_shape[1]),
+                center=(slm.height - cell_dim[0], slm.width - cell_dim[1]),
             )
