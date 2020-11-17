@@ -19,26 +19,13 @@ def monochrome_display_example(file_path, not_original_ratio):
     if file_path is not None:
         raise NotImplementedError
     else:
+        # random mask
         P = 0.5
-        image = np.random.choice([0, 1], size=D.shape, p=[P, 1 - P])
+        image = np.random.rand(*D.shape)
+        image = image < P
 
     # display
     D.imshow(image)
-
-    # # prepare image data
-    # if file_path is not None:
-    #     keep_aspect_ratio = not not_original_ratio
-    #     image = util.load_image(
-    #         file_path, output_shape=D.shape, keep_aspect_ratio=keep_aspect_ratio
-    #     )
-    # else:
-    #     if rgb:
-    #         image = np.random.rand(3, *D.shape)
-    #     else:
-    #         image = np.random.rand(*D.shape)
-    #
-    # # display
-    # D.imshow(image)
 
 
 if __name__ == "__main__":

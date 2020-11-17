@@ -221,14 +221,11 @@ class MonochromeDisplay(Display):
         ----------
         I : :py:class:`~numpy.ndarray`
             (N_height, N_width) binary data
-
-            2D inputs are interpreted as grayscale.
-            3D inputs are interpreted as RGB.
         """
         assert I.shape == self.shape
         assert np.all(np.logical_or(I == 0, I == 1))
 
-        I_p = Image.fromarray(I, mode="1")
+        I_p = Image.fromarray(I.T, mode="1")
 
         self.clear()
 
