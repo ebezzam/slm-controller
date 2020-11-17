@@ -57,7 +57,7 @@ class RGBDisplay(Display):
         baudrate=24000000,
     ):
         """
-        Object to display images on the Adafruit 1.8" TFT Display Breakout with a Raspberry Pi:
+        Object to display images on the Adafruit 1.8 inch TFT Display Breakout with a Raspberry Pi:
         https://learn.adafruit.com/1-8-tft-display/overview
 
         Parameters
@@ -159,3 +159,56 @@ class RGBDisplay(Display):
             self._disp.image(I_p)
         except:
             raise ValueError("Parameter[I]: unsupported shape")
+
+
+class MonochromeDisplay(Display):
+    def __init__(
+        self,
+        cs_pin=None,
+        height=144,
+        width=168,
+        baudrate=2000000,
+    ):
+        """
+        Object to display images on the Adafruit 1.3 inch monochrome display with a Raspberry Pi:
+        https://learn.adafruit.com/adafruit-sharp-memory-display-breakout
+
+        Parameters
+        ----------
+        cs_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
+            Raspberry Pi pin connected to TFT_CS pin on the display breakout.
+        height : int
+            Height in number of cells.
+        width : int
+            Width in number of cells.
+        baudrate : int
+            Baud rate.
+        """
+        super().__init__()
+
+        try:
+
+            import board
+            import busio
+            import digitalio
+            import adafruit_sharpmemorydisplay
+
+            cs_pin = cs_pin if (cs_pin is not None) else board.D6
+
+            spi = busio.SPI(board.SCK, MOSI=board.MOSI)
+            scs = digitalio.DigitalInOut(cs_pin)  # inverted chip select
+            self._disp = adafruit_sharpmemorydisplay.SharpMemoryDisplay(
+                spi, scs, height, width, baudrate=baudrate
+            )
+            self._height = height
+            self._width = width
+
+        except:
+            raise IOError("Failed to load display.")
+
+    def clear(self):
+        """
+        Clear display.
+        """
+        self._disp.fill(1)
+        self._disp.show()

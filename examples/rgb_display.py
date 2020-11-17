@@ -1,5 +1,5 @@
 """
-Data cube display.
+RGB display example.
 """
 
 import numpy as np
