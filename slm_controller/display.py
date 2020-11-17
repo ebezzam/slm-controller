@@ -225,12 +225,12 @@ class MonochromeDisplay(Display):
         assert I.shape == self.shape
         assert np.all(np.logical_or(I == 0, I == 1))
 
-        I_p = Image.fromarray(I.T, mode="1")
-
         self.clear()
 
         try:
 
+            I_u = np.uint8(I * 255)
+            I_p = Image.fromarray(I_u).convert("1")
             self._disp.image(I_p)
             self._disp.show()
 
