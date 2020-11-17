@@ -227,12 +227,15 @@ class MonochromeDisplay(Display):
 
         self.clear()
 
-        try:
+        I_u = np.uint8(I * 255)
+        I_p = Image.fromarray(I_u.T).convert("1")
+        self._disp.image(I_p)
+        self._disp.show()
 
-            I_u = np.uint8(I * 255)
-            I_p = Image.fromarray(I_u).convert("1")
-            self._disp.image(I_p)
-            self._disp.show()
-
-        except:
-            raise ValueError("Parameter[I]: unsupported data")
+        # try:
+        #
+        #     self._disp.image(I_p)
+        #     self._disp.show()
+        #
+        # except:
+        #     raise ValueError("Parameter[I]: unsupported data")
