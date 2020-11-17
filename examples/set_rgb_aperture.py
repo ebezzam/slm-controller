@@ -14,7 +14,7 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
 @click.option(
     "--shape", default=ApertureOptions.SQUARE.value, type=click.Choice(ApertureOptions.values())
 )
-@click.option("--n_cels", default=10, type=int)
+@click.option("--n_cells", default=10, type=int)
 @click.option("--rect_shape", default=None, nargs=2, type=int)
 @click.option("--vertical", is_flag=True)
 def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
