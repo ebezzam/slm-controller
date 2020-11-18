@@ -1,7 +1,8 @@
 import abc
-
 import numpy as np
 from PIL import Image, ImageDraw
+
+from slm_controller.hardware import DeviceOptions
 
 
 class Display:
@@ -236,3 +237,23 @@ class MonochromeDisplay(Display):
 
         except:
             raise ValueError("Parameter[I]: unsupported data")
+
+
+def create_display(device_key):
+    """
+    Factory method to create `Display` object.
+
+    Parameters
+    ----------
+    device_key : str
+        Option from `DeviceOptions`.
+    """
+    assert device_key in DeviceOptions.values()
+
+    display = None
+    if device_key == DeviceOptions.ADAFRUIT_RGB.value:
+        display = RGBDisplay()
+    elif device_key == DeviceOptions.ADAFRUIT_MONOCHROME.value:
+        display = MonochromeDisplay()
+    assert display is not None
+    return display

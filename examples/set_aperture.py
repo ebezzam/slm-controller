@@ -1,5 +1,5 @@
 import click
-from slm_controller import display
+from slm_controller.display import create_display
 from slm_controller.aperture import (
     create_rect_aperture,
     create_line_aperture,
@@ -17,7 +17,10 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
 @click.option("--n_cells", default=10, type=int)
 @click.option("--rect_shape", default=None, nargs=2, type=int)
 @click.option("--vertical", is_flag=True)
-def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
+@click.option(
+    "--device", default=DeviceOptions.ADAFRUIT_RGB.value, type=click.Choice(DeviceOptions.values())
+)
+def set_aperture(shape, n_cells, rect_shape, vertical, device):
     """
     Set aperture for the 1.8 inch RGB display by Adafruit.
 
@@ -32,6 +35,8 @@ def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
         Shape for "rect" in number of cells; `shape` must be set to "rect".
     vertical : bool
         Whether line should be vertical (True) or horizontal (False).
+    device : "rgb" or "mono"
+        Which device to program with aperture.
     """
 
     # check input parameters
@@ -40,13 +45,9 @@ def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
     if vertical and shape is not ApertureOptions.LINE.value:
         raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
-    # prepare display
-    rgb_device = DeviceOptions.ADAFRUIT_RGB
-    D = display.RGBDisplay(rotation=0)
-
     # print device info
-    cell_dim = devices[rgb_device][DeviceParam.CELL_DIM]
-    slm_shape = D.shape
+    cell_dim = devices[device][DeviceParam.CELL_DIM]
+    slm_shape = devices[device][DeviceParam.SLM_SHAPE]
     print(f"SLM dimension : {slm_shape}")
     print(f"Cell dim (m) : {cell_dim}")
     if shape == ApertureOptions.LINE.value:
@@ -84,9 +85,10 @@ def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
         ap = create_rect_aperture(slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim)
     assert ap is not None
 
-    # set aperture
+    # set aperture to device
+    D = create_display(device_key=device)
     D.imshow(ap.values)
 
 
 if __name__ == "__main__":
-    set_rgb_aperture()
+    set_aperture()
