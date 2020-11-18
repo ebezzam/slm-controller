@@ -9,9 +9,9 @@ from slm_controller import display, util
 
 @click.command()
 @click.option("--file_path", type=str, default=None)
-@click.option("--threshold", type=int, default=0.5)
+@click.option("--thresh", type=float, default=0.5)
 @click.option("--not_original_ratio", is_flag=True)
-def monochrome_display_example(file_path, threshold, not_original_ratio):
+def monochrome_display_example(file_path, thresh, not_original_ratio):
 
     # instantiate display object
     D = display.MonochromeDisplay()
@@ -29,7 +29,7 @@ def monochrome_display_example(file_path, threshold, not_original_ratio):
         image = np.random.rand(*D.shape)
 
     # make binary image
-    image = image < threshold
+    image = image > thresh
 
     # display
     D.imshow(image)
