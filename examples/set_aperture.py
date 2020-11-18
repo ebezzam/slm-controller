@@ -12,31 +12,36 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
 
 @click.command()
 @click.option(
-    "--shape", default=ApertureOptions.SQUARE.value, type=click.Choice(ApertureOptions.values())
+    "--shape",
+    default=ApertureOptions.RECT.value,
+    type=click.Choice(ApertureOptions.values()),
+    help="Shape of aperture.",
 )
-@click.option("--n_cells", default=10, type=int)
-@click.option("--rect_shape", default=None, nargs=2, type=int)
-@click.option("--vertical", is_flag=True)
 @click.option(
-    "--device", default=DeviceOptions.ADAFRUIT_RGB.value, type=click.Choice(DeviceOptions.values())
+    "--n_cells",
+    default=10,
+    type=int,
+    help="Side length for 'square', length for 'line', radius for 'circ'. To set shape for "
+    "'rect', use`rect_shape`.",
+)
+@click.option(
+    "--rect_shape",
+    default=None,
+    nargs=2,
+    type=int,
+    help="Shape for 'rect' in number of cells; `shape` must be set to 'rect'.",
+)
+@click.option(
+    "--vertical", is_flag=True, help="Whether line should be vertical (True) or horizontal (False)."
+)
+@click.option(
+    "--device",
+    type=click.Choice(DeviceOptions.values()),
+    help="Which device to program with aperture.",
 )
 def set_aperture(shape, n_cells, rect_shape, vertical, device):
     """
-    Set aperture for the 1.8 inch RGB display by Adafruit.
-
-    Parameters
-    ----------
-    shape : "rect", "square", "line", or "circ"
-        Shape of aperture.
-    n_cells : int
-        Side length for "square", length for "line", radius for "circ". To set shape for "rect", use
-        `rect_shape`.
-    rect_shape : tuple(int)
-        Shape for "rect" in number of cells; `shape` must be set to "rect".
-    vertical : bool
-        Whether line should be vertical (True) or horizontal (False).
-    device : "rgb" or "mono"
-        Which device to program with aperture.
+    Set aperture on a physical device.
     """
 
     # check input parameters

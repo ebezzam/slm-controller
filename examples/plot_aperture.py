@@ -12,43 +12,52 @@ from slm_controller.hardware import DeviceOptions, devices, DeviceParam
 
 @click.command()
 @click.option(
-    "--shape", default=ApertureOptions.RECT.value, type=click.Choice(ApertureOptions.values())
+    "--shape",
+    default=ApertureOptions.RECT.value,
+    type=click.Choice(ApertureOptions.values()),
+    help="Shape of aperture.",
 )
-@click.option("--n_cells", default=10, type=int)
-@click.option("--rect_shape", default=None, nargs=2, type=int)
-@click.option("--vertical", is_flag=True)
-@click.option("--show_tick_labels", is_flag=True)
-@click.option("--cell_dim", default=None, nargs=2, type=float)
-@click.option("--slm_shape", default=None, nargs=2, type=int)
-@click.option("--monochrome", is_flag=True)
-@click.option("--device", type=click.Choice(DeviceOptions.values()))
+@click.option(
+    "--n_cells",
+    default=10,
+    type=int,
+    help="Side length for 'square', length for 'line', radius for 'circ'. To set shape for "
+    "'rect', use`rect_shape`.",
+)
+@click.option(
+    "--rect_shape",
+    default=None,
+    nargs=2,
+    type=int,
+    help="Shape for 'rect' in number of cells; `shape` must be set to 'rect'.",
+)
+@click.option(
+    "--vertical", is_flag=True, help="Whether line should be vertical (True) or horizontal (False)."
+)
+@click.option(
+    "--show_tick_labels", is_flag=True, help="Whether or not to show cell values along axes."
+)
+@click.option(
+    "--cell_dim", default=None, nargs=2, type=float, help="Shape of cell in meters (height, width)."
+)
+@click.option(
+    "--slm_shape",
+    default=None,
+    nargs=2,
+    type=int,
+    help="Dimension of SLM in number of cells (height, width).",
+)
+@click.option("--monochrome", is_flag=True, help="Whether SLM is monochrome.")
+@click.option(
+    "--device",
+    type=click.Choice(DeviceOptions.values()),
+    help="Which device to program with aperture.",
+)
 def plot_aperture(
     shape, n_cells, rect_shape, vertical, show_tick_labels, cell_dim, slm_shape, monochrome, device
 ):
     """
     Plot SLM aperture.
-
-    Parameters
-    ----------
-    shape : "rect", "square", "line", or "circ"
-        Shape of aperture.
-    n_cells : int
-        Side length for "square", length for "line", radius for "circ". To set shape for "rect", use
-        `rect_shape`.
-    rect_shape : tuple(int)
-        Shape for "rect" in number of cells; `shape` must be set to "rect".
-    vertical : bool
-        Whether line should be vertical (True) or horizontal (False).
-    show_tick_labels : bool
-        Whether or not to show cell values along axes.
-    cell_dim : tuple
-        Shape of cell in meters (height, width).
-    slm_shape : tuple
-        Dimension of SLM in number of cells (height, width).
-    monochrome : bool
-        Whether SLM is monochrome.
-    device : "rgb" or "mono"
-        Which device to program with aperture.
     """
 
     if device is None:
