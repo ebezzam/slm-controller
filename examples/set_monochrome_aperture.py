@@ -17,9 +17,9 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
 @click.option("--n_cells", default=10, type=int)
 @click.option("--rect_shape", default=None, nargs=2, type=int)
 @click.option("--vertical", is_flag=True)
-def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
+def set_monochrome_aperture(shape, n_cells, rect_shape, vertical):
     """
-    Set aperture for the 1.8 inch RGB display by Adafruit.
+    Set aperture for the 1.3 inch monochrome display by Adafruit.
 
     Parameters
     ----------
@@ -41,8 +41,8 @@ def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
         raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
     # prepare display
-    rgb_device = DeviceOptions.ADAFRUIT_RGB
-    D = display.RGBDisplay(rotation=0)
+    rgb_device = DeviceOptions.ADAFRUIT_MONOCHROME
+    D = display.MonochromeDisplay()
 
     # print device info
     cell_dim = devices[rgb_device][DeviceParam.CELL_DIM]
@@ -89,4 +89,4 @@ def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
 
 
 if __name__ == "__main__":
-    set_rgb_aperture()
+    set_monochrome_aperture()
