@@ -178,17 +178,29 @@ def create_circ_aperture(slm_shape, cell_dim, radius, center=None, monochrome=Fa
         ), f"Center {center} must lie within SLM dimensions {slm.dim}."
 
     # compute mask
-    top_left = center - radius
-    bottom_right = top_left + 2 * radius + slm.cell_dim
-    r2 = radius ** 2
     i, j = np.meshgrid(
-        np.arange(top_left[0], bottom_right[0], slm.cell_dim[0]),
-        np.arange(top_left[1], bottom_right[1], slm.cell_dim[1]),
+        np.arange(slm.dim[0], step=slm.cell_dim[0]),
+        np.arange(slm.dim[1], step=slm.cell_dim[1]),
         sparse=True,
         indexing="ij",
     )
     x2 = (i - center[0]) ** 2
     y2 = (j - center[1]) ** 2
+    slm.values[:, ] = x2 + y2 < radius ** 2
 
-    slm[top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]] = x2 + y2 < r2
+
+    # # compute mask
+    # top_left = center - radius
+    # bottom_right = top_left + 2 * radius + slm.cell_dim
+    # r2 = radius ** 2
+    # i, j = np.meshgrid(
+    #     np.arange(top_left[0], bottom_right[0], slm.cell_dim[0]),
+    #     np.arange(top_left[1], bottom_right[1], slm.cell_dim[1]),
+    #     sparse=True,
+    #     indexing="ij",
+    # )
+    # x2 = (i - center[0]) ** 2
+    # y2 = (j - center[1]) ** 2
+    #
+    # slm[top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]] = x2 + y2 < r2
     return slm
