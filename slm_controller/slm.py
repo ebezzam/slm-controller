@@ -19,7 +19,7 @@ class SLM:
         self._shape = shape
         self._cell_dim = cell_dim
         if monochrome:
-            self._values = np.zeros((1,) + shape)
+            self._values = np.zeros((1,) + shape, dtype=bool)
         else:
             self._values = np.zeros((3,) + shape)
 
@@ -53,7 +53,11 @@ class SLM:
 
     @property
     def values(self):
-        return self._values
+        if self._values.shape[0] == 1:
+            # if monochrome, drop first dimension
+            return self._values[0]
+        else:
+            return self._values
 
     def __getitem__(self, key):
         idx = _prepare_index_vals(key, self._cell_dim)

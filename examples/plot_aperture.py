@@ -19,7 +19,10 @@ from slm_controller.aperture import (
 @click.option("--show_tick_labels", is_flag=True)
 @click.option("--cell_dim", default=None, nargs=2, type=float)
 @click.option("--slm_shape", default=None, nargs=2, type=int)
-def plot_aperture(shape, n_cells, rect_shape, vertical, show_tick_labels, cell_dim, slm_shape):
+@click.option("--monochrome", is_flag=True)
+def plot_aperture(
+    shape, n_cells, rect_shape, vertical, show_tick_labels, cell_dim, slm_shape, monochrome
+):
     """
     Plot SLM aperture.
 
@@ -40,6 +43,8 @@ def plot_aperture(shape, n_cells, rect_shape, vertical, show_tick_labels, cell_d
         Shape of cell in meters (height, width).
     slm_shape : tuple
         Dimension of SLM in number of cells (height, width).
+    monochrome : bool
+        Whether SLM is monochrome.
     """
 
     if len(cell_dim) == 0:
@@ -55,22 +60,34 @@ def plot_aperture(shape, n_cells, rect_shape, vertical, show_tick_labels, cell_d
             rect_shape = (n_cells, n_cells)
         print(f"Shape : {rect_shape}")
         apert_dim = rect_shape[0] * cell_dim[0], rect_shape[1] * cell_dim[1]
-        ap = create_rect_aperture(slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim)
+        ap = create_rect_aperture(
+            slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim, monochrome=monochrome
+        )
     elif shape == ApertureOptions.LINE.value:
         print(f"Length : {n_cells}")
         length = n_cells * cell_dim[0] if vertical else n_cells * cell_dim[1]
         ap = create_line_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, length=length, vertical=vertical
+            slm_shape=slm_shape,
+            cell_dim=cell_dim,
+            length=length,
+            vertical=vertical,
+            monochrome=monochrome,
         )
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
         ap = create_square_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, side=n_cells * cell_dim[0]
+            slm_shape=slm_shape,
+            cell_dim=cell_dim,
+            side=n_cells * cell_dim[0],
+            monochrome=monochrome,
         )
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
         ap = create_circ_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, radius=n_cells * cell_dim[0]
+            slm_shape=slm_shape,
+            cell_dim=cell_dim,
+            radius=n_cells * cell_dim[0],
+            monochrome=monochrome,
         )
 
     assert ap is not None
