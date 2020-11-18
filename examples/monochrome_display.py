@@ -20,7 +20,7 @@ def monochrome_display_example(file_path, threshold, not_original_ratio):
     if file_path is not None:
         keep_aspect_ratio = not not_original_ratio
         image = util.load_image(
-            file_path, output_shape=D.shape, keep_aspect_ratio=keep_aspect_ratio
+            file_path, output_shape=D.shape, keep_aspect_ratio=keep_aspect_ratio, grayscale=True
         )
         image = image / 255.0
 

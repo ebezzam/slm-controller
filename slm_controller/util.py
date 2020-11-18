@@ -1,8 +1,8 @@
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
 
-def load_image(fname, output_shape=None, keep_aspect_ratio=True):
+def load_image(fname, output_shape=None, keep_aspect_ratio=True, grayscale=False):
     """
     Load an image.
 
@@ -49,6 +49,9 @@ def load_image(fname, output_shape=None, keep_aspect_ratio=True):
 
         if not keep_aspect_ratio:
             raise ValueError("Must provide [output_shape] if [keep_aspect_ratio] is False.")
+
+    if grayscale:
+        I_p = ImageOps.grayscale(I_p)
 
     # re-order dimensions
     I = np.asarray(I_p)  # (N_height, N_width [, N_channel])
