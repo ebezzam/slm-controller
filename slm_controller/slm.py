@@ -3,7 +3,7 @@ from slm_controller.util import _prepare_index_vals
 
 
 class SLM:
-    def __init__(self, shape, cell_dim, grayscale=False):
+    def __init__(self, shape, cell_dim, monochrome=False):
         """
         Class for defining SLM.
 
@@ -18,7 +18,7 @@ class SLM:
         assert np.all(cell_dim) > 0
         self._shape = shape
         self._cell_dim = cell_dim
-        if grayscale:
+        if monochrome:
             self._values = np.zeros((1,) + shape)
         else:
             self._values = np.zeros((3,) + shape)

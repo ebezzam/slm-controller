@@ -15,7 +15,7 @@ class ApertureOptions(Enum):
         return [shape.value for shape in ApertureOptions]
 
 
-def create_rect_aperture(slm_shape, cell_dim, apert_dim, center=None):
+def create_rect_aperture(slm_shape, cell_dim, apert_dim, center=None, monochrome=False):
     """
     Create and return SLM object with rectangular aperture of desired dimensions.
 
@@ -30,6 +30,8 @@ def create_rect_aperture(slm_shape, cell_dim, apert_dim, center=None):
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.
+    monochrome : bool
+        [Optional] Whether SLM is monochrome.
 
     Returns
     -------
@@ -41,7 +43,7 @@ def create_rect_aperture(slm_shape, cell_dim, apert_dim, center=None):
     assert np.all(apert_dim) > 0
 
     # initialize SLM
-    slm = SLM(shape=slm_shape, cell_dim=cell_dim)
+    slm = SLM(shape=slm_shape, cell_dim=cell_dim, monochrome=monochrome)
 
     # check / compute center
     if center is None:
@@ -74,7 +76,7 @@ def create_rect_aperture(slm_shape, cell_dim, apert_dim, center=None):
     return slm
 
 
-def create_line_aperture(slm_shape, cell_dim, length, vertical=True, center=None):
+def create_line_aperture(slm_shape, cell_dim, length, vertical=True, center=None, monochrome=False):
     """
     Create and return SLM object with a line aperture of desired length.
 
@@ -89,6 +91,8 @@ def create_line_aperture(slm_shape, cell_dim, length, vertical=True, center=None
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.
+    monochrome : bool
+        [Optional] Whether SLM is monochrome.
 
     Returns
     -------
@@ -102,10 +106,10 @@ def create_line_aperture(slm_shape, cell_dim, length, vertical=True, center=None
         apert_dim = (length, cell_dim[1])
     else:
         apert_dim = (cell_dim[0], length)
-    return create_rect_aperture(slm_shape, cell_dim, apert_dim, center)
+    return create_rect_aperture(slm_shape, cell_dim, apert_dim, center, monochrome)
 
 
-def create_square_aperture(slm_shape, cell_dim, side, center=None):
+def create_square_aperture(slm_shape, cell_dim, side, center=None, monochrome=False):
     """
     Create and return SLM object with a square aperture of desired shape.
 
@@ -120,6 +124,8 @@ def create_square_aperture(slm_shape, cell_dim, side, center=None):
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.
+    monochrome : bool
+        [Optional] Whether SLM is monochrome.
 
     Returns
     -------
@@ -127,10 +133,10 @@ def create_square_aperture(slm_shape, cell_dim, side, center=None):
         SLM object with cells programmed to desired square aperture.
 
     """
-    return create_rect_aperture(slm_shape, cell_dim, (side, side), center)
+    return create_rect_aperture(slm_shape, cell_dim, (side, side), center, monochrome)
 
 
-def create_circ_aperture(slm_shape, cell_dim, radius, center=None):
+def create_circ_aperture(slm_shape, cell_dim, radius, center=None, monochrome=False):
     """
     Create and return SLM object with a circle aperture of desired shape.
 
@@ -145,6 +151,8 @@ def create_circ_aperture(slm_shape, cell_dim, radius, center=None):
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.
+    monochrome : bool
+        [Optional] Whether SLM is monochrome.
 
     Returns
     -------
@@ -156,7 +164,7 @@ def create_circ_aperture(slm_shape, cell_dim, radius, center=None):
     assert radius > 0
 
     # initialize SLM
-    slm = SLM(shape=slm_shape, cell_dim=cell_dim)
+    slm = SLM(shape=slm_shape, cell_dim=cell_dim, monochrome=monochrome)
 
     # check / compute center
     if center is None:

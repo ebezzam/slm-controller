@@ -41,11 +41,12 @@ def set_monochrome_aperture(shape, n_cells, rect_shape, vertical):
         raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
     # prepare display
-    rgb_device = DeviceOptions.ADAFRUIT_MONOCHROME
+    _device_key = DeviceOptions.ADAFRUIT_MONOCHROME
     D = display.MonochromeDisplay()
+    monochrome = True
 
     # print device info
-    cell_dim = devices[rgb_device][DeviceParam.CELL_DIM]
+    cell_dim = devices[_device_key][DeviceParam.CELL_DIM]
     slm_shape = D.shape
     print(f"SLM dimension : {slm_shape}")
     print(f"Cell dim (m) : {cell_dim}")
@@ -63,17 +64,27 @@ def set_monochrome_aperture(shape, n_cells, rect_shape, vertical):
         print(f"Length : {n_cells}")
         length = n_cells * cell_dim[0] if vertical else n_cells * cell_dim[1]
         ap = create_line_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, length=length, vertical=vertical
+            slm_shape=slm_shape,
+            cell_dim=cell_dim,
+            length=length,
+            vertical=vertical,
+            monochrome=monochrome,
         )
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
         ap = create_square_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, side=n_cells * cell_dim[0]
+            slm_shape=slm_shape,
+            cell_dim=cell_dim,
+            side=n_cells * cell_dim[0],
+            monochrome=monochrome,
         )
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
         ap = create_circ_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, radius=n_cells * cell_dim[0]
+            slm_shape=slm_shape,
+            cell_dim=cell_dim,
+            radius=n_cells * cell_dim[0],
+            monochrome=monochrome,
         )
     elif shape == ApertureOptions.RECT.value:
         if len(rect_shape) == 0:
@@ -81,7 +92,9 @@ def set_monochrome_aperture(shape, n_cells, rect_shape, vertical):
             rect_shape = (n_cells, n_cells)
         print(f"Shape : {rect_shape}")
         apert_dim = rect_shape[0] * cell_dim[0], rect_shape[1] * cell_dim[1]
-        ap = create_rect_aperture(slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim)
+        ap = create_rect_aperture(
+            slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim, monochrome=monochrome
+        )
     assert ap is not None
 
     # set aperture
