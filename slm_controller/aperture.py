@@ -187,6 +187,6 @@ def create_circ_aperture(slm_shape, cell_dim, radius, center=None, monochrome=Fa
     x2 = (i - center[0]) ** 2
     y2 = (j - center[1]) ** 2
     slm.values[:,] = (
-        x2 + y2 < radius ** 2
+        x2 + y2 <= radius ** 2
     )
     return slm
