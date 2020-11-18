@@ -82,7 +82,7 @@ The original image will be rescaled and cropped to match the original aspect rat
 #### Aperture
 
 To set a defined aperture shape, check out the following script:
-```sh
+```
 >> python examples/set_aperture.py --help
 
 Usage: set_aperture.py [OPTIONS]
@@ -117,7 +117,7 @@ python examples/set_aperture.py --device rgb --shape square --n_cells 2
 ```
 
 You can preview an aperture with the following script:
-```sh
+```
 >> python examples/plot_aperture.py --help
 
 Usage: plot_aperture.py [OPTIONS]
