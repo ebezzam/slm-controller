@@ -7,6 +7,7 @@ from slm_controller.aperture import (
     create_square_aperture,
     create_circ_aperture,
 )
+from slm_controller.hardware import DeviceOptions, devices, DeviceParam
 
 
 @click.command()
@@ -20,8 +21,9 @@ from slm_controller.aperture import (
 @click.option("--cell_dim", default=None, nargs=2, type=float)
 @click.option("--slm_shape", default=None, nargs=2, type=int)
 @click.option("--monochrome", is_flag=True)
+@click.option("--device", type=click.Choice(DeviceOptions.values()))
 def plot_aperture(
-    shape, n_cells, rect_shape, vertical, show_tick_labels, cell_dim, slm_shape, monochrome
+    shape, n_cells, rect_shape, vertical, show_tick_labels, cell_dim, slm_shape, monochrome, device
 ):
     """
     Plot SLM aperture.
@@ -45,12 +47,18 @@ def plot_aperture(
         Dimension of SLM in number of cells (height, width).
     monochrome : bool
         Whether SLM is monochrome.
+    device : "rgb" or "mono"
+        Which device to program with aperture.
     """
 
-    if len(cell_dim) == 0:
-        cell_dim = (0.18e-3, 0.18e-3)
-    if len(slm_shape) == 0:
-        slm_shape = (160, 128)
+    if device is None:
+        device_config = {
+            DeviceParam.CELL_DIM: (0.18e-3, 0.18e-3) if len(cell_dim) == 0 else cell_dim,
+            DeviceParam.SLM_SHAPE: (128, 160) if len(slm_shape) == 0 else slm_shape,
+            DeviceParam.MONOCHROME: monochrome,
+        }
+    else:
+        device_config = devices[device]
 
     # create aperture
     ap = None
@@ -59,35 +67,28 @@ def plot_aperture(
             # not provided
             rect_shape = (n_cells, n_cells)
         print(f"Shape : {rect_shape}")
-        apert_dim = rect_shape[0] * cell_dim[0], rect_shape[1] * cell_dim[1]
-        ap = create_rect_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim, monochrome=monochrome
+        apert_dim = (
+            rect_shape[0] * device_config[DeviceParam.CELL_DIM][0],
+            rect_shape[1] * device_config[DeviceParam.CELL_DIM][1],
         )
+        ap = create_rect_aperture(apert_dim=apert_dim, **device_config)
     elif shape == ApertureOptions.LINE.value:
         print(f"Length : {n_cells}")
-        length = n_cells * cell_dim[0] if vertical else n_cells * cell_dim[1]
-        ap = create_line_aperture(
-            slm_shape=slm_shape,
-            cell_dim=cell_dim,
-            length=length,
-            vertical=vertical,
-            monochrome=monochrome,
+        length = (
+            n_cells * device_config[DeviceParam.CELL_DIM][0]
+            if vertical
+            else n_cells * device_config[DeviceParam.CELL_DIM][1]
         )
+        ap = create_line_aperture(length=length, vertical=vertical, **device_config)
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
         ap = create_square_aperture(
-            slm_shape=slm_shape,
-            cell_dim=cell_dim,
-            side=n_cells * cell_dim[0],
-            monochrome=monochrome,
+            side=n_cells * device_config[DeviceParam.CELL_DIM][0], **device_config
         )
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
         ap = create_circ_aperture(
-            slm_shape=slm_shape,
-            cell_dim=cell_dim,
-            radius=n_cells * cell_dim[0],
-            monochrome=monochrome,
+            radius=n_cells * device_config[DeviceParam.CELL_DIM][0], **device_config
         )
 
     assert ap is not None

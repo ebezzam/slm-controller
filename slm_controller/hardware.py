@@ -13,7 +13,7 @@ class DeviceOptions(Enum):
 class DeviceParam:
     CELL_DIM = "cell_dim"
     SLM_SHAPE = "slm_shape"
-    MONOCHROME = "rgb"
+    MONOCHROME = "monochrome"
 
 
 devices = {
