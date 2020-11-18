@@ -48,6 +48,7 @@ def set_aperture(shape, n_cells, rect_shape, vertical, device):
     # print device info
     cell_dim = devices[device][DeviceParam.CELL_DIM]
     slm_shape = devices[device][DeviceParam.SLM_SHAPE]
+    monochrome = devices[device][DeviceParam.MONOCHROME]
     print(f"SLM dimension : {slm_shape}")
     print(f"Cell dim (m) : {cell_dim}")
     if shape == ApertureOptions.LINE.value:
@@ -64,17 +65,27 @@ def set_aperture(shape, n_cells, rect_shape, vertical, device):
         print(f"Length : {n_cells}")
         length = n_cells * cell_dim[0] if vertical else n_cells * cell_dim[1]
         ap = create_line_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, length=length, vertical=vertical
+            slm_shape=slm_shape,
+            cell_dim=cell_dim,
+            length=length,
+            vertical=vertical,
+            monochrome=monochrome,
         )
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
         ap = create_square_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, side=n_cells * cell_dim[0]
+            slm_shape=slm_shape,
+            cell_dim=cell_dim,
+            side=n_cells * cell_dim[0],
+            monochrome=monochrome,
         )
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
         ap = create_circ_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, radius=n_cells * cell_dim[0]
+            slm_shape=slm_shape,
+            cell_dim=cell_dim,
+            radius=n_cells * cell_dim[0],
+            monochrome=monochrome,
         )
     elif shape == ApertureOptions.RECT.value:
         if len(rect_shape) == 0:
@@ -82,7 +93,9 @@ def set_aperture(shape, n_cells, rect_shape, vertical, device):
             rect_shape = (n_cells, n_cells)
         print(f"Shape : {rect_shape}")
         apert_dim = rect_shape[0] * cell_dim[0], rect_shape[1] * cell_dim[1]
-        ap = create_rect_aperture(slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim)
+        ap = create_rect_aperture(
+            slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim, monochrome=monochrome
+        )
     assert ap is not None
 
     # set aperture to device

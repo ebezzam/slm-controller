@@ -13,6 +13,7 @@ class DeviceOptions(Enum):
 class DeviceParam:
     CELL_DIM = "cell_dim"
     SLM_SHAPE = "slm_shape"
+    MONOCHROME = "rgb"
 
 
 devices = {
@@ -21,6 +22,7 @@ devices = {
     DeviceOptions.ADAFRUIT_RGB.value: {
         DeviceParam.CELL_DIM: (0.18e-3, 0.18e-3),
         DeviceParam.SLM_SHAPE: (128, 160),
+        DeviceParam.MONOCHROME: False,
     },
     # 1.3 inch monochrome display by Adafruit:
     # https://learn.adafruit.com/adafruit-sharp-memory-display-breakout
@@ -28,5 +30,6 @@ devices = {
     DeviceOptions.ADAFRUIT_MONOCHROME.value: {
         DeviceParam.CELL_DIM: (0.145e-3, 0.145e-3),
         DeviceParam.SLM_SHAPE: (144, 168),
+        DeviceParam.MONOCHROME: True,
     },
 }
