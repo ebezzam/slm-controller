@@ -56,13 +56,35 @@ class SLM:
     def grayscale_values(self):
         return rgb2gray(self._values)
 
+    def at(self, physical_coord, value=None):
+        """
+        Get/set values of SLM at physical coordinate in meters.
+
+        Parameters
+        ----------
+        physical_coord : int, float, slice tuples
+            Physical coordinates to get/set SLM values.
+        value : int, float, :py:class:`~numpy.ndarray`
+            [Optional] values to set, otherwise return values at specified coordinates.
+        """
+
+        import pudb
+
+        pudb.set_trace()
+
+        idx = _prepare_index_vals(physical_coord, self._cell_dim)
+        if value is None:
+            # getter
+            return self._values[idx]
+        else:
+            # setter
+            self._values[idx] = value
+
     def __getitem__(self, key):
-        idx = _prepare_index_vals(key, self._cell_dim)
-        return self._values[idx]
+        return self._values[key]
 
     def __setitem__(self, key, value):
-        idx = _prepare_index_vals(key, self._cell_dim)
-        self._values[idx] = value
+        self._values[key] = value
 
     def plot(self, show_tick_labels=False):
         """
