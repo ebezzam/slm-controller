@@ -162,7 +162,7 @@ class RGBDisplay(Display):
             raise ValueError("Parameter[I]: unsupported data")
 
 
-class MonochromeDisplay(Display):
+class BinaryDisplay(Display):
     def __init__(
         self,
         cs_pin=None,
@@ -216,21 +216,26 @@ class MonochromeDisplay(Display):
 
     def imshow(self, I):
         """
-        Display monochrome data.
+        Display monochrome data in binary format..
 
         Parameters
         ----------
         I : :py:class:`~numpy.ndarray`
-            (N_height, N_width) binary data
+            (N_height, N_width) monochrome data.
         """
         assert I.shape == self.shape
-        assert np.all(np.logical_or(I == 0, I == 1))
+        assert isinstance(I, np.ndarray) and (
+                np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
+        )
+        assert np.all(I >= 0)
 
         self.clear()
 
         try:
 
-            I_u = np.uint8(I * 255)
+            I_max = I.max()
+            I_max = 1 if np.isclose(I_max, 0) else I_max
+            I_u = np.uint8(255 * I / I_max)  # uint8, full range
             I_p = Image.fromarray(I_u.T).convert("1")
             self._disp.image(I_p)
             self._disp.show()
@@ -254,6 +259,6 @@ def create_display(device_key):
     if device_key == DeviceOptions.ADAFRUIT_RGB.value:
         display = RGBDisplay()
     elif device_key == DeviceOptions.ADAFRUIT_MONOCHROME.value:
-        display = MonochromeDisplay()
+        display = BinaryDisplay()
     assert display is not None
     return display
