@@ -67,11 +67,6 @@ class SLM:
         value : int, float, :py:class:`~numpy.ndarray`
             [Optional] values to set, otherwise return values at specified coordinates.
         """
-
-        import pudb
-
-        pudb.set_trace()
-
         idx = _prepare_index_vals(physical_coord, self._cell_dim)
         if value is None:
             # getter
