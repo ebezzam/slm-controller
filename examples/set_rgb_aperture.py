@@ -1,10 +1,10 @@
 import click
 from slm_controller import display
 from slm_controller.aperture import (
-    create_rect_aperture,
-    create_line_aperture,
-    create_square_aperture,
-    create_circ_aperture,
+    rect_aperture,
+    line_aperture,
+    square_aperture,
+    circ_aperture,
     ApertureOptions,
 )
 from slm_controller.hardware import devices, DeviceOptions, DeviceParam
@@ -62,26 +62,20 @@ def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
     if shape == ApertureOptions.LINE.value:
         print(f"Length : {n_cells}")
         length = n_cells * cell_dim[0] if vertical else n_cells * cell_dim[1]
-        ap = create_line_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, length=length, vertical=vertical
-        )
+        ap = line_aperture(slm_shape=slm_shape, cell_dim=cell_dim, length=length, vertical=vertical)
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
-        ap = create_square_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, side=n_cells * cell_dim[0]
-        )
+        ap = square_aperture(slm_shape=slm_shape, cell_dim=cell_dim, side=n_cells * cell_dim[0])
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
-        ap = create_circ_aperture(
-            slm_shape=slm_shape, cell_dim=cell_dim, radius=n_cells * cell_dim[0]
-        )
+        ap = circ_aperture(slm_shape=slm_shape, cell_dim=cell_dim, radius=n_cells * cell_dim[0])
     elif shape == ApertureOptions.RECT.value:
         if len(rect_shape) == 0:
             # not provided
             rect_shape = (n_cells, n_cells)
         print(f"Shape : {rect_shape}")
         apert_dim = rect_shape[0] * cell_dim[0], rect_shape[1] * cell_dim[1]
-        ap = create_rect_aperture(slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim)
+        ap = rect_aperture(slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim)
     assert ap is not None
 
     # set aperture
