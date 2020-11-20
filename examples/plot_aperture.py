@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 import click
 from slm_controller.aperture import (
     ApertureOptions,
-    create_rect_aperture,
-    create_line_aperture,
-    create_square_aperture,
-    create_circ_aperture,
+    rect_aperture,
+    line_aperture,
+    square_aperture,
+    circ_aperture,
 )
 from slm_controller.hardware import DeviceOptions, devices, DeviceParam
 
@@ -80,7 +80,7 @@ def plot_aperture(
             rect_shape[0] * device_config[DeviceParam.CELL_DIM][0],
             rect_shape[1] * device_config[DeviceParam.CELL_DIM][1],
         )
-        ap = create_rect_aperture(apert_dim=apert_dim, **device_config)
+        ap = rect_aperture(apert_dim=apert_dim, **device_config)
     elif shape == ApertureOptions.LINE.value:
         print(f"Length : {n_cells}")
         length = (
@@ -88,17 +88,13 @@ def plot_aperture(
             if vertical
             else n_cells * device_config[DeviceParam.CELL_DIM][1]
         )
-        ap = create_line_aperture(length=length, vertical=vertical, **device_config)
+        ap = line_aperture(length=length, vertical=vertical, **device_config)
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
-        ap = create_square_aperture(
-            side=n_cells * device_config[DeviceParam.CELL_DIM][0], **device_config
-        )
+        ap = square_aperture(side=n_cells * device_config[DeviceParam.CELL_DIM][0], **device_config)
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
-        ap = create_circ_aperture(
-            radius=n_cells * device_config[DeviceParam.CELL_DIM][0], **device_config
-        )
+        ap = circ_aperture(radius=n_cells * device_config[DeviceParam.CELL_DIM][0], **device_config)
 
     assert ap is not None
 

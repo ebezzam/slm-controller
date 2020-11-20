@@ -15,7 +15,7 @@ class ApertureOptions(Enum):
         return [shape.value for shape in ApertureOptions]
 
 
-def create_rect_aperture(slm_shape, cell_dim, apert_dim, center=None, monochrome=False):
+def rect_aperture(slm_shape, cell_dim, apert_dim, center=None, monochrome=False):
     """
     Create and return SLM object with rectangular aperture of desired dimensions.
 
@@ -26,7 +26,7 @@ def create_rect_aperture(slm_shape, cell_dim, apert_dim, center=None, monochrome
     cell_dim : tuple(float)
         Dimensions (height, width) of each cell in meters.
     apert_dim : tuple(float)
-        Dimensions (height, width) of each aperture in meters.
+        Dimensions (height, width) of aperture in meters.
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.
@@ -76,7 +76,7 @@ def create_rect_aperture(slm_shape, cell_dim, apert_dim, center=None, monochrome
     return slm
 
 
-def create_line_aperture(slm_shape, cell_dim, length, vertical=True, center=None, monochrome=False):
+def line_aperture(slm_shape, cell_dim, length, vertical=True, center=None, monochrome=False):
     """
     Create and return SLM object with a line aperture of desired length.
 
@@ -106,10 +106,10 @@ def create_line_aperture(slm_shape, cell_dim, length, vertical=True, center=None
         apert_dim = (length, cell_dim[1])
     else:
         apert_dim = (cell_dim[0], length)
-    return create_rect_aperture(slm_shape, cell_dim, apert_dim, center, monochrome)
+    return rect_aperture(slm_shape, cell_dim, apert_dim, center, monochrome)
 
 
-def create_square_aperture(slm_shape, cell_dim, side, center=None, monochrome=False):
+def square_aperture(slm_shape, cell_dim, side, center=None, monochrome=False):
     """
     Create and return SLM object with a square aperture of desired shape.
 
@@ -120,7 +120,7 @@ def create_square_aperture(slm_shape, cell_dim, side, center=None, monochrome=Fa
     cell_dim : tuple(float)
         Dimensions (height, width) of each cell in meters.
     side : float
-        Side length of square in meters.
+        Side length of square aperture in meters.
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.
@@ -133,10 +133,10 @@ def create_square_aperture(slm_shape, cell_dim, side, center=None, monochrome=Fa
         SLM object with cells programmed to desired square aperture.
 
     """
-    return create_rect_aperture(slm_shape, cell_dim, (side, side), center, monochrome)
+    return rect_aperture(slm_shape, cell_dim, (side, side), center, monochrome)
 
 
-def create_circ_aperture(slm_shape, cell_dim, radius, center=None, monochrome=False):
+def circ_aperture(slm_shape, cell_dim, radius, center=None, monochrome=False):
     """
     Create and return SLM object with a circle aperture of desired shape.
 
@@ -147,7 +147,7 @@ def create_circ_aperture(slm_shape, cell_dim, radius, center=None, monochrome=Fa
     cell_dim : tuple(float)
         Dimensions (height, width) of each cell in meters.
     radius : float
-        Radius in meters.
+        Radius of aperture in meters.
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.

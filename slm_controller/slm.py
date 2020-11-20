@@ -45,11 +45,11 @@ class SLM:
 
     @property
     def height(self):
-        return self._shape[0] * self._cell_dim[0]
+        return self.dim[0]
 
     @property
     def width(self):
-        return self._shape[1] * self._cell_dim[1]
+        return self.dim[1]
 
     @property
     def values(self):
@@ -108,3 +108,4 @@ class SLM:
         else:
             y_tick_labels = [None] * len(y_ticks)
         ax.set_yticklabels(y_tick_labels)
+        return ax
