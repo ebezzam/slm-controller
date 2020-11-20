@@ -84,6 +84,19 @@ def save_image(I, fname):
     I_p.save(fname)
 
 
+def rgb2gray(rgb):
+    """
+    Convert RGB array to grayscale.
+
+    Parameters
+    ----------
+    rgb : :py:class:`~numpy.ndarray`
+        (N_channel, N_height, N_width) image.
+    """
+    weights = np.array([0.299, 0.587, 0.144])
+    return np.sum(rgb * weights[:, np.newaxis, np.newaxis], axis=0)
+
+
 def _cell_slice(_slice, cell_m):
     """
     Convert slice indexing in meters to slice indexing in cells.

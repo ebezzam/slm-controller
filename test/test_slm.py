@@ -2,7 +2,7 @@ from slm_controller.slm import SLM
 
 
 dim = 10
-s = SLM(shape=(dim, dim), cell_dim=(1, 1), monochrome=False)
+s = SLM(shape=(dim, dim), cell_dim=(1, 1))
 
 
 class TestSLMIndexing:

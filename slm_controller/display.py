@@ -225,7 +225,7 @@ class BinaryDisplay(Display):
         """
         assert I.shape == self.shape
         assert isinstance(I, np.ndarray) and (
-                np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
+            np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
         )
         assert np.all(I >= 0)
 

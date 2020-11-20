@@ -51,8 +51,9 @@ def set_aperture(shape, n_cells, rect_shape, vertical, device):
         raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
     # print device info
-    cell_dim = devices[device][DeviceParam.CELL_DIM]
-    print(f"SLM dimension : {devices[device][DeviceParam.SLM_SHAPE]}")
+    device_config = devices[device]
+    cell_dim = device_config[DeviceParam.CELL_DIM]
+    print(f"SLM dimension : {device_config[DeviceParam.SLM_SHAPE]}")
     print(f"Cell dim (m) : {cell_dim}")
     if shape == ApertureOptions.LINE.value:
         if vertical:
@@ -67,25 +68,45 @@ def set_aperture(shape, n_cells, rect_shape, vertical, device):
     if shape == ApertureOptions.LINE.value:
         print(f"Length : {n_cells}")
         length = n_cells * cell_dim[0] if vertical else n_cells * cell_dim[1]
-        ap = line_aperture(length=length, vertical=vertical, **devices[device])
+        ap = line_aperture(
+            length=length,
+            vertical=vertical,
+            slm_shape=device_config[DeviceParam.SLM_SHAPE],
+            cell_dim=device_config[DeviceParam.CELL_DIM],
+        )
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
-        ap = square_aperture(side=n_cells * cell_dim[0], **devices[device])
+        ap = square_aperture(
+            side=n_cells * cell_dim[0],
+            slm_shape=device_config[DeviceParam.SLM_SHAPE],
+            cell_dim=device_config[DeviceParam.CELL_DIM],
+        )
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
-        ap = circ_aperture(radius=n_cells * cell_dim[0], **devices[device])
+        ap = circ_aperture(
+            radius=n_cells * cell_dim[0],
+            slm_shape=device_config[DeviceParam.SLM_SHAPE],
+            cell_dim=device_config[DeviceParam.CELL_DIM],
+        )
     elif shape == ApertureOptions.RECT.value:
         if len(rect_shape) == 0:
             # not provided
             rect_shape = (n_cells, n_cells)
         print(f"Shape : {rect_shape}")
         apert_dim = rect_shape[0] * cell_dim[0], rect_shape[1] * cell_dim[1]
-        ap = rect_aperture(apert_dim=apert_dim, **devices[device])
+        ap = rect_aperture(
+            apert_dim=apert_dim,
+            slm_shape=device_config[DeviceParam.SLM_SHAPE],
+            cell_dim=device_config[DeviceParam.CELL_DIM],
+        )
     assert ap is not None
 
     # set aperture to device
     D = create_display(device_key=device)
-    D.imshow(ap.values)
+    if device_config[DeviceParam.MONOCHROME]:
+        D.imshow(ap.grayscale_values)
+    else:
+        D.imshow(ap.values)
 
 
 if __name__ == "__main__":

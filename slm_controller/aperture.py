@@ -15,7 +15,7 @@ class ApertureOptions(Enum):
         return [shape.value for shape in ApertureOptions]
 
 
-def rect_aperture(slm_shape, cell_dim, apert_dim, center=None, monochrome=False):
+def rect_aperture(slm_shape, cell_dim, apert_dim, center=None):
     """
     Create and return SLM object with rectangular aperture of desired dimensions.
 
@@ -30,8 +30,6 @@ def rect_aperture(slm_shape, cell_dim, apert_dim, center=None, monochrome=False)
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.
-    monochrome : bool
-        [Optional] Whether SLM is monochrome.
 
     Returns
     -------
@@ -43,7 +41,7 @@ def rect_aperture(slm_shape, cell_dim, apert_dim, center=None, monochrome=False)
     assert np.all(apert_dim) > 0
 
     # initialize SLM
-    slm = SLM(shape=slm_shape, cell_dim=cell_dim, monochrome=monochrome)
+    slm = SLM(shape=slm_shape, cell_dim=cell_dim)
 
     # check / compute center
     if center is None:
@@ -76,7 +74,7 @@ def rect_aperture(slm_shape, cell_dim, apert_dim, center=None, monochrome=False)
     return slm
 
 
-def line_aperture(slm_shape, cell_dim, length, vertical=True, center=None, monochrome=False):
+def line_aperture(slm_shape, cell_dim, length, vertical=True, center=None):
     """
     Create and return SLM object with a line aperture of desired length.
 
@@ -91,8 +89,6 @@ def line_aperture(slm_shape, cell_dim, length, vertical=True, center=None, monoc
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.
-    monochrome : bool
-        [Optional] Whether SLM is monochrome.
 
     Returns
     -------
@@ -106,10 +102,10 @@ def line_aperture(slm_shape, cell_dim, length, vertical=True, center=None, monoc
         apert_dim = (length, cell_dim[1])
     else:
         apert_dim = (cell_dim[0], length)
-    return rect_aperture(slm_shape, cell_dim, apert_dim, center, monochrome)
+    return rect_aperture(slm_shape, cell_dim, apert_dim, center)
 
 
-def square_aperture(slm_shape, cell_dim, side, center=None, monochrome=False):
+def square_aperture(slm_shape, cell_dim, side, center=None):
     """
     Create and return SLM object with a square aperture of desired shape.
 
@@ -124,8 +120,6 @@ def square_aperture(slm_shape, cell_dim, side, center=None, monochrome=False):
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.
-    monochrome : bool
-        [Optional] Whether SLM is monochrome.
 
     Returns
     -------
@@ -133,10 +127,10 @@ def square_aperture(slm_shape, cell_dim, side, center=None, monochrome=False):
         SLM object with cells programmed to desired square aperture.
 
     """
-    return rect_aperture(slm_shape, cell_dim, (side, side), center, monochrome)
+    return rect_aperture(slm_shape, cell_dim, (side, side), center)
 
 
-def circ_aperture(slm_shape, cell_dim, radius, center=None, monochrome=False):
+def circ_aperture(slm_shape, cell_dim, radius, center=None):
     """
     Create and return SLM object with a circle aperture of desired shape.
 
@@ -151,8 +145,6 @@ def circ_aperture(slm_shape, cell_dim, radius, center=None, monochrome=False):
     center : tuple(float)
         [Optional] center of aperture along (SLM) coordinates, indexing starts in top-left corner.
         Default is to place center of aperture at center of SLM.
-    monochrome : bool
-        [Optional] Whether SLM is monochrome.
 
     Returns
     -------
@@ -164,7 +156,7 @@ def circ_aperture(slm_shape, cell_dim, radius, center=None, monochrome=False):
     assert radius > 0
 
     # initialize SLM
-    slm = SLM(shape=slm_shape, cell_dim=cell_dim, monochrome=monochrome)
+    slm = SLM(shape=slm_shape, cell_dim=cell_dim)
 
     # check / compute center
     if center is None:

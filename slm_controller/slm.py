@@ -1,9 +1,9 @@
 import numpy as np
-from slm_controller.util import _prepare_index_vals
+from slm_controller.util import _prepare_index_vals, rgb2gray
 
 
 class SLM:
-    def __init__(self, shape, cell_dim, monochrome=False):
+    def __init__(self, shape, cell_dim):
         """
         Class for defining SLM.
 
@@ -18,10 +18,7 @@ class SLM:
         assert np.all(cell_dim) > 0
         self._shape = shape
         self._cell_dim = cell_dim
-        if monochrome:
-            self._values = np.zeros((1,) + shape, dtype=bool)
-        else:
-            self._values = np.zeros((3,) + shape)
+        self._values = np.zeros((3,) + shape)
 
     @property
     def size(self):
@@ -53,11 +50,11 @@ class SLM:
 
     @property
     def values(self):
-        if self._values.shape[0] == 1:
-            # if monochrome, drop first dimension
-            return self._values[0]
-        else:
-            return self._values
+        return self._values
+
+    @property
+    def grayscale_values(self):
+        return rgb2gray(self._values)
 
     def __getitem__(self, key):
         idx = _prepare_index_vals(key, self._cell_dim)
@@ -80,7 +77,7 @@ class SLM:
         import matplotlib.pyplot as plt
 
         # prepare mask data for `imshow`, expects the input data array size to be (width, height, 3)
-        Z = self._values.transpose(1, 2, 0)
+        Z = self.values.transpose(1, 2, 0)
 
         # plot
         fig, ax = plt.subplots()
