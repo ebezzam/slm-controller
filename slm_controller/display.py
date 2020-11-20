@@ -235,7 +235,7 @@ class BinaryDisplay(Display):
 
             I_max = I.max()
             I_max = 1 if np.isclose(I_max, 0) else I_max
-            I_u = np.uint8(:I / float(I_max) * 255)  # uint8, full range
+            I_u = np.uint8(I / float(I_max) * 255)  # uint8, full range
             I_p = Image.fromarray(I_u.T).convert("1")
             self._disp.image(I_p)
             self._disp.show()
