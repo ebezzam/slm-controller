@@ -258,7 +258,7 @@ def create_display(device_key):
     display = None
     if device_key == DeviceOptions.ADAFRUIT_RGB.value:
         display = RGBDisplay()
-    elif device_key == DeviceOptions.ADAFRUIT_MONOCHROME.value:
+    elif device_key == DeviceOptions.ADAFRUIT_BINARY.value:
         display = BinaryDisplay()
     assert display is not None
     return display

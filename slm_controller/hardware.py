@@ -3,7 +3,7 @@ from enum import Enum
 
 class DeviceOptions(Enum):
     ADAFRUIT_RGB = "rgb"
-    ADAFRUIT_MONOCHROME = "mono"
+    ADAFRUIT_BINARY = "binary"
 
     @staticmethod
     def values():
@@ -27,7 +27,7 @@ devices = {
     # 1.3 inch monochrome display by Adafruit:
     # https://learn.adafruit.com/adafruit-sharp-memory-display-breakout
     # datasheet: https://cdn-shop.adafruit.com/product-files/3502/Data+sheet.pdf
-    DeviceOptions.ADAFRUIT_MONOCHROME.value: {
+    DeviceOptions.ADAFRUIT_BINARY.value: {
         DeviceParam.CELL_DIM: (0.145e-3, 0.145e-3),
         DeviceParam.SLM_SHAPE: (144, 168),
         DeviceParam.MONOCHROME: True,
