@@ -32,6 +32,13 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
     help="Shape for 'rect' in number of cells; `shape` must be set to 'rect'.",
 )
 @click.option(
+    "--center",
+    default=None,
+    nargs=2,
+    type=int,
+    help="Coordinate for center.",
+)
+@click.option(
     "--vertical", is_flag=True, help="Whether line should be vertical (True) or horizontal (False)."
 )
 @click.option(
@@ -39,7 +46,7 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
     type=click.Choice(DeviceOptions.values()),
     help="Which device to program with aperture.",
 )
-def set_aperture(shape, n_cells, rect_shape, vertical, device):
+def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
     """
     Set aperture on a physical device.
     """
@@ -73,6 +80,7 @@ def set_aperture(shape, n_cells, rect_shape, vertical, device):
             vertical=vertical,
             slm_shape=device_config[DeviceParam.SLM_SHAPE],
             cell_dim=device_config[DeviceParam.CELL_DIM],
+            center=center,
         )
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
@@ -80,6 +88,7 @@ def set_aperture(shape, n_cells, rect_shape, vertical, device):
             side=n_cells * cell_dim[0],
             slm_shape=device_config[DeviceParam.SLM_SHAPE],
             cell_dim=device_config[DeviceParam.CELL_DIM],
+            center=center,
         )
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
@@ -87,6 +96,7 @@ def set_aperture(shape, n_cells, rect_shape, vertical, device):
             radius=n_cells * cell_dim[0],
             slm_shape=device_config[DeviceParam.SLM_SHAPE],
             cell_dim=device_config[DeviceParam.CELL_DIM],
+            center=center,
         )
     elif shape == ApertureOptions.RECT.value:
         if len(rect_shape) == 0:
@@ -98,6 +108,7 @@ def set_aperture(shape, n_cells, rect_shape, vertical, device):
             apert_dim=apert_dim,
             slm_shape=device_config[DeviceParam.SLM_SHAPE],
             cell_dim=device_config[DeviceParam.CELL_DIM],
+            center=center,
         )
     assert ap is not None
 
