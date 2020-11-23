@@ -79,3 +79,97 @@ def save_image(I, fname):
 
     I_p = Image.fromarray(I_u)
     I_p.save(fname)
+
+
+def _cell_slice(_slice, cell_m):
+    """
+    Convert slice indexing in meters to slice indexing in cells.
+
+    Parameters
+    ----------
+    _slice : slice
+        Original slice in meters.
+    cell_m : float
+        Cell dimension in meters.
+    """
+    if _slice.start is not None:
+        start = _m_to_cell_idx(_slice.start, cell_m)
+    else:
+        start = None
+    if _slice.stop is not None:
+        stop = _m_to_cell_idx(_slice.stop, cell_m)
+    else:
+        stop = None
+    if _slice.step is not None:
+        step = _m_to_cell_idx(_slice.step, cell_m)
+    else:
+        step = None
+    return slice(start, stop, step)
+
+
+def _m_to_cell_idx(val, cell_m):
+    """
+    Convert location to cell index.
+
+    Parameters
+    ----------
+    val : float
+        Location in meters.
+    cell_m : float
+        Dimension of cell in meters.
+    """
+    return int(val / cell_m)
+
+
+def si2cell(val: np.ndarray, cell_m):
+    """
+    Convert locations to cell index.
+
+    Parameters
+    ----------
+    val : :py:class:`~numpy.ndarray`
+        Locations in meters.
+    cell_m : float
+        Dimension of cell in meters.
+    """
+    return np.array(val // cell_m, dtype=int)
+
+
+def _prepare_index_vals(key, cell_shape):
+    """
+    Convert indexing object in meters to indexing object in cell indices.
+
+    Parameters
+    ----------
+    key : int, float, slice, or list
+        Indexing operation in meters.
+    cell_shape : tuple(float)
+        Cell dimensions (height, width) in meters.
+    """
+
+    if isinstance(key, float) or isinstance(key, int):
+        idx = slice(None), _m_to_cell_idx(key, cell_shape[0])
+
+    elif isinstance(key, slice):
+        idx = slice(None), _cell_slice(key, cell_shape[0])
+
+    elif len(key) == 2:
+        idx = [slice(None)]
+        for k, _slice in enumerate(key):
+
+            if isinstance(_slice, slice):
+                idx.append(_cell_slice(_slice, cell_shape[k]))
+
+            elif isinstance(_slice, float) or isinstance(_slice, int):
+                idx.append(_m_to_cell_idx(_slice, cell_shape[k]))
+
+            else:
+                raise ValueError("Invalid key.")
+        idx = tuple(idx)
+
+    elif len(key) == 3:
+        raise NotImplementedError("Cannot index individual channels.")
+
+    else:
+        raise ValueError("Invalid key.")
+    return idx

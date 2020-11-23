@@ -1,10 +1,10 @@
 import click
 from slm_controller import display
 from slm_controller.aperture import (
-    LineAperture,
-    SquareAperture,
-    CircAperture,
-    RectAperture,
+    rect_aperture,
+    line_aperture,
+    square_aperture,
+    circ_aperture,
     ApertureOptions,
 )
 from slm_controller.hardware import devices, DeviceOptions, DeviceParam
@@ -14,10 +14,10 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
 @click.option(
     "--shape", default=ApertureOptions.SQUARE.value, type=click.Choice(ApertureOptions.values())
 )
-@click.option("--n_pixels", default=10, type=int)
+@click.option("--n_cells", default=10, type=int)
 @click.option("--rect_shape", default=None, nargs=2, type=int)
 @click.option("--vertical", is_flag=True)
-def set_rgb_aperture(shape, n_pixels, rect_shape, vertical):
+def set_rgb_aperture(shape, n_cells, rect_shape, vertical):
     """
     Set aperture for the 1.8'' RGB display by Adafruit.
 
@@ -25,11 +25,11 @@ def set_rgb_aperture(shape, n_pixels, rect_shape, vertical):
     ----------
     shape : "rect", "square", "line", or "circ"
         Shape of aperture.
-    n_pixels : int
+    n_cells : int
         Side length for "square", length for "line", radius for "circ". To set shape for "rect", use
         `rect_shape`.
-    rect_shape : tuple
-        Shape for "rect"; `shape` must be set to "rect".
+    rect_shape : tuple(int)
+        Shape for "rect" in number of cells; `shape` must be set to "rect".
     vertical : bool
         Whether line should be vertical (True) or horizontal (False).
     """
@@ -41,12 +41,14 @@ def set_rgb_aperture(shape, n_pixels, rect_shape, vertical):
         raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
     # prepare display
+    rgb_device = DeviceOptions.ADAFRUIT_RGB
     D = display.RGBDisplay(rotation=0)
 
     # print device info
-    pixel_shape = devices[DeviceOptions.ADAFRUIT_RGB][DeviceParam.PIXEL_SHAPE]
-    print(f"SLM dimension : {D.shape}")
-    print(f"Pixel shape (m) : {pixel_shape}")
+    cell_dim = devices[rgb_device][DeviceParam.CELL_DIM]
+    slm_shape = D.shape
+    print(f"SLM dimension : {slm_shape}")
+    print(f"Cell dim (m) : {cell_dim}")
     if shape == ApertureOptions.LINE.value:
         if vertical:
             print("Aperture shape : vertical line")
@@ -58,26 +60,26 @@ def set_rgb_aperture(shape, n_pixels, rect_shape, vertical):
     # create aperture mask
     ap = None
     if shape == ApertureOptions.LINE.value:
-        print(f"Length : {n_pixels}")
-        ap = LineAperture(
-            n_pixels=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape, vertical=vertical
-        )
+        print(f"Length : {n_cells}")
+        length = n_cells * cell_dim[0] if vertical else n_cells * cell_dim[1]
+        ap = line_aperture(slm_shape=slm_shape, cell_dim=cell_dim, length=length, vertical=vertical)
     elif shape == ApertureOptions.SQUARE.value:
-        print(f"Side length : {n_pixels}")
-        ap = SquareAperture(side=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape)
+        print(f"Side length : {n_cells}")
+        ap = square_aperture(slm_shape=slm_shape, cell_dim=cell_dim, side=n_cells * cell_dim[0])
     elif shape == ApertureOptions.CIRC.value:
-        print(f"Radius : {n_pixels}")
-        ap = CircAperture(radius=n_pixels, slm_dim=D.shape, pixel_shape=pixel_shape)
+        print(f"Radius : {n_cells}")
+        ap = circ_aperture(slm_shape=slm_shape, cell_dim=cell_dim, radius=n_cells * cell_dim[0])
     elif shape == ApertureOptions.RECT.value:
         if len(rect_shape) == 0:
             # not provided
-            rect_shape = (n_pixels, n_pixels)
+            rect_shape = (n_cells, n_cells)
         print(f"Shape : {rect_shape}")
-        ap = RectAperture(apert_dim=rect_shape, slm_dim=D.shape, pixel_shape=pixel_shape)
+        apert_dim = rect_shape[0] * cell_dim[0], rect_shape[1] * cell_dim[1]
+        ap = rect_aperture(slm_shape=slm_shape, cell_dim=cell_dim, apert_dim=apert_dim)
     assert ap is not None
 
     # set aperture
-    D.imshow(ap.mask)
+    D.imshow(ap.values)
 
 
 if __name__ == "__main__":
