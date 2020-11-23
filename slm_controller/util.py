@@ -84,7 +84,7 @@ def save_image(I, fname):
     I_p.save(fname)
 
 
-def rgb2gray(rgb):
+def rgb2gray(rgb, weights=None):
     """
     Convert RGB array to grayscale.
 
@@ -92,9 +92,13 @@ def rgb2gray(rgb):
     ----------
     rgb : :py:class:`~numpy.ndarray`
         (N_channel, N_height, N_width) image.
+    weights : :py:class:`~numpy.ndarray`
+        [Optional] (3,) weights to convert from RGB to grayscale.
     """
-    weights = np.array([0.299, 0.587, 0.144])
-    return np.sum(rgb * weights[:, np.newaxis, np.newaxis], axis=0)
+    if weights is None:
+        weights = np.array([0.299, 0.587, 0.144])
+    assert len(weights) == 3
+    return np.tensordot(rgb, weights, axes=((0,), (0)))
 
 
 def _cell_slice(_slice, cell_m):

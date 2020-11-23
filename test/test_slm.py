@@ -6,7 +6,7 @@ dim = 10
 s = SLM(shape=(dim, dim), cell_dim=(1, 1))
 
 
-class TestSLMIndexing:
+class TestSLM:
     """
     Test :py:module:`~slm_controller.slm.SLM`.
     """
@@ -39,3 +39,7 @@ class TestSLMIndexing:
         assert val.shape == (3, dim, 4)
         val = s.at(np.s_[:, 4.5:])
         assert val.shape == (3, dim, 6)
+
+    def test_grayscale_values(self):
+        vals = s.grayscale_values
+        assert vals.shape == (10, 10)
