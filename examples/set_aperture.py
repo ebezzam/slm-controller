@@ -69,6 +69,8 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
             print("Aperture shape : horizontal line")
     else:
         print(f"Aperture shape : {shape}")
+    if center is not None:
+        center = (center[0] * cell_dim[0], center[1] * cell_dim[1])
 
     # create aperture mask
     ap = None
