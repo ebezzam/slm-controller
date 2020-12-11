@@ -98,7 +98,7 @@ def rgb2gray(rgb, weights=None):
     if weights is None:
         weights = np.array([0.299, 0.587, 0.144])
     assert len(weights) == 3
-    return np.tensordot(rgb, weights, axes=((0,), (0)))
+    return np.tensordot(rgb, weights, axes=((0,), 0))
 
 
 def _cell_slice(_slice, cell_m):

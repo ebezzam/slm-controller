@@ -30,7 +30,8 @@ You won't be able to run any examples that use the display.
 
 ## Example scripts
 
-In `examples` are various example scripts to control an RGB and a monochrome display by Adafruit.
+In `examples` are various example scripts to control an RGB and a monochrome (binary) display by 
+Adafruit.
 
 First, activate the virtual environment:
 
@@ -67,16 +68,22 @@ The original image will be rescaled and cropped to match the original aspect rat
 To display a randomly generated monochrome image:
 
 ```sh
-python examples/monochrome_display.py
+python examples/binary_display.py
 ```
 
 For an image, you can pass the file path:
 
 ```sh
-python examples/monochrome_display.py --file_path examples/blinka.jpg --thresh 0.4
+python examples/binary_display.py --file_path examples/blinka.jpg
 ```
-The original image will be rescaled and cropped to match the original aspect ratio. The option
-`--thresh` can be used to modify the cutoff between black and white.
+
+The original image will be rescaled and cropped to match the original aspect ratio.
+
+With the following command, a simple reshape will be performed which can distort the original image.
+
+```sh
+python examples/binary_display.py --file_path examples/blinka.jpg --not_original_ratio
+```
 
 
 #### Aperture
@@ -102,13 +109,13 @@ Options:
   --vertical                      Whether line should be vertical (True) or
                                   horizontal (False).
 
-  --device [rgb|mono]             Which device to program with aperture.
+  --device [rgb|binary]           Which device to program with aperture.
   --help                          Show this message and exit.
 ```
 
-For example, to create a circle aperture on the monochrome device with a radius of 5 cells:
+For example, to create a circle aperture on the monochrome device with a radius of 20 cells:
 ```sh
-python examples/set_aperture.py --device mono --shape circ --n_cells 5
+python examples/set_aperture.py --device binary --shape circ --n_cells 20
 ```
 
 For a square aperture on the RGB device with a side length of 2 cells:
@@ -116,7 +123,8 @@ For a square aperture on the RGB device with a side length of 2 cells:
 python examples/set_aperture.py --device rgb --shape square --n_cells 2
 ```
 
-You can preview an aperture with the following script:
+You can preview an aperture with the following script. Note that it should be run on a machine with
+plotting capabilities, i.e. with `matplotlib`.
 ```
 >> python examples/plot_aperture.py --help
 
@@ -145,6 +153,6 @@ Options:
                                   width).
 
   --monochrome                    Whether SLM is monochrome.
-  --device [rgb|mono]             Which device to program with aperture.
+  --device [rgb|binary]           Which device to program with aperture.
   --help                          Show this message and exit.
 ```
