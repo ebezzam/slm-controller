@@ -1,7 +1,8 @@
 import abc
-
 import numpy as np
 from PIL import Image, ImageDraw
+
+from slm_controller.hardware import DeviceOptions
 
 
 class Display:
@@ -57,7 +58,7 @@ class RGBDisplay(Display):
         baudrate=24000000,
     ):
         """
-        Object to display images on the Adafruit 1.8" TFT Display Breakout with a Raspberry Pi:
+        Object to display images on the Adafruit 1.8 inch TFT Display Breakout with a Raspberry Pi:
         https://learn.adafruit.com/1-8-tft-display/overview
 
         Parameters
@@ -158,4 +159,106 @@ class RGBDisplay(Display):
             I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
             self._disp.image(I_p)
         except:
-            raise ValueError("Parameter[I]: unsupported shape")
+            raise ValueError("Parameter[I]: unsupported data")
+
+
+class BinaryDisplay(Display):
+    def __init__(
+        self,
+        cs_pin=None,
+        height=144,
+        width=168,
+        baudrate=2000000,
+    ):
+        """
+        Object to display images on the Adafruit 1.3 inch monochrome display with a Raspberry Pi:
+        https://learn.adafruit.com/adafruit-sharp-memory-display-breakout
+
+        Parameters
+        ----------
+        cs_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
+            Raspberry Pi pin connected to TFT_CS pin on the display breakout.
+        height : int
+            Height in number of cells.
+        width : int
+            Width in number of cells.
+        baudrate : int
+            Baud rate.
+        """
+        super().__init__()
+
+        try:
+
+            import board
+            import busio
+            import digitalio
+            import adafruit_sharpmemorydisplay
+
+            cs_pin = cs_pin if (cs_pin is not None) else board.D6
+
+            spi = busio.SPI(board.SCK, MOSI=board.MOSI)
+            scs = digitalio.DigitalInOut(cs_pin)  # inverted chip select
+            self._disp = adafruit_sharpmemorydisplay.SharpMemoryDisplay(
+                spi, scs, height, width, baudrate=baudrate
+            )
+            self._height = height
+            self._width = width
+
+        except:
+            raise IOError("Failed to load display.")
+
+    def clear(self):
+        """
+        Clear display.
+        """
+        self._disp.fill(1)
+        self._disp.show()
+
+    def imshow(self, I):
+        """
+        Display monochrome data in binary format..
+
+        Parameters
+        ----------
+        I : :py:class:`~numpy.ndarray`
+            (N_height, N_width) monochrome data.
+        """
+        assert I.shape == self.shape
+        assert isinstance(I, np.ndarray) and (
+            np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
+        )
+        assert np.all(I >= 0)
+
+        self.clear()
+
+        try:
+
+            I_max = I.max()
+            I_max = 1 if np.isclose(I_max, 0) else I_max
+            I_u = np.uint8(I / float(I_max) * 255)  # uint8, full range
+            I_p = Image.fromarray(I_u.T).convert("1")
+            self._disp.image(I_p)
+            self._disp.show()
+
+        except:
+            raise ValueError("Parameter[I]: unsupported data")
+
+
+def create_display(device_key):
+    """
+    Factory method to create `Display` object.
+
+    Parameters
+    ----------
+    device_key : str
+        Option from `DeviceOptions`.
+    """
+    assert device_key in DeviceOptions.values()
+
+    display = None
+    if device_key == DeviceOptions.ADAFRUIT_RGB.value:
+        display = RGBDisplay()
+    elif device_key == DeviceOptions.ADAFRUIT_BINARY.value:
+        display = BinaryDisplay()
+    assert display is not None
+    return display
