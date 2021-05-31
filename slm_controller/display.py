@@ -262,7 +262,22 @@ class NokiaDisplay(Display):
 
         Parameters
         ----------
-        TODO
+        dc_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
+            Raspberry Pi pin connected to the DC pin on the display breakout.
+        cs_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
+            Raspberry Pi pin connected to the CE pin on the display breakout.
+        reset_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
+            Raspberry Pi pin connected to the RST pin on the display breakout.
+        height : int
+            Height in number of cells.
+        width : int
+            Width in number of cells.
+        contrast : int
+            Display contrast, should be 0-127.
+        bias : int
+            Display bias.
+        baudrate : int
+            Baud rate.
         """
         super().__init__()
 
