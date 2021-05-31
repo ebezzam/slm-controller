@@ -38,8 +38,8 @@ devices = {
     # 1.5 inch diagonal: https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd
     # datasheet: https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf
     DeviceOptions.NOKIA_5110.value: {
-        DeviceParam.CELL_DIM: (0.396e-3, 0.339e-3),  # TODO: measured by "hand", check elsewhere
-        DeviceParam.SLM_SHAPE: (48, 84),
+        DeviceParam.CELL_DIM: (0.339e-3, 0.396e-3),  # TODO: measured by "hand", check elsewhere
+        DeviceParam.SLM_SHAPE: (84, 48),
         DeviceParam.MONOCHROME: True,
     },
 }

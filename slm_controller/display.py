@@ -250,8 +250,8 @@ class NokiaDisplay(Display):
         dc_pin=None,
         cs_pin=None,
         reset_pin=None,
-        height=48,
-        width=84,
+        height=84,
+        width=48,
         contrast=80,
         bias=4,
         baudrate=1000000,
@@ -325,7 +325,7 @@ class NokiaDisplay(Display):
 
             I_max = I.max()
             I_max = 1 if np.isclose(I_max, 0) else I_max
-            I_u = np.uint8(I / float(I_max) * 255)  # uint8, full range
+            I_u = 255 - np.uint8(I / float(I_max) * 255)  # uint8, full range, image is inverted
             I_p = Image.fromarray(I_u.T).convert("1")
             self._disp.image(I_p)
             self._disp.show()
