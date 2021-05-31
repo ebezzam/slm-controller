@@ -21,6 +21,7 @@ setuptools.setup(
     install_requires=[
         "adafruit-circuitpython-rgb-display",
         "adafruit-circuitpython-sharpmemorydisplay",
+        "adafruit-circuitpython-pcd8544",
         "pillow==5.4.1",
         "numpy==1.16.2",
     ],

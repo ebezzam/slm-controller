@@ -156,3 +156,10 @@ Options:
   --device [rgb|binary]           Which device to program with aperture.
   --help                          Show this message and exit.
 ```
+
+
+## Adding new device
+
+1. Add configuration in `slm_controller/hardware.py`.
+2. Create class in `slm_controller/display.py`.
+3. Add to factory method `create_display` in `slm_controller/display.py`.

@@ -216,7 +216,97 @@ class BinaryDisplay(Display):
 
     def imshow(self, I):
         """
-        Display monochrome data in binary format..
+        Display monochrome data in binary format.
+
+        Parameters
+        ----------
+        I : :py:class:`~numpy.ndarray`
+            (N_height, N_width) monochrome data.
+        """
+        assert I.shape == self.shape
+        assert isinstance(I, np.ndarray) and (
+            np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
+        )
+        assert np.all(I >= 0)
+
+        self.clear()
+
+        try:
+
+            I_max = I.max()
+            I_max = 1 if np.isclose(I_max, 0) else I_max
+            I_u = np.uint8(I / float(I_max) * 255)  # uint8, full range
+            I_p = Image.fromarray(I_u.T).convert("1")
+            self._disp.image(I_p)
+            self._disp.show()
+
+        except:
+            raise ValueError("Parameter[I]: unsupported data")
+
+
+class NokiaDisplay(Display):
+    def __init__(
+        self,
+        dc_pin=None,
+        cs_pin=None,
+        reset_pin=None,
+        height=48,
+        width=84,
+        contrast=80,
+        bias=4,
+        baudrate=1000000,
+    ):
+        """
+        Object to display images on the Nokia 5110 monochrome display with a Raspberry Pi:
+        https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd
+
+        Parameters
+        ----------
+        TODO
+        """
+        super().__init__()
+
+        try:
+
+            import board
+            import busio
+            import digitalio
+            import adafruit_pcd8544
+
+            dc_pin = dc_pin if dc_pin is not None else board.D6
+            cs_pin = cs_pin if cs_pin is not None else board.CE0
+            reset_pin = reset_pin if reset_pin is not None else board.D5
+
+            spi = busio.SPI(board.SCK, MOSI=board.MOSI)
+            dc_pin = digitalio.DigitalInOut(dc_pin)  # data/command
+            cs_pin = digitalio.DigitalInOut(cs_pin)  # Chip select
+            reset_pin = digitalio.DigitalInOut(reset_pin)  # reset
+            self._disp = adafruit_pcd8544.PCD8544(
+                spi=spi,
+                dc_pin=dc_pin,
+                cs_pin=cs_pin,
+                reset_pin=reset_pin,
+                contrast=contrast,
+                bias=bias,
+                baudrate=baudrate,
+            )
+
+            self._height = height
+            self._width = width
+
+        except:
+            raise IOError("Failed to load display.")
+
+    def clear(self):
+        """
+        Clear display.
+        """
+        self._disp.fill(1)
+        self._disp.show()
+
+    def imshow(self, I):
+        """
+        Display monochrome data in binary format.
 
         Parameters
         ----------
@@ -260,5 +350,7 @@ def create_display(device_key):
         display = RGBDisplay()
     elif device_key == DeviceOptions.ADAFRUIT_BINARY.value:
         display = BinaryDisplay()
+    elif device_key == DeviceOptions.NOKIA_5110.value:
+        display = NokiaDisplay()
     assert display is not None
     return display
