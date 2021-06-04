@@ -51,6 +51,11 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
     Set aperture on a physical device.
     """
 
+    if rect_shape is None:
+        rect_shape = []
+    if center is None:
+        center = []
+
     # check input parameters
     if len(rect_shape) > 0 and shape is not ApertureOptions.RECT.value:
         raise ValueError("Received [rect_shape], but [shape] parameters is not 'rect'.")
