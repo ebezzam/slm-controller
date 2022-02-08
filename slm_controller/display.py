@@ -1,5 +1,6 @@
 import abc
 import numpy as np
+import warnings
 from PIL import Image, ImageDraw
 
 from slm_controller.hardware import DeviceOptions
@@ -78,6 +79,7 @@ class RGBDisplay(Display):
 
         if rotation not in (0, 90, 180, 270):
             raise ValueError("Rotation must be 0/90/180/270")
+        self._virtual = False
 
         try:
             import board
@@ -113,7 +115,10 @@ class RGBDisplay(Display):
                 self._width = self._disp.width
                 self._height = self._disp.height
         except:
-            raise IOError("Failed to load display.")
+            self._virtual = True
+            self._width = 160
+            self._height = 128
+            warnings.warn("Failed to load display. Using virtual device...")
 
     def clear(self):
         """
@@ -147,19 +152,31 @@ class RGBDisplay(Display):
         assert I.ndim in (2, 3)
         assert I.shape[-2:] == self.shape
 
-        self.clear()
+        if not self._virtual:
 
-        try:
-            I_max = I.max()
-            I_max = 1 if np.isclose(I_max, 0) else I_max
+            self.clear()
 
-            I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
-            I_u = np.uint8(255 * I_f)  # uint8
+            try:
+                I_max = I.max()
+                I_max = 1 if np.isclose(I_max, 0) else I_max
 
-            I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
-            self._disp.image(I_p)
-        except:
-            raise ValueError("Parameter[I]: unsupported data")
+                I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
+                I_u = np.uint8(255 * I_f)  # uint8
+
+                I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
+                self._disp.image(I_p)
+            except:
+                raise ValueError("Parameter[I]: unsupported data")
+
+        else:
+
+            import matplotlib.pyplot as plt
+
+            Z = I.transpose(1, 2, 0)
+            # plot
+            fig, ax = plt.subplots()
+            ax.imshow(Z)
+            plt.show()
 
 
 class BinaryDisplay(Display):

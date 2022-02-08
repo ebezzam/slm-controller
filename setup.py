@@ -22,8 +22,8 @@ setuptools.setup(
         "adafruit-circuitpython-rgb-display",
         "adafruit-circuitpython-sharpmemorydisplay",
         "adafruit-circuitpython-pcd8544",
-        "pillow==5.4.1",
-        "numpy==1.16.2",
+        "Pillow",
+        "numpy",
     ],
     extra_requires={
         "dev": ["click", "matplotlib", "pytest"],

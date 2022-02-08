@@ -58,7 +58,7 @@ python examples/rgb_display.py --rgb
 For an image, you can pass the file path:
 
 ```sh
-python examples/rgb_display.py --file_path examples/blinka.jpg
+python examples/rgb_display.py --fp examples/blinka.jpg
 ```
 The original image will be rescaled and cropped to match the original aspect ratio.
 
@@ -155,6 +155,11 @@ Options:
   --monochrome                    Whether SLM is monochrome.
   --device [rgb|binary]           Which device to program with aperture.
   --help                          Show this message and exit.
+```
+
+For example, to plot a square aperture on the RGB device with a side length of 2 cells:
+```sh
+python examples/plot_aperture.py --shape square --n_cells 2 --device rgb
 ```
 
 

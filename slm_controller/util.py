@@ -21,7 +21,11 @@ def load_image(fname, output_shape=None, keep_aspect_ratio=True, grayscale=False
         ([N_channel,] N_height, N_width) image.
         Output dtype is format-dependent.
     """
-    I_p = Image.open(fname, mode="r")
+    if fname.endswith(".npy"):
+        return np.load(fname)
+        # TODO : possible resizing
+    else:
+        I_p = Image.open(fname, mode="r")
 
     # rescale and resize if need be
     if output_shape is not None:
