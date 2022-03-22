@@ -5,6 +5,10 @@ from PIL import Image, ImageDraw
 
 from slm_controller.hardware import DeviceOptions, DeviceParam
 
+import detect_heds_module_path  # TODO add in setup
+import holoeye
+from holoeye import slmdisplaysdk
+
 
 class Display:
     def __init__(self):
@@ -366,26 +370,41 @@ class NokiaDisplay(Display):
             raise ValueError("Parameter[I]: unsupported data")
 
 
-class HoloeyeDisplay(Display):  # TODO Implement
+class HoloeyeDisplay(Display):
     def __init__(
         self,
     ):
-        """ """
+        """
+        #TODO doc
+        """
         super().__init__()
+
+        # Similar to: https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/slm_display_module.py#L19
+        self.ErrorCode = slmdisplaysdk.SLMDisplay.ErrorCode
+        self.ShowFlags = slmdisplaysdk.SLMDisplay.ShowFlags
+
+        self.displayOptions = (
+            self.ShowFlags.PresentAutomatic
+        )  # PresentAutomatic == 0 (default) //TODO check those flags
+        self.displayOptions |= self.ShowFlags.PresentFitWithBars
 
         self._virtual = False
         self._height, self._width = DeviceOptions.HOLOEYE.value(DeviceParam.SLM_SHAPE)
 
-        try:
-            pass  # TODO Implement
+        try:  # TODO check return values/exceptions
+            self._disp = slmdisplaysdk.SLMDisplay()
+            self._disp.open()
         except:
             self._virtual = True
 
             warnings.warn("Failed to load display. Using virtual device...")
 
-    def clear(self):  # Adapt
+    def __del__(self):
+        self._disp.release()
+
+    def clear(self):  # TODO check if there is a method provided allready
         """
-        Clear display.
+        Clear display. #TODO doc
         """
         I = Image.new("RGB", (self.width, self.height))
 
@@ -396,8 +415,10 @@ class HoloeyeDisplay(Display):  # TODO Implement
         draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
         self._disp.image(I)
 
-    def imshow(self, I):  # Adapt
-        """ """
+    def imshow(self, I):
+        """
+        Display monochrome data. #TODO doc
+        """
         assert isinstance(I, np.ndarray) and (
             np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
         )
@@ -416,12 +437,15 @@ class HoloeyeDisplay(Display):  # TODO Implement
                 I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
                 I_u = np.uint8(255 * I_f)  # uint8
 
-                I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
-                self._disp.image(I_p)
+                I_p = I_u.transpose(1, 2, 0)
+
+                error = self._disp.showData(I_p)
+                assert error == self.ErrorCode.NoError, self._disp.errorString(error)
+
             except:
                 raise ValueError("Parameter[I]: unsupported data")
 
-        else:  # TODO this art won't change
+        else:
 
             import matplotlib.pyplot as plt
 
