@@ -70,7 +70,8 @@ def rect_aperture(slm_shape, cell_dim, apert_dim, center=None):
             f"SLM dimensions {slm.dim}"
         )
     slm.at(
-        physical_coord=np.s_[top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]], value=1
+        physical_coord=np.s_[top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]],
+        value=1,
     )
 
     return slm
@@ -180,5 +181,5 @@ def circ_aperture(slm_shape, cell_dim, radius, center=None):
     )
     x2 = (i - center[0]) ** 2
     y2 = (j - center[1]) ** 2
-    slm[:] = x2 + y2 < radius**2
+    slm[:] = x2 + y2 < radius ** 2
     return slm

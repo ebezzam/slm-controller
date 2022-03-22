@@ -3,7 +3,7 @@ import numpy as np
 import warnings
 from PIL import Image, ImageDraw
 
-from slm_controller.hardware import DeviceOptions
+from slm_controller.hardware import DeviceOptions, DeviceParam
 
 
 class Display:
@@ -116,7 +116,7 @@ class RGBDisplay(Display):
                 self._height = self._disp.height
         except:
             self._virtual = True
-            self._width = 160
+            self._width = 160  # TODO lookup table
             self._height = 128
             warnings.warn("Failed to load display. Using virtual device...")
 
@@ -183,7 +183,7 @@ class BinaryDisplay(Display):
     def __init__(
         self,
         cs_pin=None,
-        height=144,
+        height=144,  # TODO lookup table
         width=168,
         baudrate=2000000,
     ):
@@ -267,7 +267,7 @@ class NokiaDisplay(Display):
         dc_pin=None,
         cs_pin=None,
         reset_pin=None,
-        height=84,
+        height=84,  # TODO lookup table
         width=48,
         contrast=80,
         bias=4,
@@ -366,6 +366,72 @@ class NokiaDisplay(Display):
             raise ValueError("Parameter[I]: unsupported data")
 
 
+class HoloeyeDisplay(Display):  # TODO Implement
+    def __init__(
+        self,
+    ):
+        """ """
+        super().__init__()
+
+        self._virtual = False
+        self._height, self._width = DeviceOptions.HOLOEYE.value(DeviceParam.SLM_SHAPE)
+
+        try:
+            pass  # TODO Implement
+        except:
+            self._virtual = True
+
+            warnings.warn("Failed to load display. Using virtual device...")
+
+    def clear(self):  # Adapt
+        """
+        Clear display.
+        """
+        I = Image.new("RGB", (self.width, self.height))
+
+        # Get drawing object to draw on image.
+        draw = ImageDraw.Draw(I)
+
+        # Draw a black filled box to clear the image.
+        draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
+        self._disp.image(I)
+
+    def imshow(self, I):  # Adapt
+        """ """
+        assert isinstance(I, np.ndarray) and (
+            np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
+        )
+        assert np.all(I >= 0)
+        assert I.ndim in (2, 3)
+        assert I.shape[-2:] == self.shape
+
+        if not self._virtual:
+
+            self.clear()
+
+            try:
+                I_max = I.max()
+                I_max = 1 if np.isclose(I_max, 0) else I_max
+
+                I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
+                I_u = np.uint8(255 * I_f)  # uint8
+
+                I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
+                self._disp.image(I_p)
+            except:
+                raise ValueError("Parameter[I]: unsupported data")
+
+        else:  # TODO this art won't change
+
+            import matplotlib.pyplot as plt
+
+            Z = I.transpose(1, 2, 0)
+            # plot
+            _, ax = plt.subplots()
+            ax.imshow(Z)
+            plt.show()
+
+
 def create_display(device_key):
     """
     Factory method to create `Display` object.
@@ -384,5 +450,7 @@ def create_display(device_key):
         display = BinaryDisplay()
     elif device_key == DeviceOptions.NOKIA_5110.value:
         display = NokiaDisplay()
+    elif device_key == DeviceOptions.HOLOEYE.value:
+        display = HoloeyeDisplay()
     assert display is not None
     return display

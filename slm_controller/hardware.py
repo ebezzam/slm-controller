@@ -5,6 +5,7 @@ class DeviceOptions(Enum):
     ADAFRUIT_RGB = "rgb"
     ADAFRUIT_BINARY = "binary"
     NOKIA_5110 = "nokia"
+    HOLOEYE = "holoeye"
 
     @staticmethod
     def values():
@@ -38,7 +39,16 @@ devices = {
     # 1.5 inch diagonal: https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd
     # datasheet: https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf
     DeviceOptions.NOKIA_5110.value: {
-        DeviceParam.CELL_DIM: (0.339e-3, 0.396e-3),  # TODO: measured by "hand", check elsewhere
+        DeviceParam.CELL_DIM: (
+            0.339e-3,
+            0.396e-3,
+        ),  # TODO: measured by "hand", check elsewhere
+        DeviceParam.SLM_SHAPE: (84, 48),
+        DeviceParam.MONOCHROME: True,
+    },
+    # Holoeye SLM #TODO: add documentation, link, lookup values
+    DeviceOptions.HOLOEYE.value: {
+        DeviceParam.CELL_DIM: (0.339e-3, 0.396e-3),
         DeviceParam.SLM_SHAPE: (84, 48),
         DeviceParam.MONOCHROME: True,
     },
