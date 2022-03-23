@@ -70,8 +70,7 @@ def rect_aperture(slm_shape, cell_dim, apert_dim, center=None):
             f"SLM dimensions {slm.dim}"
         )
     slm.at(
-        physical_coord=np.s_[top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]],
-        value=1,
+        physical_coord=np.s_[top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]], value=1,
     )
 
     return slm

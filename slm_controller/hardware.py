@@ -5,7 +5,7 @@ class DeviceOptions(Enum):
     ADAFRUIT_RGB = "rgb"
     ADAFRUIT_BINARY = "binary"
     NOKIA_5110 = "nokia"
-    HOLOEYE = "holoeye"
+    HOLOEYE_LC_2012 = "holoeye"
 
     @staticmethod
     def values():
@@ -39,17 +39,23 @@ devices = {
     # 1.5 inch diagonal: https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd
     # datasheet: https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf
     DeviceOptions.NOKIA_5110.value: {
-        DeviceParam.CELL_DIM: (
-            0.339e-3,
-            0.396e-3,
-        ),  # TODO: measured by "hand", check elsewhere
+        DeviceParam.CELL_DIM: (0.339e-3, 0.396e-3,),  # TODO: measured by "hand", check elsewhere
         DeviceParam.SLM_SHAPE: (84, 48),
         DeviceParam.MONOCHROME: True,
     },
-    # Holoeye SLM #TODO: add documentation, link, lookup values
-    DeviceOptions.HOLOEYE.value: {
-        DeviceParam.CELL_DIM: (0.339e-3, 0.396e-3),
-        DeviceParam.SLM_SHAPE: (84, 48),
+    # Holoeye SLM - LC 2012
+    # https://holoeye.com/lc-2012-spatial-light-modulator/
+    # 1.8 inch diagonal #TODO: add documentation, link, lookup values
+    # Pixel pitch is defined as the #TODO check pixel pitch -> 36 μm
+    # center‐to‐center spacing between adjacent pixels. Interpixel gap describes the
+    # edge‐to‐edge spacing between adjacent pixels.
+    # 36.9 x 27.6 mm / 1.8”
+    DeviceOptions.HOLOEYE_LC_2012.value: {
+        DeviceParam.CELL_DIM: (
+            0.359e-4,
+            0.360e-4,
+        ),  # TODO Units in meters, 0.359375e-4, 0.3603515625e-4
+        DeviceParam.SLM_SHAPE: (768, 1024),
         DeviceParam.MONOCHROME: True,
     },
 }

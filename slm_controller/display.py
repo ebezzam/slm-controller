@@ -5,8 +5,7 @@ from PIL import Image, ImageDraw
 
 from slm_controller.hardware import DeviceOptions, DeviceParam
 
-import detect_heds_module_path  # TODO add in setup
-import holoeye
+import slm_controller.detect_heds_module_path  # TODO add in setup
 from holoeye import slmdisplaysdk
 
 
@@ -55,12 +54,7 @@ class Display:
 
 class RGBDisplay(Display):
     def __init__(
-        self,
-        cs_pin=None,
-        dc_pin=None,
-        reset_pin=None,
-        rotation=90,
-        baudrate=24000000,
+        self, cs_pin=None, dc_pin=None, reset_pin=None, rotation=90, baudrate=24000000,
     ):
         """
         Object to display images on the Adafruit 1.8 inch TFT Display Breakout with a Raspberry Pi:
@@ -104,12 +98,7 @@ class RGBDisplay(Display):
 
             # Create interface with board
             self._disp = st7735.ST7735R(
-                spi,
-                rotation=rotation,
-                cs=cs_pin,
-                dc=dc_pin,
-                rst=reset_pin,
-                baudrate=baudrate,
+                spi, rotation=rotation, cs=cs_pin, dc=dc_pin, rst=reset_pin, baudrate=baudrate,
             )
 
             if self._disp.rotation % 180 == 90:
@@ -185,11 +174,7 @@ class RGBDisplay(Display):
 
 class BinaryDisplay(Display):
     def __init__(
-        self,
-        cs_pin=None,
-        height=144,  # TODO lookup table
-        width=168,
-        baudrate=2000000,
+        self, cs_pin=None, height=144, width=168, baudrate=2000000,  # TODO lookup table
     ):
         """
         Object to display images on the Adafruit 1.3 inch monochrome display with a Raspberry Pi:
@@ -371,9 +356,7 @@ class NokiaDisplay(Display):
 
 
 class HoloeyeDisplay(Display):
-    def __init__(
-        self,
-    ):
+    def __init__(self,):
         """
         #TODO doc
         """
@@ -389,31 +372,41 @@ class HoloeyeDisplay(Display):
         self.displayOptions |= self.ShowFlags.PresentFitWithBars
 
         self._virtual = False
-        self._height, self._width = DeviceOptions.HOLOEYE.value(DeviceParam.SLM_SHAPE)
+        self._height, self._width = DeviceOptions.HOLOEYE_LC_2012.value(DeviceParam.SLM_SHAPE)
 
-        try:  # TODO check return values/exceptions
-            self._disp = slmdisplaysdk.SLMDisplay()
-            self._disp.open()
-        except:
+        if not self._disp.requiresVersion(3):
             self._virtual = True
+            warnings.warn(
+                "Failed to load display because the LC 2012 requires version 3 of its SDK. Using virtual device..."
+            )
 
-            warnings.warn("Failed to load display. Using virtual device...")
+        # Initializes the SLM library
+        # self._disp = slmdisplaysdk.SLMInstance() # TODO Example code
+
+        self._disp = slmdisplaysdk.SLMDisplay()  # TODO neural-holography
+
+        # Detect SLMs and open a window on the selected SLM
+        error = self._disp.open()
+
+        if error != slmdisplaysdk.ErrorCode.NoError:
+            self._virtual = True
+            warnings.warn(
+                f"Failed to load display: {self._disp.errorString(error)}. Using virtual device..."
+            )
 
     def __del__(self):
         self._disp.release()
 
-    def clear(self):  # TODO check if there is a method provided allready
+    def clear(self):
         """
         Clear display. #TODO doc
         """
-        I = Image.new("RGB", (self.width, self.height))
+        # Configure the blank screen:
+        black = 0
 
-        # Get drawing object to draw on image.
-        draw = ImageDraw.Draw(I)
-
-        # Draw a black filled box to clear the image.
-        draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
-        self._disp.image(I)
+        # Show value on SLM:
+        error = self._disp.showBlankscreen(black)
+        assert error == slmdisplaysdk.ErrorCode.NoError, self._disp.errorString(error)
 
     def imshow(self, I):
         """
@@ -474,7 +467,7 @@ def create_display(device_key):
         display = BinaryDisplay()
     elif device_key == DeviceOptions.NOKIA_5110.value:
         display = NokiaDisplay()
-    elif device_key == DeviceOptions.HOLOEYE.value:
+    elif device_key == DeviceOptions.HOLOEYE_LC_2012.value:
         display = HoloeyeDisplay()
     assert display is not None
     return display

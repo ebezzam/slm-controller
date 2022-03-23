@@ -32,11 +32,7 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
     help="Shape for 'rect' in number of cells; `shape` must be set to 'rect'.",
 )
 @click.option(
-    "--center",
-    default=None,
-    nargs=2,
-    type=int,
-    help="Coordinate for center.",
+    "--center", default=None, nargs=2, type=int, help="Coordinate for center.",
 )
 @click.option(
     "--vertical", is_flag=True, help="Whether line should be vertical (True) or horizontal (False)."
