@@ -172,10 +172,13 @@ class RGBDisplay(Display):
 
             import matplotlib.pyplot as plt
 
-            Z = I.transpose(1, 2, 0)
-            # plot
             fig, ax = plt.subplots()
-            ax.imshow(Z)
+            if len(I.shape) == 3:
+                # if RGB, put channel dim in right place
+                I = I.transpose(1, 2, 0)
+                ax.imshow(I)
+            else:
+                ax.imshow(I, cmap="gray")
             plt.show()
 
 
