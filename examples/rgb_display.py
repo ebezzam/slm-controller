@@ -33,6 +33,7 @@ def rgb_display_example(fp, rgb, not_original_ratio):
         print(f"Created random pattern and saved to : {fp}")
 
     # display
+    print(f"Image shape : {image.shape}")
     D.imshow(image)
 
 
