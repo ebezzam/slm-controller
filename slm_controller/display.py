@@ -52,6 +52,9 @@ class Display:
         pass
 
 
+from hardware import DeviceOptions
+
+
 class RGBDisplay(Display):
     def __init__(
         self, cs_pin=None, dc_pin=None, reset_pin=None, rotation=90, baudrate=24000000,
@@ -109,8 +112,7 @@ class RGBDisplay(Display):
                 self._height = self._disp.height
         except:
             self._virtual = True
-            self._width = 160  # TODO lookup table
-            self._height = 128
+            self._height, self._width = DeviceOptions.ADAFRUIT_RGB.value(DeviceParam.SLM_SHAPE)
             warnings.warn("Failed to load display. Using virtual device...")
 
     def clear(self):
@@ -173,9 +175,7 @@ class RGBDisplay(Display):
 
 
 class BinaryDisplay(Display):
-    def __init__(
-        self, cs_pin=None, height=144, width=168, baudrate=2000000,  # TODO lookup table
-    ):
+    def __init__(self, cs_pin=None, baudrate=2000000):
         """
         Object to display images on the Adafruit 1.3 inch monochrome display with a Raspberry Pi:
         https://learn.adafruit.com/adafruit-sharp-memory-display-breakout
@@ -184,10 +184,6 @@ class BinaryDisplay(Display):
         ----------
         cs_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
             Raspberry Pi pin connected to TFT_CS pin on the display breakout.
-        height : int
-            Height in number of cells.
-        width : int
-            Width in number of cells.
         baudrate : int
             Baud rate.
         """
@@ -202,13 +198,13 @@ class BinaryDisplay(Display):
 
             cs_pin = cs_pin if (cs_pin is not None) else board.D6
 
+            self._height, self._width = DeviceOptions.ADAFRUIT_BINARY.value(DeviceParam.SLM_SHAPE)
+
             spi = busio.SPI(board.SCK, MOSI=board.MOSI)
             scs = digitalio.DigitalInOut(cs_pin)  # inverted chip select
             self._disp = adafruit_sharpmemorydisplay.SharpMemoryDisplay(
-                spi, scs, height, width, baudrate=baudrate
+                spi, scs, self._height, self._width, baudrate=baudrate
             )
-            self._height = height
-            self._width = width
 
         except:
             raise IOError("Failed to load display.")
@@ -252,15 +248,7 @@ class BinaryDisplay(Display):
 
 class NokiaDisplay(Display):
     def __init__(
-        self,
-        dc_pin=None,
-        cs_pin=None,
-        reset_pin=None,
-        height=84,  # TODO lookup table
-        width=48,
-        contrast=80,
-        bias=4,
-        baudrate=1000000,
+        self, dc_pin=None, cs_pin=None, reset_pin=None, contrast=80, bias=4, baudrate=1000000,
     ):
         """
         Object to display images on the Nokia 5110 monochrome display with a Raspberry Pi:
@@ -274,10 +262,6 @@ class NokiaDisplay(Display):
             Raspberry Pi pin connected to the CE pin on the display breakout.
         reset_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
             Raspberry Pi pin connected to the RST pin on the display breakout.
-        height : int
-            Height in number of cells.
-        width : int
-            Width in number of cells.
         contrast : int
             Display contrast, should be 0-127.
         bias : int
@@ -312,8 +296,7 @@ class NokiaDisplay(Display):
                 baudrate=baudrate,
             )
 
-            self._height = height
-            self._width = width
+            self._height, self._width = DeviceOptions.NOKIA_5110.value(DeviceParam.SLM_SHAPE)
 
         except:
             raise IOError("Failed to load display.")
@@ -430,9 +413,7 @@ class HoloeyeDisplay(Display):
                 I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
                 I_u = np.uint8(255 * I_f)  # uint8
 
-                I_p = I_u.transpose(1, 2, 0)
-
-                error = self._disp.showData(I_p)
+                error = self._disp.showData(I_u)
                 assert error == self.ErrorCode.NoError, self._disp.errorString(error)
 
             except:
@@ -442,10 +423,9 @@ class HoloeyeDisplay(Display):
 
             import matplotlib.pyplot as plt
 
-            Z = I.transpose(1, 2, 0)
             # plot
             _, ax = plt.subplots()
-            ax.imshow(Z)
+            ax.imshow(I)
             plt.show()
 
 

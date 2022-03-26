@@ -16,6 +16,7 @@ class DeviceParam:
     CELL_DIM = "cell_dim"
     SLM_SHAPE = "slm_shape"
     MONOCHROME = "monochrome"
+    # TODO Fill factor
 
 
 devices = {
@@ -52,8 +53,8 @@ devices = {
     # 36.9 x 27.6 mm / 1.8”
     DeviceOptions.HOLOEYE_LC_2012.value: {
         DeviceParam.CELL_DIM: (
-            0.359e-4,
-            0.360e-4,
+            0.36e-4,
+            0.36e-4,
         ),  # TODO Units in meters, 0.359375e-4, 0.3603515625e-4
         DeviceParam.SLM_SHAPE: (768, 1024),
         DeviceParam.MONOCHROME: True,
