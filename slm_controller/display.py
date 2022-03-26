@@ -3,7 +3,7 @@ import numpy as np
 import warnings
 from PIL import Image, ImageDraw
 
-from slm_controller.hardware import DeviceOptions, DeviceParam
+from slm_controller.hardware import DeviceOptions, DeviceParam, devices
 
 import slm_controller.detect_heds_module_path  # TODO add in setup
 from holoeye import slmdisplaysdk
@@ -50,9 +50,6 @@ class Display:
             Interpretation of the optional 0-th dimension is class-dependent.
         """
         pass
-
-
-from hardware import DeviceOptions
 
 
 class RGBDisplay(Display):
@@ -112,7 +109,8 @@ class RGBDisplay(Display):
                 self._height = self._disp.height
         except:
             self._virtual = True
-            self._height, self._width = DeviceOptions.ADAFRUIT_RGB.value(DeviceParam.SLM_SHAPE)
+            self._height, self._width = devices[DeviceOptions.ADAFRUIT_RGB][DeviceParam.SLM_SHAPE]
+
             warnings.warn("Failed to load display. Using virtual device...")
 
     def clear(self):
@@ -201,7 +199,9 @@ class BinaryDisplay(Display):
 
             cs_pin = cs_pin if (cs_pin is not None) else board.D6
 
-            self._height, self._width = DeviceOptions.ADAFRUIT_BINARY.value(DeviceParam.SLM_SHAPE)
+            self._height, self._width = devices[DeviceOptions.ADAFRUIT_BINARY][
+                DeviceParam.SLM_SHAPE
+            ]
 
             spi = busio.SPI(board.SCK, MOSI=board.MOSI)
             scs = digitalio.DigitalInOut(cs_pin)  # inverted chip select
@@ -299,7 +299,7 @@ class NokiaDisplay(Display):
                 baudrate=baudrate,
             )
 
-            self._height, self._width = DeviceOptions.NOKIA_5110.value(DeviceParam.SLM_SHAPE)
+            self._height, self._width = devices[DeviceOptions.NOKIA_5110][DeviceParam.SLM_SHAPE]
 
         except:
             raise IOError("Failed to load display.")
@@ -358,7 +358,7 @@ class HoloeyeDisplay(Display):
         self.displayOptions |= self.ShowFlags.PresentFitWithBars
 
         self._virtual = False
-        self._height, self._width = DeviceOptions.HOLOEYE_LC_2012.value(DeviceParam.SLM_SHAPE)
+        self._height, self._width = devices[DeviceOptions.HOLOEYE_LC_2012][DeviceParam.SLM_SHAPE]
 
         if not self._disp.requiresVersion(3):
             self._virtual = True
