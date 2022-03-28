@@ -109,7 +109,9 @@ class RGBDisplay(Display):
                 self._height = self._disp.height
         except:
             self._virtual = True
-            self._height, self._width = devices[DeviceOptions.ADAFRUIT_RGB][DeviceParam.SLM_SHAPE]
+            self._height, self._width = devices[DeviceOptions.ADAFRUIT_RGB.value][
+                DeviceParam.SLM_SHAPE
+            ]
 
             warnings.warn("Failed to load display. Using virtual device...")
 
@@ -199,7 +201,7 @@ class BinaryDisplay(Display):
 
             cs_pin = cs_pin if (cs_pin is not None) else board.D6
 
-            self._height, self._width = devices[DeviceOptions.ADAFRUIT_BINARY][
+            self._height, self._width = devices[DeviceOptions.ADAFRUIT_BINARY.value][
                 DeviceParam.SLM_SHAPE
             ]
 
@@ -299,7 +301,9 @@ class NokiaDisplay(Display):
                 baudrate=baudrate,
             )
 
-            self._height, self._width = devices[DeviceOptions.NOKIA_5110][DeviceParam.SLM_SHAPE]
+            self._height, self._width = devices[DeviceOptions.NOKIA_5110.value][
+                DeviceParam.SLM_SHAPE
+            ]
 
         except:
             raise IOError("Failed to load display.")
@@ -349,8 +353,8 @@ class HoloeyeDisplay(Display):
         super().__init__()
 
         # Similar to: https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/slm_display_module.py#L19
-        self.ErrorCode = slmdisplaysdk.SLMDisplay.ErrorCode
-        self.ShowFlags = slmdisplaysdk.SLMDisplay.ShowFlags
+        self.ErrorCode = slmdisplaysdk.ErrorCode
+        self.ShowFlags = slmdisplaysdk.ShowFlags
 
         self.displayOptions = (
             self.ShowFlags.PresentAutomatic
@@ -358,18 +362,21 @@ class HoloeyeDisplay(Display):
         self.displayOptions |= self.ShowFlags.PresentFitWithBars
 
         self._virtual = False
-        self._height, self._width = devices[DeviceOptions.HOLOEYE_LC_2012][DeviceParam.SLM_SHAPE]
+        self._height, self._width = devices[DeviceOptions.HOLOEYE_LC_2012.value][
+            DeviceParam.SLM_SHAPE
+        ]
 
-        if not self._disp.requiresVersion(3):
+        # Initializes the SLM library
+        self._disp = slmdisplaysdk.SLMInstance()  # TODO Example code
+
+        # self._disp = slmdisplaysdk.SLMDisplay()  # TODO neural-holography,
+        # exist anymore?
+
+        if not self._disp.requiresVersion(3):  # TODO check order of instructions
             self._virtual = True
             warnings.warn(
                 "Failed to load display because the LC 2012 requires version 3 of its SDK. Using virtual device..."
             )
-
-        # Initializes the SLM library
-        # self._disp = slmdisplaysdk.SLMInstance() # TODO Example code
-
-        self._disp = slmdisplaysdk.SLMDisplay()  # TODO neural-holography
 
         # Detect SLMs and open a window on the selected SLM
         error = self._disp.open()
@@ -380,8 +387,9 @@ class HoloeyeDisplay(Display):
                 f"Failed to load display: {self._disp.errorString(error)}. Using virtual device..."
             )
 
-    def __del__(self):
-        self._disp.release()
+    def __del__(self):  # TODO needed?
+        self._disp.close()
+        self._disp.__del__()
 
     def clear(self):
         """
@@ -413,13 +421,13 @@ class HoloeyeDisplay(Display):
                 I_max = I.max()
                 I_max = 1 if np.isclose(I_max, 0) else I_max
 
-                I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
+                I_f = I / I_max  # float64
                 I_u = np.uint8(255 * I_f)  # uint8
 
                 error = self._disp.showData(I_u)
                 assert error == self.ErrorCode.NoError, self._disp.errorString(error)
 
-            except:
+            except:  # TODO needed?
                 raise ValueError("Parameter[I]: unsupported data")
 
         else:
