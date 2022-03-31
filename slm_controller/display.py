@@ -392,7 +392,6 @@ class HoloeyeDisplay(Display):
 
     def __del__(self):  # TODO needed?
         self._disp.close()
-        self._disp.release()  # TODO needed?
         self._disp.__del__()
 
     def clear(self):
