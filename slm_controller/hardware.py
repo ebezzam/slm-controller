@@ -16,7 +16,7 @@ class DeviceParam:
     CELL_DIM = "cell_dim"
     SLM_SHAPE = "slm_shape"
     MONOCHROME = "monochrome"
-    # TODO Fill factor
+    FILL_FACTOR = "fill_factor"
 
 
 devices = {
@@ -46,17 +46,11 @@ devices = {
     },
     # Holoeye SLM - LC 2012
     # https://holoeye.com/lc-2012-spatial-light-modulator/
-    # 1.8 inch diagonal #TODO: add documentation, link, lookup values
-    # Pixel pitch is defined as the #TODO check pixel pitch -> 36 μm
-    # center‐to‐center spacing between adjacent pixels. Interpixel gap describes the
-    # edge‐to‐edge spacing between adjacent pixels.
-    # 36.9 x 27.6 mm / 1.8”
+    # 1.8 inch diagonal, 36.9 x 27.6 mm #TODO: add documentation, link, lookup values
     DeviceOptions.HOLOEYE_LC_2012.value: {
-        DeviceParam.CELL_DIM: (
-            0.36e-4,
-            0.36e-4,
-        ),  # TODO Units in meters, 0.359375e-4, 0.3603515625e-4
+        DeviceParam.CELL_DIM: (0.36e-4, 0.36e-4,),  # TODO Computed 0.359375e-4, 0.3603515625e-4
         DeviceParam.SLM_SHAPE: (768, 1024),
         DeviceParam.MONOCHROME: True,
+        DeviceParam.FILL_FACTOR: 0.55,
     },
 }

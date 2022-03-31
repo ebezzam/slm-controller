@@ -3,20 +3,23 @@ Holoeye display example.
 """
 
 import numpy as np
+import click
 from slm_controller import display
 
 # Calculates a lens using numpy and show it on the SLM.
-# Taken from the Holoeye code examples lens.py
+# Taken from the Holoeye code examples lens.py delivered with the SDK.
 
 import math
 
 # TODO is not persistent!
 
 
-def holoeye_display_example():
+@click.command()
+@click.option("--show_time", type=float, default=2.0, help="Time to show the pattern on the SLM.")
+def holoeye_display_example(show_time):
 
     # instantiate display object
-    D = display.HoloeyeDisplay()
+    D = display.HoloeyeDisplay(show_time)
 
     # Configure the lens properties:
     innerRadius = D.height / 3

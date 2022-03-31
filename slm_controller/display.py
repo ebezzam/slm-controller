@@ -2,6 +2,7 @@ import abc
 import numpy as np
 import warnings
 from PIL import Image, ImageDraw
+import time
 
 from slm_controller.hardware import DeviceOptions, DeviceParam, devices
 
@@ -346,7 +347,7 @@ class NokiaDisplay(Display):
 
 
 class HoloeyeDisplay(Display):
-    def __init__(self,):
+    def __init__(self, show_time=2):
         """
         #TODO doc
         """
@@ -365,6 +366,8 @@ class HoloeyeDisplay(Display):
         self._height, self._width = devices[DeviceOptions.HOLOEYE_LC_2012.value][
             DeviceParam.SLM_SHAPE
         ]
+
+        self._show_time = show_time
 
         # Initializes the SLM library
         self._disp = slmdisplaysdk.SLMInstance()  # TODO Example code
@@ -389,6 +392,7 @@ class HoloeyeDisplay(Display):
 
     def __del__(self):  # TODO needed?
         self._disp.close()
+        self._disp.release()  # TODO needed?
         self._disp.__del__()
 
     def clear(self):
@@ -426,6 +430,11 @@ class HoloeyeDisplay(Display):
 
                 error = self._disp.showData(I_u)
                 assert error == self.ErrorCode.NoError, self._disp.errorString(error)
+
+                # sleep for specified time
+                time.sleep(
+                    self._show_time
+                )  # TODO https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/modules.py#L307
 
             except:  # TODO needed?
                 raise ValueError("Parameter[I]: unsupported data")
