@@ -354,13 +354,10 @@ class HoloeyeDisplay(Display):
         super().__init__()
 
         # Similar to: https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/slm_display_module.py#L19
-        self.ErrorCode = slmdisplaysdk.ErrorCode
-        self.ShowFlags = slmdisplaysdk.ShowFlags
-
-        self.displayOptions = (
-            self.ShowFlags.PresentAutomatic
+        self._show_flags = (
+            slmdisplaysdk.ShowFlags.PresentAutomatic
         )  # PresentAutomatic == 0 (default) //TODO check those flags
-        self.displayOptions |= self.ShowFlags.PresentFitWithBars
+        self._show_flags |= slmdisplaysdk.ShowFlags.PresentFitWithBars
 
         self._virtual = False
         self._height, self._width = devices[DeviceOptions.HOLOEYE_LC_2012.value][
@@ -371,9 +368,6 @@ class HoloeyeDisplay(Display):
 
         # Initializes the SLM library
         self._disp = slmdisplaysdk.SLMInstance()  # TODO Example code
-
-        # self._disp = slmdisplaysdk.SLMDisplay()  # TODO neural-holography,
-        # exist anymore?
 
         if not self._disp.requiresVersion(3):  # TODO check order of instructions
             self._virtual = True
@@ -427,7 +421,7 @@ class HoloeyeDisplay(Display):
                 I_f = I / I_max  # float64
                 I_u = np.uint8(255 * I_f)  # uint8
 
-                error = self._disp.showData(I_u)
+                error = self._disp.showData(I_u, self._show_flags)
                 assert error == self.ErrorCode.NoError, self._disp.errorString(error)
 
                 # sleep for specified time
