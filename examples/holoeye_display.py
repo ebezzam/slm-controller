@@ -10,7 +10,7 @@ from slm_controller import display
 
 
 @click.command()
-@click.option("--show_time", type=float, default=2.0, help="Time to show the pattern on the SLM.")
+@click.option("--show_time", type=float, default=5.0, help="Time to show the pattern on the SLM.")
 def holoeye_display_example(show_time):
 
     # instantiate display object

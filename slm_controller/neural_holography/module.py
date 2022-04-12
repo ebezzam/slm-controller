@@ -6,7 +6,7 @@ Some modules for easy use. (No need to calculate kernels explicitly)
 """
 import torch
 import torch.nn as nn
-from neural_holography.algorithms import (
+from slm_controller.neural_holography.algorithms import (
     gerchberg_saxton,
     stochastic_gradient_descent,
     double_phase_amplitude_coding,
@@ -15,15 +15,18 @@ from neural_holography.algorithms import (
 import os
 import time
 import skimage.io
-import neural_holography.utils as utils
+import slm_controller.neural_holography.utils as utils
+from slm_controller.neural_holography.propagation_ASM import propagation_ASM
 import platform
 
-my_os = platform.system()
-if my_os == "Windows":
-    from neural_holography.arduino_laser_control_module import ArduinoLaserControl
-    from neural_holography.camera_capture_module import CameraCapture
-    from neural_holography.calibration_module import Calibration
-    from neural_holography.slm_display_module import SLMDisplay
+# my_os = platform.system() #TODO check this
+# if my_os == "Windows":
+#     from slm_controller.neural_holography.arduino_laser_control_module import (
+#         ArduinoLaserControl,
+#     )
+#     from slm_controller.neural_holography.camera_capture_module import CameraCapture
+#     from slm_controller.neural_holography.calibration_module import Calibration
+#     from slm_controller.neural_holography.slm_display_module import SLMDisplay
 
 
 class GS(nn.Module):
@@ -62,7 +65,7 @@ class GS(nn.Module):
         num_iters,
         phase_path=None,
         prop_model="ASM",
-        propagator=None,
+        propagator=propagation_ASM,
         writer=None,
         device=torch.device("cuda"),
     ):
@@ -82,7 +85,7 @@ class GS(nn.Module):
         self.dev = device
 
     def forward(self, target_amp, init_phase=None):
-        # Pre-compute propagataion kernel only once
+        # Pre-compute propagation kernel only once
         if self.precomputed_H_f is None and self.prop_model == "ASM":
             self.precomputed_H_f = self.prop(
                 torch.empty(*init_phase.shape, dtype=torch.complex64),
@@ -173,7 +176,7 @@ class SGD(nn.Module):
         roi_res,
         phase_path=None,
         prop_model="ASM",
-        propagator=None,
+        propagator=propagation_ASM,
         loss=nn.MSELoss(),
         lr=0.01,
         lr_s=0.003,
@@ -308,7 +311,7 @@ class DPAC(nn.Module):
         wavelength,
         feature_size,
         prop_model="ASM",
-        propagator=None,
+        propagator=propagation_ASM,
         device=torch.device("cuda"),
     ):
         """

@@ -5,7 +5,6 @@ from PIL import Image, ImageDraw
 import time
 
 from slm_controller.hardware import DeviceOptions, DeviceParam, devices
-
 import slm_controller.holoeye.detect_heds_module_path  # TODO add in setup
 from holoeye import slmdisplaysdk
 
@@ -420,7 +419,7 @@ class HoloeyeDisplay(Display):
             I_u = np.uint8(255 * I_f)  # uint8
 
             error = self._disp.showData(I_u, self._show_flags)
-            assert error == self.ErrorCode.NoError, self._disp.errorString(error)
+            assert error == slmdisplaysdk.ErrorCode.NoError, self._disp.errorString(error)
 
             # sleep for specified time
             time.sleep(

@@ -17,8 +17,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-import neural_holography.utils as utils
-from neural_holography.propagation_ASM import *
+import slm_controller.neural_holography.utils as utils
+from slm_controller.neural_holography.propagation_ASM import *
 
 
 # 1. GS
@@ -31,7 +31,7 @@ def gerchberg_saxton(
     feature_size=6.4e-6,
     phase_path=None,
     prop_model="ASM",
-    propagator=None,
+    propagator=propagation_ASM,  # TODO before None, why?
     writer=None,
     dtype=torch.float32,
     precomputed_H_f=None,
@@ -117,7 +117,7 @@ def stochastic_gradient_descent(
     roi_res=None,
     phase_path=None,
     prop_model="ASM",
-    propagator=None,
+    propagator=propagation_ASM,
     loss=nn.MSELoss(),
     lr=0.01,
     lr_s=0.003,
@@ -240,7 +240,7 @@ def double_phase_amplitude_coding(
     wavelength,
     feature_size,
     prop_model="ASM",
-    propagator=None,
+    propagator=propagation_ASM,
     dtype=torch.float32,
     precomputed_H=None,
 ):
