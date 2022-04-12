@@ -6,7 +6,7 @@ import time
 
 from slm_controller.hardware import DeviceOptions, DeviceParam, devices
 
-import slm_controller.detect_heds_module_path  # TODO add in setup
+import slm_controller.holoeye.detect_heds_module_path  # TODO add in setup
 from holoeye import slmdisplaysdk
 
 
@@ -411,27 +411,21 @@ class HoloeyeDisplay(Display):
         assert I.shape[-2:] == self.shape
 
         if not self._virtual:
-
             self.clear()
 
-            try:
-                I_max = I.max()
-                I_max = 1 if np.isclose(I_max, 0) else I_max
+            I_max = I.max()
+            I_max = 1 if np.isclose(I_max, 0) else I_max
 
-                I_f = I / I_max  # float64
-                I_u = np.uint8(255 * I_f)  # uint8
+            I_f = I / I_max  # float64
+            I_u = np.uint8(255 * I_f)  # uint8
 
-                error = self._disp.showData(I_u, self._show_flags)
-                assert error == self.ErrorCode.NoError, self._disp.errorString(error)
+            error = self._disp.showData(I_u, self._show_flags)
+            assert error == self.ErrorCode.NoError, self._disp.errorString(error)
 
-                # sleep for specified time
-                time.sleep(
-                    self._show_time
-                )  # TODO https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/modules.py#L307
-
-            except:  # TODO needed?
-                raise ValueError("Parameter[I]: unsupported data")
-
+            # sleep for specified time
+            time.sleep(
+                self._show_time
+            )  # TODO https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/modules.py#L307
         else:
 
             import matplotlib.pyplot as plt
