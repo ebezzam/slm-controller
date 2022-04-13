@@ -9,6 +9,8 @@ from slm_controller import display
 from slm_controller.hardware import DeviceOptions, DeviceParam, devices
 from PIL import Image, ImageOps
 from slm_controller.neural_holography.module import GS
+from slm_controller.neural_holography.utils import phasemap_8bit
+from slm_controller.neural_holography.augmented_image_loader import ImageLoader
 
 # Show Holoeye Logo using neural holography code
 
@@ -17,38 +19,42 @@ from slm_controller.neural_holography.module import GS
 @click.option("--show_time", type=float, default=5.0, help="Time to show the pattern on the SLM.")
 def neural_holography_example(show_time):
 
-    height, width = devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.SLM_SHAPE]
-    img = Image.open("examples/HOLOEYE_logo.png")
-    img = ImageOps.grayscale(img)
-    img = img.resize((height, height))
-    padding = int((width - height) / 2)
-    target_amp = np.pad(np.array(img), ((0, 0), (padding, padding)), mode="constant")
-    target_amp = target_amp[None, None, :, :]
-    # PyTorch Complex tensor (torch.cfloat) of size (num_images, 1, height, width)
-    target_amp[0, :, :, :] = 1
-    target_amp[:, 0, :, :] = 1
-    target_amp = torch.from_numpy(target_amp).to("cuda")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    init_phase = np.random.uniform(-np.pi, np.pi, (height, width))
-    init_phase = init_phase[None, None, :, :]
-    init_phase[0, :, :, :] = 1
-    init_phase[:, 0, :, :] = 1
-    init_phase = torch.from_numpy(init_phase).to("cuda")
+    slm_res = devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.SLM_SHAPE]
+    img_res = slm_res
 
-    gs = GS(0.2, 520e-9, devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM], 100,)
+    image_loader = ImageLoader(
+        "examples/",
+        channel=0,
+        image_res=img_res,
+        homography_res=slm_res,
+        shuffle=False,
+        vertical_flips=False,
+        horizontal_flips=False,
+    )
+
+    target_amp, _, _ = image_loader.load_image(0)
+    target_amp = target_amp.to(device)
+
+    init_phase = (-0.5 + 1.0 * torch.rand(1, 1, slm_res[0], slm_res[1])).to(device)
+
+    gs = GS(
+        0.2,
+        520e-9,
+        devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM],
+        100,
+        device=device,
+    )
     final_phase = gs(target_amp, init_phase)
 
-    final_phase = final_phase.to("cpu")
-    final_phase = final_phase.numpy()
-    final_phase = final_phase[0, 0, :, :]
-
-    final_phase = (255 * (final_phase - np.min(final_phase)) / np.ptp(final_phase)).astype(int)
+    phase_out_8bit = phasemap_8bit(final_phase.cpu().detach(), inverted=True)
 
     # instantiate display object
     D = display.HoloeyeDisplay(show_time)
 
     # display
-    D.imshow(final_phase)
+    D.imshow(phase_out_8bit)
 
 
 if __name__ == "__main__":

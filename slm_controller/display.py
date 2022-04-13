@@ -366,7 +366,7 @@ class HoloeyeDisplay(Display):
         self._show_time = show_time
 
         # Initializes the SLM library
-        self._disp = slmdisplaysdk.SLMInstance()  # TODO Example code
+        self._disp = slmdisplaysdk.SLMInstance()
 
         if not self._disp.requiresVersion(3):  # TODO check order of instructions
             self._virtual = True
