@@ -55,7 +55,7 @@ def neural_holography_example(show_time):
 
     print(final_phase.min(), final_phase.max())
 
-    phase_out_8bit = phasemap_8bit(final_phase.cpu().detach(), inverted=True)
+    phase_out_8bit = phasemap_8bit(final_phase.cpu().detach())
 
     print(phase_out_8bit.min(), phase_out_8bit.max())
 
