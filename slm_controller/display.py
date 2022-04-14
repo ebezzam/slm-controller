@@ -365,17 +365,21 @@ class HoloeyeDisplay(Display):
 
         self._show_time = show_time
 
-        # Initializes the SLM library
-        self._disp = slmdisplaysdk.SLMInstance()
+        try:
+            # Initializes the SLM library
+            self._disp = slmdisplaysdk.SLMInstance()
+        except RuntimeError as ex:
+            self._virtual = True
+            warnings.warn(f"{ex} Using virtual device...")
 
-        if not self._disp.requiresVersion(3):  # TODO check order of instructions
+        if not self._virtual and not self._disp.requiresVersion(3):
             self._virtual = True
             warnings.warn(
                 "Failed to load display because the LC 2012 requires version 3 of its SDK. Using virtual device..."
             )
 
         # Detect SLMs and open a window on the selected SLM
-        error = self._disp.open()
+        error = self._disp.open()  # TODO check if can set max wait time when no SLM is found!
 
         if error != slmdisplaysdk.ErrorCode.NoError:
             self._virtual = True
@@ -383,8 +387,7 @@ class HoloeyeDisplay(Display):
                 f"Failed to load display: {self._disp.errorString(error)}. Using virtual device..."
             )
 
-    def __del__(self):  # TODO needed?
-        self._disp.close()
+    def __del__(self):
         self._disp.__del__()
 
     def clear(self):

@@ -17,6 +17,7 @@ class DeviceParam:
     SLM_SHAPE = "slm_shape"
     MONOCHROME = "monochrome"
     FILL_FACTOR = "fill_factor"
+    FRAME_RATE = "frame_rate"
 
 
 devices = {
@@ -51,6 +52,7 @@ devices = {
         DeviceParam.CELL_DIM: (0.36e-4, 0.36e-4,),  # TODO Computed 0.359375e-4, 0.3603515625e-4
         DeviceParam.SLM_SHAPE: (768, 1024),
         DeviceParam.MONOCHROME: True,
-        DeviceParam.FILL_FACTOR: 0.55,
+        DeviceParam.FILL_FACTOR: 0.58,
+        DeviceParam.FRAME_RATE: 60,
     },
 }
