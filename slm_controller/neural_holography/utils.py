@@ -188,9 +188,7 @@ def pad_stacked_complex(field, pad_width, padval=0, mode="constant"):
         return torch.stack((real, imag), -1)
 
 
-def pad_image(
-    field, target_shape, pytorch=True, stacked_complex=True, padval=0, mode="constant"
-):
+def pad_image(field, target_shape, pytorch=True, stacked_complex=True, padval=0, mode="constant"):
     """Pads a 2D complex field up to target_shape in size
 
     Padding is done such that when used with crop_image(), odd and even dimensions are
@@ -238,9 +236,7 @@ def pad_image(
             if leading_dims > 0:
                 pad_front = np.concatenate(([0] * leading_dims, pad_front))
                 pad_end = np.concatenate(([0] * leading_dims, pad_end))
-            return np.pad(
-                field, tuple(zip(pad_front, pad_end)), mode, constant_values=padval
-            )
+            return np.pad(field, tuple(zip(pad_front, pad_end)), mode, constant_values=padval)
     else:
         return field
 
@@ -270,9 +266,7 @@ def crop_image(field, target_shape, pytorch=True, stacked_complex=True):
         crop_front = (crop_total + 1 - odd_dim) // 2
         crop_end = (crop_total + odd_dim) // 2
 
-        crop_slices = [
-            slice(int(f), int(-e) if e else None) for f, e in zip(crop_front, crop_end)
-        ]
+        crop_slices = [slice(int(f), int(-e) if e else None) for f, e in zip(crop_front, crop_end)]
         if pytorch and stacked_complex:
             return field[(..., *crop_slices, slice(None))]
         else:
@@ -284,18 +278,14 @@ def crop_image(field, target_shape, pytorch=True, stacked_complex=True):
 def srgb_gamma2lin(im_in):
     """converts from sRGB to linear color space"""
     thresh = 0.04045
-    im_out = np.where(
-        im_in <= thresh, im_in / 12.92, ((im_in + 0.055) / 1.055) ** (2.4)
-    )
+    im_out = np.where(im_in <= thresh, im_in / 12.92, ((im_in + 0.055) / 1.055) ** (2.4))
     return im_out
 
 
 def srgb_lin2gamma(im_in):
     """converts from linear to sRGB color space"""
     thresh = 0.0031308
-    im_out = np.where(
-        im_in <= thresh, 12.92 * im_in, 1.055 * (im_in ** (1 / 2.4)) - 0.055
-    )
+    im_out = np.where(im_in <= thresh, 12.92 * im_in, 1.055 * (im_in ** (1 / 2.4)) - 0.055)
     return im_out
 
 
@@ -320,23 +310,11 @@ def phasemap_8bit(phasemap, inverted=True):
     output_phase = ((phasemap + np.pi) % (2 * np.pi)) / (2 * np.pi)
     if inverted:
         phase_out_8bit = (
-            ((1 - output_phase) * 255)
-            .round()
-            .cpu()
-            .detach()
-            .squeeze()
-            .numpy()
-            .astype(np.uint8)
+            ((1 - output_phase) * 255).round().cpu().detach().squeeze().numpy().astype(np.uint8)
         )  # quantized to 8 bits
     else:
         phase_out_8bit = (
-            ((output_phase) * 255)
-            .round()
-            .cpu()
-            .detach()
-            .squeeze()
-            .numpy()
-            .astype(np.uint8)
+            ((output_phase) * 255).round().cpu().detach().squeeze().numpy().astype(np.uint8)
         )  # quantized to 8 bits
     return phase_out_8bit
 
@@ -433,12 +411,10 @@ def write_sgd_summary(
     loss = nn.MSELoss().to(out_amp.device)
     loss_value = loss(s * out_amp, target_amp)
     psnr_value = psnr(
-        target_amp.squeeze().cpu().detach().numpy(),
-        (s * out_amp).squeeze().cpu().detach().numpy(),
+        target_amp.squeeze().cpu().detach().numpy(), (s * out_amp).squeeze().cpu().detach().numpy(),
     )
     ssim_value = ssim(
-        target_amp.squeeze().cpu().detach().numpy(),
-        (s * out_amp).squeeze().cpu().detach().numpy(),
+        target_amp.squeeze().cpu().detach().numpy(), (s * out_amp).squeeze().cpu().detach().numpy(),
     )
 
     s_min = (target_amp * out_amp).mean() / (out_amp ** 2).mean()
@@ -463,9 +439,7 @@ def write_sgd_summary(
         writer.add_scalar(f"{prefix}_scalar", s, k)
 
 
-def write_gs_summary(
-    slm_field, recon_field, target_amp, k, writer, roi=(880, 1600), prefix="test"
-):
+def write_gs_summary(slm_field, recon_field, target_amp, k, writer, roi=(880, 1600), prefix="test"):
     """tensorboard summary for GS"""
     slm_phase = slm_field.angle()
     recon_amp, recon_phase = recon_field.abs(), recon_field.angle()
@@ -480,12 +454,10 @@ def write_gs_summary(
 
     loss_value = loss(recon_amp, target_amp)
     psnr_value = psnr(
-        target_amp.squeeze().cpu().detach().numpy(),
-        recon_amp.squeeze().cpu().detach().numpy(),
+        target_amp.squeeze().cpu().detach().numpy(), recon_amp.squeeze().cpu().detach().numpy(),
     )
     ssim_value = ssim(
-        target_amp.squeeze().cpu().detach().numpy(),
-        recon_amp.squeeze().cpu().detach().numpy(),
+        target_amp.squeeze().cpu().detach().numpy(), recon_amp.squeeze().cpu().detach().numpy(),
     )
 
     if writer is not None:

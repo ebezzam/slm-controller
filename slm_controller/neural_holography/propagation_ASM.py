@@ -79,12 +79,8 @@ def propagation_ASM(
         y, x = (dy * float(num_y), dx * float(num_x))
 
         # frequency coordinates sampling
-        fy = np.linspace(
-            -1 / (2 * dy) + 0.5 / (2 * y), 1 / (2 * dy) - 0.5 / (2 * y), num_y
-        )
-        fx = np.linspace(
-            -1 / (2 * dx) + 0.5 / (2 * x), 1 / (2 * dx) - 0.5 / (2 * x), num_x
-        )
+        fy = np.linspace(-1 / (2 * dy) + 0.5 / (2 * y), 1 / (2 * dy) - 0.5 / (2 * y), num_y)
+        fx = np.linspace(-1 / (2 * dx) + 0.5 / (2 * x), 1 / (2 * dx) - 0.5 / (2 * x), num_x)
 
         # momentum/reciprocal space
         FX, FY = np.meshgrid(fx, fy)
@@ -113,8 +109,7 @@ def propagation_ASM(
         fy_max = 1 / np.sqrt((2 * z * (1 / y)) ** 2 + 1) / wavelength
         fx_max = 1 / np.sqrt((2 * z * (1 / x)) ** 2 + 1) / wavelength
         H_filter = torch.tensor(
-            ((np.abs(FX) < fx_max) & (np.abs(FY) < fy_max)).astype(np.uint8),
-            dtype=dtype,
+            ((np.abs(FX) < fx_max) & (np.abs(FY) < fy_max)).astype(np.uint8), dtype=dtype,
         )
 
         # get real/img components
@@ -346,9 +341,7 @@ def combine_zernike_basis(coeffs, basis, return_phase=False):
     return torch.complex(real, imag)
 
 
-def compute_zernike_basis(
-    num_polynomials, field_res, dtype=torch.float32, wo_piston=False
-):
+def compute_zernike_basis(num_polynomials, field_res, dtype=torch.float32, wo_piston=False):
     """Computes a set of Zernike basis function with resolution field_res
 
     num_polynomials: number of Zernike polynomials in this basis

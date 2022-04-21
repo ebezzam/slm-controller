@@ -80,9 +80,7 @@ def gerchberg_saxton(
         # write to tensorboard / write phase image
         # Note that it takes 0.~ s for writing it to tensorboard
         if False:  # k > 0 and k % 10 == 0:
-            utils.write_gs_summary(
-                slm_field, recon_field, target_amp, k, writer, prefix="test"
-            )
+            utils.write_gs_summary(slm_field, recon_field, target_amp, k, writer, prefix="test")
 
         # replace amplitude at the image plane
         recon_field = utils.replace_amplitude(recon_field, target_amp)
@@ -195,9 +193,7 @@ def stochastic_gradient_descent(
         recon_amp = recon_field.abs()
 
         # crop roi
-        recon_amp = utils.crop_image(
-            recon_amp, target_shape=roi_res, stacked_complex=False
-        )
+        recon_amp = utils.crop_image(recon_amp, target_shape=roi_res, stacked_complex=False)
 
         # camera-in-the-loop technique
         if citl:

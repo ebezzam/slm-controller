@@ -100,9 +100,7 @@ class ImageLoader:
         for aug_type in self.augmentations:
             states = aug_type()  # empty call gets possible states
             # augment existing list with new entry to states tuple
-            self.order = (
-                (*prev_states, s) for prev_states in self.order for s in states
-            )
+            self.order = ((*prev_states, s) for prev_states in self.order for s in states)
         self.order = list(self.order)
 
     def __iter__(self):
@@ -142,9 +140,7 @@ class ImageLoader:
         im = imread(self.im_names[filenum])
 
         if len(im.shape) < 3:
-            im = np.repeat(
-                im[:, :, np.newaxis], 3, axis=2
-            )  # augment channels for gray images
+            im = np.repeat(im[:, :, np.newaxis], 3, axis=2)  # augment channels for gray images
 
         if self.channel is None:
             im = im[..., :3]  # remove alpha channel, if any
@@ -157,9 +153,7 @@ class ImageLoader:
         # linearize intensity and convert to amplitude
         low_val = im <= 0.04045
         im[low_val] = 25 / 323 * im[low_val]
-        im[np.logical_not(low_val)] = (
-            (200 * im[np.logical_not(low_val)] + 11) / 211
-        ) ** (12 / 5)
+        im[np.logical_not(low_val)] = ((200 * im[np.logical_not(low_val)] + 11) / 211) ** (12 / 5)
         im = np.sqrt(im)  # to amplitude
 
         # move channel dim to torch convention
@@ -250,4 +244,3 @@ def pad_crop_to_res(image, target_res):
     return utils.crop_image(
         utils.pad_image(image, target_res, pytorch=False), target_res, pytorch=False
     )
-

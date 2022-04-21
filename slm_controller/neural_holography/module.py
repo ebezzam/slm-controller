@@ -414,9 +414,7 @@ class PhysicalProp(nn.Module):
 
         # 1. Connect Camera
         self.camera = CameraCapture()
-        self.camera.connect(
-            0
-        )  # specify the camera to use, 0 for main cam, 1 for the second cam
+        self.camera.connect(0)  # specify the camera to use, 0 for main cam, 1 for the second cam
 
         # 2. Connect SLM
         self.slm = SLMDisplay()
@@ -431,9 +429,7 @@ class PhysicalProp(nn.Module):
             self.alc = None
 
         # 4. Calibrate hardwares using homography
-        calib_ptrn_path = os.path.join(
-            patterns_path, f'{("red", "green", "blue")[channel]}.png'
-        )
+        calib_ptrn_path = os.path.join(patterns_path, f'{("red", "green", "blue")[channel]}.png')
         space_btw_circs = [
             int(roi / (num_circs - 1)) for roi, num_circs in zip(roi_res, num_circles)
         ]
@@ -490,9 +486,7 @@ class PhysicalProp(nn.Module):
         captured_img_masked = captured_img[
             range_row[0] : range_row[1], range_col[0] : range_col[1], ...
         ]
-        calib_success = self.calibrator.calibrate(
-            captured_img_masked, show_preview=show_preview
-        )
+        calib_success = self.calibrator.calibrate(captured_img_masked, show_preview=show_preview)
 
         self.calibrator.start_row, self.calibrator.end_row = range_row
         self.calibrator.start_col, self.calibrator.end_col = range_col
@@ -521,17 +515,13 @@ class PhysicalProp(nn.Module):
         # convert raw-16 linear intensity image into an amplitude tensor
         if len(captured_linear_np.shape) > 2:
             captured_linear = (
-                torch.tensor(captured_linear_np, dtype=torch.float32)
-                .permute(2, 0, 1)
-                .unsqueeze(0)
+                torch.tensor(captured_linear_np, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0)
             )
             captured_linear = captured_linear.to(slm_phase.device)
             captured_linear = torch.sum(captured_linear, dim=1, keepdim=True)
         else:
             captured_linear = (
-                torch.tensor(captured_linear_np, dtype=torch.float32)
-                .unsqueeze(0)
-                .unsqueeze(0)
+                torch.tensor(captured_linear_np, dtype=torch.float32).unsqueeze(0).unsqueeze(0)
             )
             captured_linear = captured_linear.to(slm_phase.device)
 
@@ -552,9 +542,7 @@ class PhysicalProp(nn.Module):
 
         # capture and take average
         grabbed_images = self.camera.grab_images(num_grab_images)
-        captured_intensity_raw_avg = utils.burst_img_processor(
-            grabbed_images
-        )  # averaging
+        captured_intensity_raw_avg = utils.burst_img_processor(grabbed_images)  # averaging
 
         # crop ROI as calibrated
         captured_intensity_raw_cropped = captured_intensity_raw_avg[
