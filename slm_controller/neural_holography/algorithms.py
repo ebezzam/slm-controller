@@ -31,7 +31,7 @@ def gerchberg_saxton(
     feature_size=6.4e-6,
     phase_path=None,
     prop_model="ASM",
-    propagator=propagation_ASM,  # TODO before None, why?
+    propagator=propagation_ASM,  # TODO before None, why? Does this make sense??
     writer=None,
     dtype=torch.float32,
     precomputed_H_f=None,
@@ -99,6 +99,8 @@ def gerchberg_saxton(
 
         # amplitude constraint at the SLM plane
         slm_field = utils.replace_amplitude(slm_field, torch.ones_like(target_amp))
+
+    # torch.save(slm_field.cpu(), "examples/slm_field.pt") #TODO save slm_field
 
     # return phases
     return slm_field.angle()
@@ -172,7 +174,7 @@ def stochastic_gradient_descent(
 
     # run the iterative algorithm
     for k in range(num_iters):
-        print(k)
+        # print(k) #TODO commented out print
         optimizer.zero_grad()
         # forward propagation from the SLM plane to the target plane
         real, imag = utils.polar_to_rect(torch.ones_like(slm_phase), slm_phase)

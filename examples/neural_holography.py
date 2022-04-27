@@ -13,11 +13,11 @@ from slm_controller.neural_holography.augmented_image_loader import ImageLoader
 # Show Holoeye Logo using neural holography code
 
 distance = 0.34
-wavelength = 520e-9
+wavelength = 532e-9  # TODO change everywhere, holoeye software?
 iterations = 100
 
 final_res = devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.SLM_SHAPE]
-region_of_interest_res = (200, 200)
+region_of_interest_res = (200, 200)  # TODO maybe fix to 80% of final res
 
 
 @click.command()
@@ -28,7 +28,6 @@ def neural_holography_example(show_time):
 
     image_loader = ImageLoader(
         "examples/",
-        channel=0,
         image_res=final_res,
         homography_res=region_of_interest_res,
         shuffle=False,
@@ -37,6 +36,8 @@ def neural_holography_example(show_time):
     )
 
     target_amp, _, _ = image_loader.load_image(0)
+    target_amp = torch.mean(target_amp, axis=0)
+    target_amp = target_amp[None, None, :, :]
     target_amp = target_amp.to(device)
 
     init_phase = (-0.5 + 1.0 * torch.rand(1, 1, final_res[0], final_res[1])).to(device)
@@ -49,37 +50,38 @@ def neural_holography_example(show_time):
         device=device,
     )
 
-    sgd = SGD(
-        distance,
-        wavelength,
-        devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM],
-        iterations,
-        device=device,
-    )
+    # sgd = SGD(
+    #     distance,
+    #     wavelength,
+    #     devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM],
+    #     iterations,
+    #     region_of_interest_res,
+    #     device=device,
+    # )
 
-    dpac = DPAC(
-        distance,
-        wavelength,
-        devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM],
-        device=device,
-    )
+    # dpac = DPAC(
+    #     distance,
+    #     wavelength,
+    #     devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM],
+    #     device=device,
+    # )
 
     final_phase_gs = gs(target_amp, init_phase)
     phase_out_8bit_gs = phasemap_8bit(final_phase_gs.cpu().detach())
 
-    final_phase_sgd = sgd(target_amp, init_phase)
-    phase_out_8bit_sgd = phasemap_8bit(final_phase_sgd.cpu().detach())
+    # final_phase_sgd = sgd(target_amp, init_phase)
+    # phase_out_8bit_sgd = phasemap_8bit(final_phase_sgd.cpu().detach())
 
-    _, final_phase_dpac = dpac(target_amp)
-    phase_out_8bit_dpac = phasemap_8bit(final_phase_dpac.cpu().detach())
+    # _, final_phase_dpac = dpac(target_amp)
+    # phase_out_8bit_dpac = phasemap_8bit(final_phase_dpac.cpu().detach())
 
     # instantiate display object
     D = display.HoloeyeDisplay(show_time)
 
     # display
     D.imshow(phase_out_8bit_gs)
-    D.imshow(phase_out_8bit_sgd)
-    D.imshow(phase_out_8bit_dpac)
+    # D.imshow(phase_out_8bit_sgd)
+    # D.imshow(phase_out_8bit_dpac)
 
 
 if __name__ == "__main__":

@@ -41,7 +41,10 @@ devices = {
     # 1.5 inch diagonal: https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd
     # datasheet: https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf
     DeviceOptions.NOKIA_5110.value: {
-        DeviceParam.CELL_DIM: (0.339e-3, 0.396e-3,),  # TODO: measured by "hand", check elsewhere
+        DeviceParam.CELL_DIM: (
+            0.339e-3,
+            0.396e-3,  # TODO Why this comma?
+        ),  # TODO: measured by "hand", check elsewhere
         DeviceParam.SLM_SHAPE: (84, 48),
         DeviceParam.MONOCHROME: True,
     },
@@ -49,7 +52,10 @@ devices = {
     # https://holoeye.com/lc-2012-spatial-light-modulator/
     # 1.8 inch diagonal, 36.9 x 27.6 mm #TODO: add documentation, link, lookup values
     DeviceOptions.HOLOEYE_LC_2012.value: {
-        DeviceParam.CELL_DIM: (0.36e-4, 0.36e-4,),  # TODO Computed 0.359375e-4, 0.3603515625e-4
+        DeviceParam.CELL_DIM: (
+            0.36e-4,
+            0.36e-4,
+        ),  # TODO Computed 0.359375e-4, 0.3603515625e-4
         DeviceParam.SLM_SHAPE: (768, 1024),
         DeviceParam.MONOCHROME: True,
         DeviceParam.FILL_FACTOR: 0.58,
