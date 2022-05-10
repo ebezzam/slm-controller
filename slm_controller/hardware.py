@@ -1,6 +1,21 @@
 from enum import Enum
 
 
+class PhysicalParams(Enum):
+    WAVELENGTH = "wavelength"
+    PROPAGATION_DISTANCE = "prop_distance"
+
+    @staticmethod
+    def values():
+        return [param.value for param in PhysicalParams]
+
+
+physical_params = {
+    PhysicalParams.WAVELENGTH: 532e-9,
+    PhysicalParams.PROPAGATION_DISTANCE: 0.34,
+}
+
+
 class DeviceOptions(Enum):
     ADAFRUIT_RGB = "rgb"
     ADAFRUIT_BINARY = "binary"

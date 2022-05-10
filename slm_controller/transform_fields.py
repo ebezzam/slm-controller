@@ -3,13 +3,14 @@ import numpy as np
 from PIL import Image
 import math
 
-from slm_controller.hardware import DeviceOptions, DeviceParam, devices
+from slm_controller.hardware import (
+    DeviceOptions,
+    DeviceParam,
+    devices,
+    physical_params,
+    PhysicalParams,
+)
 import slm_controller.neural_holography.utils as utils
-
-prop_dist = 0.34
-wavelength = 532e-9
-feature_size = devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM]
-dtype = torch.float32
 
 
 def load_holoeye():
@@ -21,25 +22,26 @@ def load_holoeye():
 
     max_val = torch.max(im)
     angles = (im / max_val) * (2 * np.pi) - np.pi
-    mags = torch.ones_like(im)
 
-    holoeye_slm_field = torch.polar(mags, angles)
+    holoeye_slm_field = extend_to_complex(angles)
 
-    torch.save(holoeye_slm_field, "examples/slm_field_holoeye.pt")
-
-    return holoeye_slm_field
+    return holoeye_slm_field[None, None, :, :]
 
 
-def load_neural():
-    return torch.load("examples/slm_field_neural.pt")
+def extend_to_complex(angles):
+    mags = torch.ones_like(angles)
+    return torch.polar(mags, angles)
 
 
 def compute_H():
+    prop_dist = physical_params[PhysicalParams.PROPAGATION_DISTANCE]
+    wavelength = physical_params[PhysicalParams.WAVELENGTH]
+
     # number of pixels
     num_y, num_x = devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.SLM_SHAPE]
 
-    # sampling inteval size
-    dy, dx = feature_size
+    # sampling interval size
+    dy, dx = devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM]
 
     # size of the field
     y, x = (dy * float(num_y), dx * float(num_x))
@@ -55,7 +57,7 @@ def compute_H():
     HH = 2 * math.pi * np.sqrt(1 / wavelength ** 2 - (FX ** 2 + FY ** 2))
 
     # create tensor & upload to device (GPU)
-    H_exp = torch.tensor(HH, dtype=dtype)
+    H_exp = torch.tensor(HH, dtype=torch.float32)
 
     # reshape tensor and multiply
     H_exp = torch.reshape(H_exp, (1, 1, *H_exp.size()))
@@ -67,7 +69,8 @@ def compute_H():
     fy_max = 1 / np.sqrt((2 * prop_dist * (1 / y)) ** 2 + 1) / wavelength
     fx_max = 1 / np.sqrt((2 * prop_dist * (1 / x)) ** 2 + 1) / wavelength
     H_filter = torch.tensor(
-        ((np.abs(FX) < fx_max) & (np.abs(FY) < fy_max)).astype(np.uint8), dtype=dtype,
+        ((np.abs(FX) < fx_max) & (np.abs(FY) < fy_max)).astype(np.uint8),
+        dtype=torch.float32,
     )
 
     # get real/img components
@@ -80,13 +83,7 @@ def compute_H():
     return H
 
 
-def holoeye_with_lens():
-    return load_holoeye()
-
-
-def holoeye_without_lens():
-    holoeye_slm_field = load_holoeye()
-    holoeye_slm_field = holoeye_slm_field[None, None, :, :]
+def holoeye_to_lensless_setting(holoeye_slm_field):
     H = compute_H()
 
     return utils.fftshift(
@@ -100,27 +97,22 @@ def holoeye_without_lens():
             dim=(-2, -1),
             norm="ortho",
         )
-    )[0, 0, :, :]
+    )
 
 
-def neural_with_lens():
-    neural_slm_field = load_neural()
-    neural_slm_field = neural_slm_field[None, None, :, :]
+def neural_holography_to_lens_setting(neural_holography_slm_field):
     H = compute_H()
 
     return torch.fft.ifftn(
         torch.fft.ifftn(
             H
             * torch.fft.fftn(
-                utils.ifftshift(neural_slm_field), dim=(-2, -1), norm="ortho"
+                utils.ifftshift(neural_holography_slm_field), dim=(-2, -1), norm="ortho"
             ),
             dim=(-2, -1),
             norm="ortho",
         ),
         dim=(-2, -1),
         norm="ortho",
-    )[0, 0, :, :]
+    )
 
-
-def neural_without_lens():
-    return load_neural()

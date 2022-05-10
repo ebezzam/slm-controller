@@ -100,10 +100,6 @@ def gerchberg_saxton(
         # amplitude constraint at the SLM plane
         slm_field = utils.replace_amplitude(slm_field, torch.ones_like(target_amp))
 
-    torch.save(
-        slm_field[0, 0, :, :].cpu().detach(), "examples/slm_field_neural.pt"
-    )  # TODO save slm_field
-
     # return phases
     return slm_field.angle()
 
