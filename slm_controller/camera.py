@@ -7,7 +7,7 @@ class Camera(metaclass=ABCMeta):
     def __init__(self):
         self._width = 0
         self._height = 0
-        self._frame = 0
+        self._frame = -1
 
     @property
     def height(self):
@@ -63,8 +63,7 @@ class IDS(Camera):
         )
 
         # change exposure time
-        # node_map.FindNode("ExposureTime").SetValue(33.189)
-        node_map.FindNode("ExposureTime").SetValue(42)
+        node_map.FindNode("ExposureTime").SetValue(200)
 
         # Lock critical features to prevent them from changing during acquisition
         node_map.FindNode("TLParamsLocked").SetValue(1)
@@ -86,6 +85,8 @@ class IDS(Camera):
         self._width = node_map.FindNode("WidthMax").Value()
         self._height = node_map.FindNode("HeightMax").Value()
 
+        self.acquire_image()  # TODO Bug, first image is too bright ...
+
     def acquire_image(self):
         self._frame += 1
 
@@ -103,6 +104,8 @@ class IDS(Camera):
         buffer = self.__datastream.WaitForFinishedBuffer(5000)
 
         self.__datastream.StopAcquisition()
+
+        self.__datastream.Flush(ids_peak.DataStreamFlushMode_DiscardAll)
 
         # Queue buffer so that it can be used again
         self.__datastream.QueueBuffer(buffer)

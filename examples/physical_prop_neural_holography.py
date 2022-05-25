@@ -2,7 +2,6 @@
 Neural holography example.
 """
 
-from matplotlib import pyplot as plt
 import torch
 import click
 from slm_controller import display
@@ -63,39 +62,32 @@ def physical_prop_neural_holography(show_time):
 
     init_phase = (-0.5 + 1.0 * torch.rand(1, 1, *slm_res)).to(device)
 
-    # gs = GS(distance, wavelength, feature_size, iterations, device=device)
-    # angles = gs(target_amp, init_phase).cpu().detach()
-    # extended = extend_to_complex(angles)
-    # final_phase_gs = neural_holography_to_lens_setting(extended).angle()
-    # phase_out_8bit_gs = phasemap_8bit(final_phase_gs)
+    gs = GS(distance, wavelength, feature_size, iterations, device=device)
+    angles = gs(target_amp, init_phase).cpu().detach()
+    extended = extend_to_complex(angles)
+    final_phase_gs = neural_holography_to_lens_setting(extended).angle()
+    phase_out_8bit_gs = phasemap_8bit(final_phase_gs)
 
-    # sgd = SGD(distance, wavelength, feature_size, iterations, roi_res, device=device)
-    # angles = sgd(target_amp, init_phase).cpu().detach()
-    # extended = extend_to_complex(angles)
-    # final_phase_sgd = neural_holography_to_lens_setting(extended).angle()
-    # phase_out_8bit_sgd = phasemap_8bit(final_phase_sgd)
+    sgd = SGD(distance, wavelength, feature_size, iterations, roi_res, device=device)
+    angles = sgd(target_amp, init_phase).cpu().detach()
+    extended = extend_to_complex(angles)
+    final_phase_sgd = neural_holography_to_lens_setting(extended).angle()
+    phase_out_8bit_sgd = phasemap_8bit(final_phase_sgd)
 
-    # dpac = DPAC(distance, wavelength, feature_size, device=device)
-    # _, angles = dpac(target_amp)
-    # angles = angles.cpu().detach()
-    # extended = extend_to_complex(angles)
-    # final_phase_dpac = neural_holography_to_lens_setting(extended).angle()
-    # phase_out_8bit_dpac = phasemap_8bit(final_phase_dpac)
-
-    camera_prop = PhysicalProp()
-    captured_amp = camera_prop(init_phase)[0, 0, :, :].numpy()
-
-    _, ax = plt.subplots()
-    ax.imshow(captured_amp, cmap="gray")
-    plt.show()
+    dpac = DPAC(distance, wavelength, feature_size, device=device)
+    _, angles = dpac(target_amp)
+    angles = angles.cpu().detach()
+    extended = extend_to_complex(angles)
+    final_phase_dpac = neural_holography_to_lens_setting(extended).angle()
+    phase_out_8bit_dpac = phasemap_8bit(final_phase_dpac)
 
     # instantiate display object
-    # D = display.HoloeyeDisplay(show_time)
+    D = display.HoloeyeDisplay(show_time)
 
     # display
-    # D.imshow(phase_out_8bit_gs)
-    # D.imshow(phase_out_8bit_sgd)
-    # D.imshow(phase_out_8bit_dpac)
+    D.imshow(phase_out_8bit_gs)
+    D.imshow(phase_out_8bit_sgd)
+    D.imshow(phase_out_8bit_dpac)
 
 
 if __name__ == "__main__":

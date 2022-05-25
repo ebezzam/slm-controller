@@ -7,7 +7,7 @@ import numpy as np
 from imageio import imread
 from skimage.transform import resize
 
-import slm_controller.neural_holography.utils as utils
+import utils as utils
 
 
 class ImageLoader:

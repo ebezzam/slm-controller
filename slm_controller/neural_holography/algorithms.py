@@ -17,8 +17,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-import slm_controller.neural_holography.utils as utils
-from slm_controller.neural_holography.propagation_ASM import *
+import utils as utils
+from propagation_ASM import *
 
 
 # 1. GS

@@ -16,7 +16,7 @@ Y. Peng, S. Choi, N. Padmanaban, G. Wetzstein. Neural Holography with Camera-in-
 import math
 import torch
 import numpy as np
-import slm_controller.neural_holography.utils as utils
+import utils as utils
 import torch.fft
 from aotools.functions import zernikeArray
 
