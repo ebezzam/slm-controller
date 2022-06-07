@@ -1,7 +1,7 @@
 """
 https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/utils.py
 
-This is the script containing all uility functions used for the implementation.
+This is the script containing all utility functions used for the implementation.
 
 This code and data is released under the Creative Commons Attribution-NonCommercial 4.0 International license (CC BY-NC.) In a nutshell:
     # The license is only for non-commercial use (commercial licenses can be obtained from Stanford).
@@ -204,41 +204,38 @@ def pad_image(field, target_shape, pytorch=True, stacked_complex=True, padval=0,
     padval: the real number value to pad by
     mode: padding mode for numpy or torch
     """
-    if pytorch:
-        if stacked_complex:
-            size_diff = np.array(target_shape) - np.array(field.shape[-3:-1])
-            odd_dim = np.array(field.shape[-3:-1]) % 2
-        else:
-            size_diff = np.array(target_shape) - np.array(field.shape[-2:])
-            odd_dim = np.array(field.shape[-2:]) % 2
+    if pytorch and stacked_complex:
+        size_diff = np.array(target_shape) - np.array(field.shape[-3:-1])
+        odd_dim = np.array(field.shape[-3:-1]) % 2
     else:
         size_diff = np.array(target_shape) - np.array(field.shape[-2:])
         odd_dim = np.array(field.shape[-2:]) % 2
+    if not (size_diff > 0).any():
+        return field
 
     # pad the dimensions that need to increase in size
-    if (size_diff > 0).any():
-        pad_total = np.maximum(size_diff, 0)
-        pad_front = (pad_total + odd_dim) // 2
-        pad_end = (pad_total + 1 - odd_dim) // 2
+    pad_total = np.maximum(size_diff, 0)
+    pad_front = (pad_total + odd_dim) // 2
+    pad_end = (pad_total + 1 - odd_dim) // 2
 
-        if pytorch:
-            pad_axes = [
-                int(p)  # convert from np.int64
-                for tple in zip(pad_front[::-1], pad_end[::-1])
-                for p in tple
-            ]
-            if stacked_complex:
-                return pad_stacked_complex(field, pad_axes, mode=mode, padval=padval)
-            else:
-                return nn.functional.pad(field, pad_axes, mode=mode, value=padval)
-        else:
-            leading_dims = field.ndim - 2  # only pad the last two dims
-            if leading_dims > 0:
-                pad_front = np.concatenate(([0] * leading_dims, pad_front))
-                pad_end = np.concatenate(([0] * leading_dims, pad_end))
-            return np.pad(field, tuple(zip(pad_front, pad_end)), mode, constant_values=padval)
+    if pytorch:
+        pad_axes = [
+            int(p)  # convert from np.int64
+            for tple in zip(pad_front[::-1], pad_end[::-1])
+            for p in tple
+        ]
+        return (
+            pad_stacked_complex(field, pad_axes, mode=mode, padval=padval)
+            if stacked_complex
+            else nn.functional.pad(field, pad_axes, mode=mode, value=padval)
+        )
+
     else:
-        return field
+        leading_dims = field.ndim - 2  # only pad the last two dims
+        if leading_dims > 0:
+            pad_front = np.concatenate(([0] * leading_dims, pad_front))
+            pad_end = np.concatenate(([0] * leading_dims, pad_end))
+        return np.pad(field, tuple(zip(pad_front, pad_end)), mode, constant_values=padval)
 
 
 def crop_image(field, target_shape, pytorch=True, stacked_complex=True):
@@ -249,44 +246,37 @@ def crop_image(field, target_shape, pytorch=True, stacked_complex=True):
     if target_shape is None:
         return field
 
-    if pytorch:
-        if stacked_complex:
-            size_diff = np.array(field.shape[-3:-1]) - np.array(target_shape)
-            odd_dim = np.array(field.shape[-3:-1]) % 2
-        else:
-            size_diff = np.array(field.shape[-2:]) - np.array(target_shape)
-            odd_dim = np.array(field.shape[-2:]) % 2
+    if pytorch and stacked_complex:
+        size_diff = np.array(field.shape[-3:-1]) - np.array(target_shape)
+        odd_dim = np.array(field.shape[-3:-1]) % 2
     else:
         size_diff = np.array(field.shape[-2:]) - np.array(target_shape)
         odd_dim = np.array(field.shape[-2:]) % 2
-
-    # crop dimensions that need to decrease in size
-    if (size_diff > 0).any():
-        crop_total = np.maximum(size_diff, 0)
-        crop_front = (crop_total + 1 - odd_dim) // 2
-        crop_end = (crop_total + odd_dim) // 2
-
-        crop_slices = [slice(int(f), int(-e) if e else None) for f, e in zip(crop_front, crop_end)]
-        if pytorch and stacked_complex:
-            return field[(..., *crop_slices, slice(None))]
-        else:
-            return field[(..., *crop_slices)]
-    else:
+    if not (size_diff > 0).any():
         return field
+    # crop dimensions that need to decrease in size
+    crop_total = np.maximum(size_diff, 0)
+    crop_front = (crop_total + 1 - odd_dim) // 2
+    crop_end = (crop_total + odd_dim) // 2
+
+    crop_slices = [slice(int(f), int(-e) if e else None) for f, e in zip(crop_front, crop_end)]
+    return (
+        field[(..., *crop_slices, slice(None))]
+        if pytorch and stacked_complex
+        else field[(..., *crop_slices)]
+    )
 
 
 def srgb_gamma2lin(im_in):
     """converts from sRGB to linear color space"""
     thresh = 0.04045
-    im_out = np.where(im_in <= thresh, im_in / 12.92, ((im_in + 0.055) / 1.055) ** (2.4))
-    return im_out
+    return np.where(im_in <= thresh, im_in / 12.92, ((im_in + 0.055) / 1.055) ** (2.4))
 
 
 def srgb_lin2gamma(im_in):
     """converts from linear to sRGB color space"""
     thresh = 0.0031308
-    im_out = np.where(im_in <= thresh, 12.92 * im_in, 1.055 * (im_in ** (1 / 2.4)) - 0.055)
-    return im_out
+    return np.where(im_in <= thresh, 12.92 * im_in, 1.055 * (im_in ** (1 / 2.4)) - 0.055)
 
 
 def cond_mkdir(path):
@@ -308,15 +298,11 @@ def phasemap_8bit(phasemap, inverted=True):
     """
 
     output_phase = ((phasemap + np.pi) % (2 * np.pi)) / (2 * np.pi)
-    if inverted:
-        phase_out_8bit = (
-            ((1 - output_phase) * 255).round().cpu().detach().squeeze().numpy().astype(np.uint8)
-        )  # quantized to 8 bits
-    else:
-        phase_out_8bit = (
-            ((output_phase) * 255).round().cpu().detach().squeeze().numpy().astype(np.uint8)
-        )  # quantized to 8 bits
-    return phase_out_8bit
+    return (
+        (((1 - output_phase) * 255).round().cpu().detach().squeeze().numpy().astype(np.uint8))
+        if inverted
+        else (((output_phase) * 255).round().cpu().detach().squeeze().numpy().astype(np.uint8))
+    )
 
 
 def burst_img_processor(img_burst_list):
@@ -379,12 +365,9 @@ def propagate_field(
             dtype=dtype,
             precomped_H=precomputed_H,
         )
-    elif "MODEL" in prop_model.upper():
+    elif "MODEL" in prop_model.upper() or prop_model == "CAMERA":
         # forward propagate through our citl-calibrated model.
         # You can directly use this model propagation, not using this wrapper module.
-        _, input_phase = rect_to_polar(input_field.real, input_field.imag)
-        output_field = propagator(input_phase)
-    elif prop_model == "CAMERA":
         _, input_phase = rect_to_polar(input_field.real, input_field.imag)
         output_field = propagator(input_phase)
     else:

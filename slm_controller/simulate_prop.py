@@ -1,9 +1,9 @@
 import torch
 
 from slm_controller.hardware import (
-    DeviceOptions,
-    DeviceParam,
-    devices,
+    SlmDevices,
+    SlmParam,
+    slm_devices,
     physical_params,
     PhysicalParams,
 )
@@ -21,7 +21,7 @@ def lensless_prop(slm_field):
         propagation_ASM,
         physical_params[PhysicalParams.PROPAGATION_DISTANCE],
         physical_params[PhysicalParams.WAVELENGTH],
-        devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM],
+        slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM],
         "ASM",
         torch.float32,
         None,

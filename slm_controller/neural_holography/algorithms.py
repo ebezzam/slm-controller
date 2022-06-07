@@ -29,10 +29,10 @@ def gerchberg_saxton(
     prop_dist,
     wavelength,
     feature_size=6.4e-6,
-    phase_path=None,
+    # phase_path=None,
     prop_model="ASM",
-    propagator=propagation_ASM,  # TODO before None, why? Does this make sense??
-    writer=None,
+    propagator=propagation_ASM,  # TODO before None, why?
+    # writer=None,
     dtype=torch.float32,
     precomputed_H_f=None,
     precomputed_H_b=None,
@@ -64,7 +64,7 @@ def gerchberg_saxton(
     slm_field = torch.complex(real, imag)
 
     # run the GS algorithm
-    for k in range(num_iters):
+    for _ in range(num_iters):
         # SLM plane to image plane
         recon_field = utils.propagate_field(
             slm_field,
@@ -76,11 +76,6 @@ def gerchberg_saxton(
             dtype,
             precomputed_H_f,
         )
-
-        # write to tensorboard / write phase image
-        # Note that it takes 0.~ s for writing it to tensorboard
-        if False:  # k > 0 and k % 10 == 0:
-            utils.write_gs_summary(slm_field, recon_field, target_amp, k, writer, prefix="test")
 
         # replace amplitude at the image plane
         recon_field = utils.replace_amplitude(recon_field, target_amp)
@@ -172,7 +167,6 @@ def stochastic_gradient_descent(
 
     # run the iterative algorithm
     for k in range(num_iters):
-        # print(k) #TODO commented out print
         optimizer.zero_grad()
         # forward propagation from the SLM plane to the target plane
         real, imag = utils.polar_to_rect(torch.ones_like(slm_phase), slm_phase)
@@ -273,9 +267,7 @@ def double_phase_amplitude_coding(
         precomputed_H,
     )
 
-    slm_phase = double_phase(slm_field, three_pi=False, mean_adjust=True)
-
-    return slm_phase
+    return double_phase(slm_field, three_pi=False, mean_adjust=True)
 
 
 def double_phase(field, three_pi=True, mean_adjust=True):
@@ -305,11 +297,7 @@ def double_phase_amp_phase(amplitudes, phases, three_pi=True, mean_adjust=True):
     phases_out[..., ::2, 1::2] = phases_b[..., ::2, 1::2]
     phases_out[..., 1::2, ::2] = phases_b[..., 1::2, ::2]
 
-    if three_pi:
-        max_phase = 3 * math.pi
-    else:
-        max_phase = 2 * math.pi
-
+    max_phase = 3 * math.pi if three_pi else 2 * math.pi
     if mean_adjust:
         phases_out -= phases_out.mean()
 

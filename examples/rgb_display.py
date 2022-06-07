@@ -22,11 +22,7 @@ def rgb_display_example(fp, rgb, not_original_ratio):
         image = util.load_image(fp, output_shape=D.shape, keep_aspect_ratio=keep_aspect_ratio)
 
     else:
-        if rgb:
-            image = np.random.rand(3, *D.shape)
-        else:
-            image = np.random.rand(*D.shape)
-
+        image = np.random.rand(3, *D.shape) if rgb else np.random.rand(*D.shape)
         # save new pattern
         fp = "slm_pattern.npy"
         np.save(fp, image)

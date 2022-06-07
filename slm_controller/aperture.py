@@ -70,7 +70,10 @@ def rect_aperture(slm_shape, cell_dim, apert_dim, center=None):
             f"SLM dimensions {slm.dim}"
         )
     slm.at(
-        physical_coord=np.s_[top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]], value=1,
+        physical_coord=np.s_[
+            top_left[0] : bottom_right[0], top_left[1] : bottom_right[1]
+        ],
+        value=1,
     )
 
     return slm
@@ -100,10 +103,7 @@ def line_aperture(slm_shape, cell_dim, length, vertical=True, center=None):
     """
 
     # call `create_rect_aperture`
-    if vertical:
-        apert_dim = (length, cell_dim[1])
-    else:
-        apert_dim = (cell_dim[0], length)
+    apert_dim = (length, cell_dim[1]) if vertical else (cell_dim[0], length)
     return rect_aperture(slm_shape, cell_dim, apert_dim, center)
 
 

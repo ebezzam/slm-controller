@@ -1,3 +1,7 @@
+"""
+Set aperture example.
+"""
+
 import click
 from slm_controller.display import create_display
 from slm_controller.aperture import (
@@ -7,7 +11,7 @@ from slm_controller.aperture import (
     circ_aperture,
     ApertureOptions,
 )
-from slm_controller.hardware import devices, DeviceOptions, DeviceParam
+from slm_controller.hardware import slm_devices, SlmDevices, SlmParam
 
 
 @click.command()
@@ -35,11 +39,13 @@ from slm_controller.hardware import devices, DeviceOptions, DeviceParam
     "--center", default=None, nargs=2, type=int, help="Coordinate for center.",
 )
 @click.option(
-    "--vertical", is_flag=True, help="Whether line should be vertical (True) or horizontal (False)."
+    "--vertical",
+    is_flag=True,
+    help="Whether line should be vertical (True) or horizontal (False).",
 )
 @click.option(
     "--device",
-    type=click.Choice(DeviceOptions.values()),
+    type=click.Choice(SlmDevices.values()),
     help="Which device to program with aperture.",
 )
 def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
@@ -59,9 +65,9 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
         raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
     # print device info
-    device_config = devices[device]
-    cell_dim = device_config[DeviceParam.CELL_DIM]
-    print(f"SLM dimension : {device_config[DeviceParam.SLM_SHAPE]}")
+    device_config = slm_devices[device]
+    cell_dim = device_config[SlmParam.CELL_DIM]
+    print(f"SLM dimension : {device_config[SlmParam.SLM_SHAPE]}")
     print(f"Cell dim (m) : {cell_dim}")
     if shape == ApertureOptions.LINE.value:
         if vertical:
@@ -83,24 +89,24 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
         ap = line_aperture(
             length=length,
             vertical=vertical,
-            slm_shape=device_config[DeviceParam.SLM_SHAPE],
-            cell_dim=device_config[DeviceParam.CELL_DIM],
+            slm_shape=device_config[SlmParam.SLM_SHAPE],
+            cell_dim=device_config[SlmParam.CELL_DIM],
             center=center,
         )
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
         ap = square_aperture(
             side=n_cells * cell_dim[0],
-            slm_shape=device_config[DeviceParam.SLM_SHAPE],
-            cell_dim=device_config[DeviceParam.CELL_DIM],
+            slm_shape=device_config[SlmParam.SLM_SHAPE],
+            cell_dim=device_config[SlmParam.CELL_DIM],
             center=center,
         )
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
         ap = circ_aperture(
             radius=n_cells * cell_dim[0],
-            slm_shape=device_config[DeviceParam.SLM_SHAPE],
-            cell_dim=device_config[DeviceParam.CELL_DIM],
+            slm_shape=device_config[SlmParam.SLM_SHAPE],
+            cell_dim=device_config[SlmParam.CELL_DIM],
             center=center,
         )
     elif shape == ApertureOptions.RECT.value:
@@ -111,15 +117,15 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
         apert_dim = rect_shape[0] * cell_dim[0], rect_shape[1] * cell_dim[1]
         ap = rect_aperture(
             apert_dim=apert_dim,
-            slm_shape=device_config[DeviceParam.SLM_SHAPE],
-            cell_dim=device_config[DeviceParam.CELL_DIM],
+            slm_shape=device_config[SlmParam.SLM_SHAPE],
+            cell_dim=device_config[SlmParam.CELL_DIM],
             center=center,
         )
     assert ap is not None
 
     # set aperture to device
-    D = create_display(device_key=device)
-    if device_config[DeviceParam.MONOCHROME]:
+    D = create_display(slm_device_key=device)
+    if device_config[SlmParam.MONOCHROME]:
         D.imshow(ap.grayscale_values)
     else:
         D.imshow(ap.values)

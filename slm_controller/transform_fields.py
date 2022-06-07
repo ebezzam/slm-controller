@@ -4,21 +4,19 @@ from PIL import Image
 import math
 
 from slm_controller.hardware import (
-    DeviceOptions,
-    DeviceParam,
-    devices,
+    SlmDevices,
+    SlmParam,
+    slm_devices,
     physical_params,
     PhysicalParams,
 )
 import slm_controller.neural_holography.utils as utils
 
 
-def load_holoeye():
-    im = Image.open("examples/holoeye_slm_pattern.png")
+def load_holoeye_slm_pattern(path="images/holoeye_logo_slm_pattern.png"):
+    im = Image.open(path)
     im = torch.from_numpy(np.array(im)).type(torch.FloatTensor)
     im = torch.mean(im, axis=2)
-
-    # print(torch.min(im), torch.max(im))  # TODO max only 254 ??
 
     max_val = torch.max(im)
     angles = (im / max_val) * (2 * np.pi) - np.pi
@@ -38,10 +36,10 @@ def compute_H():
     wavelength = physical_params[PhysicalParams.WAVELENGTH]
 
     # number of pixels
-    num_y, num_x = devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.SLM_SHAPE]
+    num_y, num_x = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
 
     # sampling interval size
-    dy, dx = devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM]
+    dy, dx = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]
 
     # size of the field
     y, x = (dy * float(num_y), dx * float(num_x))

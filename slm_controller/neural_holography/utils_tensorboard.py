@@ -16,6 +16,7 @@ import torch
 import numpy as np
 import tensorboardX
 import matplotlib.pyplot as plt
+from slm_controller.hardware import SlmDevices, SlmParam, slm_devices
 
 import utils as utils
 from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -67,11 +68,11 @@ class SummaryModelWriter(tensorboardX.SummaryWriter):
         :param show_identity: show y=x on the graph
         """
         with torch.no_grad():
-            num_x = 64
             if self.model.process_phase is not None:
                 lut = copy.deepcopy(self.model.process_phase)
                 lut.eval()
 
+                num_x = 64
                 test_phase = torch.linspace(-np.pi, np.pi, num_x, dtype=torch.float)
                 input_phase = test_phase.numpy()
                 test_phase = test_phase.reshape(num_x, 1, 1, 1)
@@ -89,16 +90,17 @@ class SummaryModelWriter(tensorboardX.SummaryWriter):
                         output_mean,
                         "b",
                         input_phase,
-                        input_phase - input_phase[int(num_x / 2)] + output_mean[int(num_x / 2)],
+                        ((input_phase - input_phase[num_x // 2]) + output_mean[num_x // 2]),
                         "k--",
                     )
+
                     plt.fill_between(
-                        input_phase, output_mean - output_std, output_mean + output_std, alpha=0.5
+                        input_phase, output_mean - output_std, output_mean + output_std, alpha=0.5,
                     )
                 else:
                     plt.plot(input_phase, output_phase, "b")
 
-                self.add_figure(f"parameters/voltage-to-phase", fig, idx)
+                self.add_figure("parameters/voltage-to-phase", fig, idx)
                 del lut
 
     def add_source_amplitude_parameters(self, idx=0):
@@ -130,7 +132,7 @@ class SummaryModelWriter(tensorboardX.SummaryWriter):
                 .detach()
                 .numpy()
             )
-            self.add_figure_cmap(f"parameters/source_amp", img, idx, self.cmap_rgb)
+            self.add_figure_cmap("parameters/source_amp", img, idx, self.cmap_rgb)
 
     def add_zernike(self, idx=0, domain="fourier", cm=plt.cm.plasma):
         """
@@ -144,10 +146,12 @@ class SummaryModelWriter(tensorboardX.SummaryWriter):
 
         if domain == "fourier":
             zernike_coeffs = self.model.coeffs_fourier
-            map_size = [2160, 3840]
+            slm_res = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
+            map_size = [2 * slm_res[0], 2 * slm_res[1]]
         elif domain == "primal":
             zernike_coeffs = self.model.coeffs
-            map_size = [1080, 1920]
+            slm_res = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
+            map_size = [slm_res[0], slm_res[1]]
 
         if zernike_coeffs is not None:
             num_coeffs = len(zernike_coeffs)
@@ -172,7 +176,7 @@ class SummaryModelWriter(tensorboardX.SummaryWriter):
             if domain == "primal":
                 if self.zernike_basis is None:
                     self.model.zernike = compute_zernike_basis(
-                        self.model.coeffs.size()[0], map_size.size()[-2:], wo_piston=True
+                        self.model.coeffs.size()[0], map_size.size()[-2:], wo_piston=True,
                     )
                     self.model.zernike = self.model.zernike.to(self.model.dev).detach()
                     self.model.zernike.requires_grad = False
@@ -194,22 +198,25 @@ class SummaryModelWriter(tensorboardX.SummaryWriter):
             amp = self.model.target_constant_amp
             amp = amp.squeeze().unsqueeze(0).cpu().detach().numpy()
             self.add_figure_cmap(
-                f"parameters/Content-independent_target_amp", amp.squeeze(), idx, self.cmap_rgb
+                "parameters/Content-independent_target_amp", amp.squeeze(), idx, self.cmap_rgb,
             )
+
             self.add_image(
-                f"parameters/Content-independent_target_amp_1080p",
-                ((amp - amp.min()) / (amp.max() - amp.min() + 1e-6)),
+                "parameters/Content-independent_target_amp_1080p",
+                (amp - amp.min()) / (amp.max() - amp.min() + 1e-6),
                 idx,
             )
+
         if self.model.target_constant_phase is not None:
             phase = self.model.target_constant_phase
             phase = phase.squeeze().unsqueeze(0).cpu().detach().numpy()
             self.add_figure_cmap(
-                f"parameters/Content-independent_target_phase", phase.squeeze(), idx, plt.cm.plasma
+                "parameters/Content-independent_target_phase", phase.squeeze(), idx, plt.cm.plasma,
             )
+
             self.add_image(
-                f"parameters/Content-independent_target_phase_1080p",
-                ((phase - phase.min()) / (phase.max() - phase.min() + 1e-6)),
+                "parameters/Content-independent_target_phase_1080p",
+                (phase - phase.min()) / (phase.max() - phase.min() + 1e-6),
                 idx,
             )
 
@@ -231,12 +238,13 @@ class SummaryModelWriter(tensorboardX.SummaryWriter):
             .unsqueeze(0)
         )
         self.add_image(
-            f"parameters/zero_input_1080p",
+            "parameters/zero_input_1080p",
             (recon_amp - recon_amp.min()) / (recon_amp.max() - recon_amp.min()),
             idx,
         )
+
         self.add_figure_cmap(
-            f"parameters/zero_input_figure", recon_amp.squeeze(), idx, self.cmap_rgb
+            "parameters/zero_input_figure", recon_amp.squeeze(), idx, self.cmap_rgb
         )
 
     def add_latent_codes(self, idx=0, chs=(0, 1)):
@@ -263,9 +271,10 @@ class SummaryModelWriter(tensorboardX.SummaryWriter):
             cdf_amp = cdf_amp.cpu().detach().squeeze().unsqueeze(0)
             cdf_phase = cdf_phase.cpu().detach().squeeze().unsqueeze(0)
 
-            self.add_figure_cmap(f"parameters/content_dependent_amp", cdf_amp, idx, self.cmap_rgb)
+            self.add_figure_cmap("parameters/content_dependent_amp", cdf_amp, idx, self.cmap_rgb)
+
             self.add_figure_cmap(
-                f"parameters/content_dependent_phase", cdf_phase, idx, plt.cm.plasma
+                "parameters/content_dependent_phase", cdf_phase, idx, plt.cm.plasma
             )
 
     def add_figure_cmap(self, title, img, idx, cmap=plt.cm.plasma):

@@ -1,14 +1,14 @@
 """
-Neural holography example.
+Physical propagation of slm patterns generated using the neural holography code.
 """
 
 import torch
 import click
 from slm_controller import display
 from slm_controller.hardware import (
-    DeviceOptions,
-    DeviceParam,
-    devices,
+    SlmDevices,
+    SlmParam,
+    slm_devices,
     physical_params,
     PhysicalParams,
 )
@@ -16,37 +16,31 @@ from slm_controller.transform_fields import (
     neural_holography_to_lens_setting,
     extend_to_complex,
 )
-from slm_controller.neural_holography.module import GS, SGD, DPAC, PhysicalProp
+from slm_controller.neural_holography.module import GS, SGD, DPAC
 from slm_controller.neural_holography.utils import phasemap_8bit
 from slm_controller.neural_holography.augmented_image_loader import ImageLoader
 
-
-# Show Holoeye Logo using neural holography code
-
+# Set parameters
 distance = physical_params[PhysicalParams.PROPAGATION_DISTANCE]
 wavelength = physical_params[PhysicalParams.WAVELENGTH]
-feature_size = devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.CELL_DIM]
+feature_size = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]
 iterations = 500
 
-slm_res = devices[DeviceOptions.HOLOEYE_LC_2012.value][DeviceParam.SLM_SHAPE]
+slm_res = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
 image_res = slm_res
 
-# image_res = (1080, 1920)
-# roi_res = (880, 1600)
-
-# x = roi_res[0] / image_res[0]
-# y = roi_res[1] / image_res[1]
-# print(image_res[0] * x, image_res[1] * y)
 roi_res = (620, 850)  # TODO about 80%
 
 
 @click.command()
 @click.option("--show_time", type=float, default=5.0, help="Time to show the pattern on the SLM.")
 def physical_prop_neural_holography(show_time):
+    # Use GPU if detected in system
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
+    # Initialize image loader
     image_loader = ImageLoader(
-        "examples/",
+        "images/holoeye_outputs",
         image_res=image_res,
         homography_res=roi_res,
         shuffle=False,
@@ -54,37 +48,63 @@ def physical_prop_neural_holography(show_time):
         horizontal_flips=False,
     )
 
+    # Load the the first image in the folder
     target_amp, _, _ = image_loader.load_image(0)
+
+    # Make it grayscale
     target_amp = torch.mean(target_amp, axis=0)
 
+    # Transform the image to be compliant with the neural holography data structure
     target_amp = target_amp[None, None, :, :]
     target_amp = target_amp.to(device)
 
+    # Setup a random initial slm phase map with values in [-0.5, 0.5]
     init_phase = (-0.5 + 1.0 * torch.rand(1, 1, *slm_res)).to(device)
 
+    # Run Gerchberg-Saxton
     gs = GS(distance, wavelength, feature_size, iterations, device=device)
     angles = gs(target_amp, init_phase).cpu().detach()
+
+    # Extend the computed angles, aka the phase values, to a complex tensor again
     extended = extend_to_complex(angles)
+
+    # Transform the results to the hardware setting using a lens
     final_phase_gs = neural_holography_to_lens_setting(extended).angle()
+
+    # Quantize the the angles, aka phase values, to a bit values
     phase_out_8bit_gs = phasemap_8bit(final_phase_gs)
 
+    # Run Stochastic Gradient Descent based method
     sgd = SGD(distance, wavelength, feature_size, iterations, roi_res, device=device)
     angles = sgd(target_amp, init_phase).cpu().detach()
+
+    # Extend the computed angles, aka the phase values, to a complex tensor again
     extended = extend_to_complex(angles)
+
+    # Transform the results to the hardware setting using a lens
     final_phase_sgd = neural_holography_to_lens_setting(extended).angle()
+
+    # Quantize the the angles, aka phase values, to a bit values
     phase_out_8bit_sgd = phasemap_8bit(final_phase_sgd)
 
+    # Run Double Phase Amplitude Coding #TODO does not work, not even out of the box
     dpac = DPAC(distance, wavelength, feature_size, device=device)
     _, angles = dpac(target_amp)
     angles = angles.cpu().detach()
+
+    # Extend the computed angles, aka the phase values, to a complex tensor again
     extended = extend_to_complex(angles)
+
+    # Transform the results to the hardware setting using a lens
     final_phase_dpac = neural_holography_to_lens_setting(extended).angle()
+
+    # Quantize the the angles, aka phase values, to a bit values
     phase_out_8bit_dpac = phasemap_8bit(final_phase_dpac)
 
     # instantiate display object
     D = display.HoloeyeDisplay(show_time)
 
-    # display
+    # display all results
     D.imshow(phase_out_8bit_gs)
     D.imshow(phase_out_8bit_sgd)
     D.imshow(phase_out_8bit_dpac)

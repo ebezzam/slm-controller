@@ -300,7 +300,7 @@ def propagation_ASM_zernike_fourier(
 
     precomped_H_new = zernike * precomped_H
 
-    u_out = propagation_ASM(
+    return propagation_ASM(
         u_in,
         feature_size,
         wavelength,
@@ -313,17 +313,14 @@ def propagation_ASM_zernike_fourier(
         precomped_H_exp,
     )
 
-    return u_out
 
-
-def combine_zernike_basis(coeffs, basis, return_phase=False):
+def combine_zernike_basis(coeffs, basis):
     """
     Multiplies the Zernike coefficients and basis functions while preserving
     dimensions
 
     :param coeffs: torch tensor with coeffs, see propagation_ASM_zernike
     :param basis: the output of compute_zernike_basis, must be same length as coeffs
-    :param return_phase:
     :return: A Complex64 tensor that combines coeffs and basis.
     """
 

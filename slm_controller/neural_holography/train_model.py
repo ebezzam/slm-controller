@@ -33,6 +33,17 @@ import skimage.util
 import torch.nn as nn
 import torch.optim as optim
 
+from slm_controller.hardware import (
+    CamDevices,
+    CamParam,
+    SlmDevices,
+    SlmParam,
+    PhysicalParams,
+    slm_devices,
+    physical_params,
+    cam_devices,
+)
+
 import utils as utils
 from module import PhysicalProp
 from propagation_model import ModelPropagate
@@ -85,19 +96,19 @@ run_id = f"{chan_str}_{opt.experiment}_lr{opt.lr_model}_batchsize{opt.batch_size
 
 print(f"   - training parameterized wave propagation model....")
 
-# units
-cm, mm, um, nm = 1e-2, 1e-3, 1e-6, 1e-9
-
-prop_dist = (20 * cm, 20 * cm, 20 * cm)[
-    channel
+prop_dist = physical_params[
+    PhysicalParams.PROPAGATION_DISTANCE
 ]  # propagation distance from SLM plane to target plane
-wavelength = (638 * nm, 520 * nm, 450 * nm)[channel]  # wavelength of each color
-feature_size = (6.4 * um, 6.4 * um)  # SLM pitch
-slm_res = (1080, 1920)  # resolution of SLM
-image_res = (1080, 1920)  # 1080p dataset
-roi_res = (880, 1600)  # regions of interest (to penalize)
+wavelength = physical_params[PhysicalParams.WAVELENGTH]  # wavelength
+feature_size = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]  # SLM pitch
+
+slm_res = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]  # resolution of SLM
+image_res = cam_devices[CamDevices.IDS.value][CamParam.IMG_SHAPE]  # TODO slm.shape == image.shape?
+roi_res = (620, 850)  # regions of interest (to penalize) # TODO about 80%
+
 dtype = torch.float32  # default datatype (results may differ if using, e.g., float64)
-device = torch.device("cuda")  # The gpu you are using
+# device = "cuda" if torch.cuda.is_available() else "cpu" # TODO use gpu
+device = torch.device("cpu")
 
 # Options for the algorithm
 lr_s_phase = opt.lr_phase / 200
@@ -117,18 +128,18 @@ result_path = f"./models"
 model_path = opt.model_path  # path for new model checkpoints
 utils.cond_mkdir(model_path)
 phase_path = opt.phase_path  # path of precomputed phase pool
-data_path = f"./data/train1080"  # path of targets
+data_path = f"./data"  # path of targets
 
 
 # Hardware setup
 camera_prop = PhysicalProp(
     channel,
     # laser_arduino=True,
-    roi_res=(roi_res[1], roi_res[0]),
+    roi_res=(roi_res[1], roi_res[0]),  # TODO why inverted
     slm_settle_time=0.15,
-    range_row=(220, 1000),
-    range_col=(300, 1630),
-    patterns_path=opt.calibration_path,  # path of 21 x 12 calibration patterns, see Supplement.
+    # range_row=(220, 1000),
+    # range_col=(300, 1630),
+    # patterns_path=opt.calibration_path,  # path of 21 x 12 calibration patterns, see Supplement.
     show_preview=True,
 )
 
@@ -136,7 +147,11 @@ camera_prop = PhysicalProp(
 # Check propagation_model.py for the default parameter settings!
 blur = utils.make_kernel_gaussian(0.85, 3)  # Optional, just be consistent with inference.
 model = ModelPropagate(
-    distance=prop_dist, feature_size=feature_size, wavelength=wavelength, blur=blur
+    distance=prop_dist,
+    feature_size=feature_size,
+    wavelength=wavelength,
+    blur=blur,
+    image_res=slm_res,  # TODO slm or image?
 ).to(device)
 
 if opt.pretrained_path != "":
@@ -185,7 +200,7 @@ if opt.step_lr:
 # tensorboard writer
 summaries_dir = os.path.join("runs", run_id)
 utils.cond_mkdir(summaries_dir)
-writer = SummaryModelWriter(model, f"{summaries_dir}", ch=channel)
+writer = SummaryModelWriter(model, f"{summaries_dir}", slm_res=slm_res, roi_res=roi_res, ch=channel)
 
 i_acc = 0
 for e in range(opt.num_epochs):
@@ -218,9 +233,16 @@ for e in range(opt.num_epochs):
                 phase_filename = os.path.join(
                     phase_path, f"{chan_str}", f"{idx}_{channel}", f"phasemaps_1000.png"
                 )
-            slm_phase = skimage.io.imread(phase_filename) / np.iinfo(np.uint8).max
 
-            # invert phase (our SLM setup)
+            if os.path.exists(phase_filename):
+                slm_phase = skimage.io.imread(phase_filename) / np.iinfo(np.uint8).max
+            else:
+                slm_phase = (
+                    np.random.randint(low=0, high=np.iinfo(np.uint8).max + 1, size=(1, 1, *slm_res))
+                    / np.iinfo(np.uint8).max
+                )
+
+            # invert phase (our SLM setup) #TODO not needed to invert in our setting
             slm_phase = (
                 torch.tensor((1 - slm_phase) * 2 * np.pi - np.pi, dtype=dtype)
                 .reshape(1, 1, *slm_res)

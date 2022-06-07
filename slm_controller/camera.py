@@ -1,9 +1,9 @@
-from abc import ABCMeta, abstractmethod
+import abc
 from ids_peak import ids_peak  # TODO installation
 from ids_peak_ipl import ids_peak_ipl  # TODO installation
 
 
-class Camera(metaclass=ABCMeta):
+class Camera:
     def __init__(self):
         self._width = 0
         self._height = 0
@@ -21,8 +21,8 @@ class Camera(metaclass=ABCMeta):
     def frame(self):
         return self._frame
 
-    @abstractmethod
-    def acquire_image(self):
+    @abc.abstractmethod
+    def acquire_images(self, number=1):
         return
 
 
@@ -41,9 +41,9 @@ class IDS(Camera):
         # update device manager
         device_manager.Update()
 
-        # # exit program if no device was found
-        # if device_manager.Devices().empty():
-        #     return #TODO what?
+        # exit program if no device was found
+        if device_manager.Devices().empty():
+            raise IOError("Failed to load IDS camera. Check its connection and setup.")
 
         # open selected device
         self.__device = device_manager.Devices()[0].OpenDevice(
@@ -85,47 +85,51 @@ class IDS(Camera):
         self._width = node_map.FindNode("WidthMax").Value()
         self._height = node_map.FindNode("HeightMax").Value()
 
-        self.acquire_image()  # TODO Bug, first image is too bright ...
+        self.acquire_images()  # TODO Bug, first image seems not use newly set parameters
 
-    def acquire_image(self):
-        self._frame += 1
+    def acquire_images(self, number=1):
+        images = []
 
-        # Get nodemap of the remote device for all accesses to the genicam nodemap tree
-        node_map = self.__device.RemoteDevice().NodeMaps()[0]
+        for _ in range(number):
+            self._frame += 1
 
-        acquisition_start = node_map.FindNode("AcquisitionStart")
+            # Get nodemap of the remote device for all accesses to the genicam nodemap tree
+            node_map = self.__device.RemoteDevice().NodeMaps()[0]
 
-        # Start acquisition on camera
-        self.__datastream.StartAcquisition()
-        acquisition_start.Execute()
-        acquisition_start.WaitUntilDone()
+            acquisition_start = node_map.FindNode("AcquisitionStart")
 
-        # Get buffer from device's datastream
-        buffer = self.__datastream.WaitForFinishedBuffer(5000)
+            # Start acquisition on camera
+            self.__datastream.StartAcquisition()
+            acquisition_start.Execute()
+            acquisition_start.WaitUntilDone()
 
-        self.__datastream.StopAcquisition()
+            # Get buffer from device's datastream
+            buffer = self.__datastream.WaitForFinishedBuffer(5000)
 
-        self.__datastream.Flush(ids_peak.DataStreamFlushMode_DiscardAll)
+            self.__datastream.StopAcquisition()
 
-        # Queue buffer so that it can be used again
-        self.__datastream.QueueBuffer(buffer)
+            self.__datastream.Flush(ids_peak.DataStreamFlushMode_DiscardAll)
 
-        # Create IDS peak IPL image
-        ipl_image = ids_peak_ipl.Image_CreateFromSizeAndBuffer(
-            buffer.PixelFormat(),
-            buffer.BasePtr(),
-            buffer.Size(),
-            self._width,
-            self._height,
-        )
+            # Queue buffer so that it can be used again
+            self.__datastream.QueueBuffer(buffer)
 
-        return ipl_image.get_numpy_2D()
+            # Create IDS peak IPL image
+            ipl_image = ids_peak_ipl.Image_CreateFromSizeAndBuffer(
+                buffer.PixelFormat(),
+                buffer.BasePtr(),
+                buffer.Size(),
+                self._width,
+                self._height,
+            )
+
+            images.append(ipl_image.get_numpy_2D())
+
+        return images
 
     def __del__(self):
         if self.__datastream:
             # Stop and flush the datastream
             self.__datastream.KillWait()
-            # self.__datastream.StopAcquisition(ids_peak.AcquisitionStopMode_Default)
             self.__datastream.Flush(ids_peak.DataStreamFlushMode_DiscardAll)
 
             for buffer in self.__datastream.AnnouncedBuffers():

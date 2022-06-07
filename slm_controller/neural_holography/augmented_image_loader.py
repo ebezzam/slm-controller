@@ -122,10 +122,7 @@ class ImageLoader:
             raise StopIteration
 
     def __len__(self):
-        if self.subset is None:
-            return len(self.order)
-        else:
-            return len(self.subset)
+        return len(self.order) if self.subset is None else len(self.subset)
 
     def load_batch(self, images):
         im_res_name = [self.load_image(*im_data) for im_data in images]
@@ -142,12 +139,7 @@ class ImageLoader:
         if len(im.shape) < 3:
             im = np.repeat(im[:, :, np.newaxis], 3, axis=2)  # augment channels for gray images
 
-        if self.channel is None:
-            im = im[..., :3]  # remove alpha channel, if any
-        else:
-            # select channel while keeping dims
-            im = im[..., self.channel, np.newaxis]
-
+        im = im[..., :3] if self.channel is None else im[..., self.channel, np.newaxis]
         im = utils.im2float(im, dtype=np.float64)  # convert to double, max 1
 
         # linearize intensity and convert to amplitude
@@ -199,8 +191,7 @@ def get_image_filenames(dir):
     image_types = ("jpg", "jpeg", "tiff", "tif", "png", "bmp", "gif")
     files = os.listdir(dir)
     exts = (os.path.splitext(f)[1] for f in files)
-    images = [os.path.join(dir, f) for e, f in zip(exts, files) if e[1:] in image_types]
-    return images
+    return [os.path.join(dir, f) for e, f in zip(exts, files) if e[1:] in image_types]
 
 
 def resize_keep_aspect(image, target_res, pad=False):
