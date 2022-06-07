@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from slm_controller import display
 from slm_controller.camera import IDS
-from algorithms import (
+from slm_controller.neural_holography.algorithms import (
     gerchberg_saxton,
     stochastic_gradient_descent,
     double_phase_amplitude_coding,
@@ -18,8 +18,8 @@ import os
 import time
 import skimage.io
 import utils as utils
-from propagation_ASM import propagation_ASM
-from calibration_module import Calibration
+from slm_controller.neural_holography.propagation_ASM import propagation_ASM
+from slm_controller.neural_holography.calibration_module import Calibration
 
 import platform
 
@@ -114,21 +114,20 @@ class GS(nn.Module):
             self.precomputed_H_b.requires_grad = False
 
         # Run algorithm
-        final_phase = gerchberg_saxton(
+        return gerchberg_saxton(
             init_phase,
             target_amp,
             self.num_iters,
             self.prop_dist,
             self.wavelength,
             self.feature_size,
-            phase_path=self.phase_path,
+            # phase_path=self.phase_path,
             prop_model=self.prop_model,
             propagator=self.prop,
             precomputed_H_f=self.precomputed_H_f,
             precomputed_H_b=self.precomputed_H_b,
-            writer=self.writer,
+            # writer=self.writer,
         )
-        return final_phase
 
     @property
     def phase_path(self):
@@ -229,7 +228,7 @@ class SGD(nn.Module):
             self.precomputed_H.requires_grad = False
 
         # Run algorithm
-        final_phase = stochastic_gradient_descent(
+        return stochastic_gradient_descent(
             init_phase,
             target_amp,
             self.num_iters,
@@ -249,7 +248,6 @@ class SGD(nn.Module):
             writer=self.writer,
             precomputed_H=self.precomputed_H,
         )
-        return final_phase
 
     @property
     def init_scale(self):
@@ -319,9 +317,6 @@ class DPAC(nn.Module):
         propagator=propagation_ASM,
         device="cuda" if torch.cuda.is_available() else "cpu",
     ):
-        """
-
-        """
         super(DPAC, self).__init__()
 
         # propagation is from target to SLM plane (one step)

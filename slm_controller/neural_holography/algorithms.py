@@ -12,14 +12,14 @@ Technical Paper:
 Y. Peng, S. Choi, N. Padmanaban, G. Wetzstein. Neural Holography with Camera-in-the-loop Training. ACM TOG (SIGGRAPH Asia), 2020.
 """
 
+import math
 import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
-import utils as utils
-from propagation_ASM import *
-
+from slm_controller.neural_holography.propagation_ASM import propagation_ASM
+import slm_controller.neural_holography.utils as utils
 
 # 1. GS
 def gerchberg_saxton(

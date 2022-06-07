@@ -1,6 +1,6 @@
 from enum import Enum
 
-
+# Physical parameters relevant for the propagation
 class PhysicalParams(Enum):
     WAVELENGTH = "wavelength"
     PROPAGATION_DISTANCE = "prop_distance"
@@ -10,12 +10,13 @@ class PhysicalParams(Enum):
         return [param.value for param in PhysicalParams]
 
 
+# Actual values of those physical parameters
 physical_params = {
     PhysicalParams.WAVELENGTH: 532e-9,
     PhysicalParams.PROPAGATION_DISTANCE: 0.34,
 }
 
-
+# Slm devices that are implemented in this project
 class SlmDevices(Enum):
     ADAFRUIT_RGB = "rgb"
     ADAFRUIT_BINARY = "binary"
@@ -27,6 +28,7 @@ class SlmDevices(Enum):
         return [slm.value for slm in SlmDevices]
 
 
+# Parameters of those slms
 class SlmParam:
     CELL_DIM = "cell_dim"
     SLM_SHAPE = "slm_shape"
@@ -35,6 +37,7 @@ class SlmParam:
     FRAME_RATE = "frame_rate"
 
 
+# Actual values of those parameters for all the slms
 slm_devices = {
     # 1.8 inch RGB display by Adafruit: https://learn.adafruit.com/1-8-tft-display/overview
     # datasheet: https://cdn-shop.adafruit.com/datasheets/JD-T1800.pdf
@@ -65,12 +68,10 @@ slm_devices = {
     },
     # Holoeye SLM - LC 2012
     # https://holoeye.com/lc-2012-spatial-light-modulator/
-    # 1.8 inch diagonal, 36.9 x 27.6 mm #TODO: add documentation, link, lookup values
+    # 1.8 inch diagonal, 36.9 x 27.6 mm
+    # datasheet: same link
     SlmDevices.HOLOEYE_LC_2012.value: {
-        SlmParam.CELL_DIM: (
-            0.36e-4,
-            0.36e-4,
-        ),  # Computed 0.359375e-4, 0.3603515625e-4
+        SlmParam.CELL_DIM: (0.36e-4, 0.36e-4,),  # Computed 0.359375e-4, 0.3603515625e-4
         SlmParam.SLM_SHAPE: (768, 1024),
         SlmParam.MONOCHROME: True,
         SlmParam.FILL_FACTOR: 0.58,
@@ -78,7 +79,7 @@ slm_devices = {
     },
 }
 
-
+# Camera devices that are implemented in this project
 class CamDevices(Enum):
     IDS = "ids"
 
@@ -87,10 +88,12 @@ class CamDevices(Enum):
         return [cam.value for cam in CamDevices]
 
 
+# Parameters of those cameras
 class CamParam:
     IMG_SHAPE = "img_shape"
 
 
+# Actual values of those parameters for all the cameras
 cam_devices = {
     CamDevices.IDS.value: {CamParam.IMG_SHAPE: (1216, 1936)},
 }

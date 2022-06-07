@@ -44,11 +44,11 @@ from slm_controller.hardware import (
     cam_devices,
 )
 
-import utils as utils
-from module import PhysicalProp
-from propagation_model import ModelPropagate
-from augmented_image_loader import ImageLoader
-from utils_tensorboard import SummaryModelWriter
+import slm_controller.neural_holography.utils as utils
+from slm_controller.neural_holography.module import PhysicalProp
+from slm_controller.neural_holography.propagation_model import ModelPropagate
+from slm_controller.neural_holography.augmented_image_loader import ImageLoader
+from slm_controller.neural_holography.utils_tensorboard import SummaryModelWriter
 
 
 # Command line argument processing

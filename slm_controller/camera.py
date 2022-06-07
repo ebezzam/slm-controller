@@ -2,11 +2,16 @@ import abc
 from ids_peak import ids_peak  # TODO installation
 from ids_peak_ipl import ids_peak_ipl  # TODO installation
 
+from slm_controller.hardware import CamDevices, CamParam, cam_devices
+
 
 class Camera:
     def __init__(self):
-        self._width = 0
-        self._height = 0
+        """
+        Abstract capturing the functionalities of the cameras used in this project.
+        """
+        self._width = -1
+        self._height = -1
         self._frame = -1
 
     @property
@@ -23,29 +28,51 @@ class Camera:
 
     @abc.abstractmethod
     def acquire_images(self, number=1):
-        return
+        """
+        Triggers the acquisition of images(s).
+
+        Parameters
+        ----------
+        number : int, optional
+            The number of images taken, by default 1
+        """
+        pass
 
 
 class IDS(Camera):
     def __init__(self):
+        """
+        Initializes the camera and sets all the parameters such that acquisition
+        in out setting can be started right away.
+
+        Raises
+        ------
+        IOError
+            If no compatible devices cameras are detected by the system
+        """
         super().__init__()
 
-        # initialize library
+        # Set height and width
+        self._height, self._width = cam_devices[CamDevices.IDS.value][
+            CamParam.IMG_SHAPE
+        ]
+
+        # Initialize library
         ids_peak.Library.Initialize()
 
-        # create a device manager object
+        # Create a device manager object
         device_manager = ids_peak.DeviceManager.Instance()
 
         self.__datastream = None
 
-        # update device manager
+        # Update device manager
         device_manager.Update()
 
-        # exit program if no device was found
+        # Raise exception if no device was found
         if device_manager.Devices().empty():
             raise IOError("Failed to load IDS camera. Check its connection and setup.")
 
-        # open selected device
+        # Open first device
         self.__device = device_manager.Devices()[0].OpenDevice(
             ids_peak.DeviceAccessType_Control
         )
@@ -53,16 +80,17 @@ class IDS(Camera):
         # Get nodemap of the remote device for all accesses to the genicam nodemap tree
         node_map = self.__device.RemoteDevice().NodeMaps()[0]
 
-        # load default settings
+        # Load default settings
         node_map.FindNode("UserSetSelector").SetCurrentEntry("Default")
         node_map.FindNode("UserSetLoad").Execute()
         node_map.FindNode("UserSetLoad").WaitUntilDone()
 
+        # Set acquisition mode to single frame
         node_map.FindNode("AcquisitionMode").SetCurrentEntry(
             node_map.FindNode("EnumEntry_AcquisitionMode_SingleFrame")
         )
 
-        # change exposure time
+        # Change exposure time (in milliseconds)
         node_map.FindNode("ExposureTime").SetValue(200)
 
         # Lock critical features to prevent them from changing during acquisition
@@ -82,12 +110,23 @@ class IDS(Camera):
             buffer = self.__datastream.AllocAndAnnounceBuffer(payload_size)
             self.__datastream.QueueBuffer(buffer)
 
-        self._width = node_map.FindNode("WidthMax").Value()
-        self._height = node_map.FindNode("HeightMax").Value()
-
+        # Hacky fix for a bug with exposure time
         self.acquire_images()  # TODO Bug, first image seems not use newly set parameters
 
     def acquire_images(self, number=1):
+        """
+        Acquire image(s).
+
+        Parameters
+        ----------
+        number : int, optional
+            The number of images to be taken, by default 1
+
+        Returns
+        -------
+        list
+            The list of acquired images
+        """
         images = []
 
         for _ in range(number):
@@ -96,9 +135,8 @@ class IDS(Camera):
             # Get nodemap of the remote device for all accesses to the genicam nodemap tree
             node_map = self.__device.RemoteDevice().NodeMaps()[0]
 
-            acquisition_start = node_map.FindNode("AcquisitionStart")
-
             # Start acquisition on camera
+            acquisition_start = node_map.FindNode("AcquisitionStart")
             self.__datastream.StartAcquisition()
             acquisition_start.Execute()
             acquisition_start.WaitUntilDone()
@@ -106,8 +144,10 @@ class IDS(Camera):
             # Get buffer from device's datastream
             buffer = self.__datastream.WaitForFinishedBuffer(5000)
 
+            # Stop acquisition on camera
             self.__datastream.StopAcquisition()
 
+            # Flush datastream
             self.__datastream.Flush(ids_peak.DataStreamFlushMode_DiscardAll)
 
             # Queue buffer so that it can be used again
@@ -122,11 +162,15 @@ class IDS(Camera):
                 self._height,
             )
 
+            # Append images as numpy array to list of acquired images
             images.append(ipl_image.get_numpy_2D())
 
         return images
 
     def __del__(self):
+        """
+        Clean up before exit.
+        """
         if self.__datastream:
             # Stop and flush the datastream
             self.__datastream.KillWait()

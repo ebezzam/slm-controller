@@ -361,7 +361,12 @@ class NokiaDisplay(Display):
 class HoloeyeDisplay(Display):
     def __init__(self, show_time=2):
         """
-        #TODO doc
+        Initialize a new holoeye slm instance
+
+        Parameters
+        ----------
+        show_time : int, optional
+            Specifies the amount of time the phase pattern is shown on the slm, by default 2
         """
         super().__init__()
 
@@ -370,6 +375,7 @@ class HoloeyeDisplay(Display):
         self._show_flags = slmdisplaysdk.ShowFlags.PresentAutomatic
         self._show_flags |= slmdisplaysdk.ShowFlags.PresentFitWithBars
 
+        # Initialize parameters of the holoeye slm display
         self._virtual = False
         self._height, self._width = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][
             SlmParam.SLM_SHAPE
@@ -381,44 +387,60 @@ class HoloeyeDisplay(Display):
             # Initializes the SLM library
             self._disp = slmdisplaysdk.SLMInstance()
         except RuntimeError as ex:
+            # The library initialization failed so a virtual device is used instead
             self._virtual = True
             warnings.warn(f"{ex} Using virtual device...")
 
+        # Check that the holoeye sdk is up to date
         if not self._virtual and not self._disp.requiresVersion(3):
             self._virtual = True
             warnings.warn(
                 "Failed to load display because the LC 2012 requires version 3 of its SDK. Using virtual device..."
             )
 
-        # Detect SLMs and open a window on the selected SLM
+        # Detect slms and open a window on the selected slm
         error = (
             self._disp.open()
         )  # TODO check if can set max wait time when no SLM is found!
 
+        # Check if the opening the window was successful
         if error != slmdisplaysdk.ErrorCode.NoError:
+            # Otherwise use again a virtual device
             self._virtual = True
             warnings.warn(
                 f"Failed to load display: {self._disp.errorString(error)}. Using virtual device..."
             )
 
     def __del__(self):
+        """
+        Destructor
+        """
         self._disp.__del__()
 
     def clear(self):
         """
-        Clear display. #TODO doc
+        Clear display aka show black screen.
         """
-        # Configure the blank screen:
+
+        # Configure the blank screen value
         black = 0
 
-        # Show value on SLM:
+        # Show phase map on slm
         error = self._disp.showBlankscreen(black)
+
+        # And check that no error occurred
         assert error == slmdisplaysdk.ErrorCode.NoError, self._disp.errorString(error)
 
     def imshow(self, I):
         """
-        Display monochrome data. #TODO doc
+        Display monochrome data.
+
+        Parameters
+        ----------
+        I : np.ndarray
+            The phase map to shw on the slm
         """
+        # Check that the phase map is valid
         assert isinstance(I, np.ndarray) and (
             np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
         )
@@ -426,16 +448,23 @@ class HoloeyeDisplay(Display):
         assert I.ndim in (2, 3)
         assert I.shape[-2:] == self.shape
 
+        # If using a physical device
         if not self._virtual:
+            # Reset devices phase pattern
             self.clear()
 
+            # Normalize entries of the phase map
             I_max = I.max()
             I_max = 1 if np.isclose(I_max, 0) else I_max
-
             I_f = I / I_max  # float64
+
+            # Quantize those floats into a bit values
             I_u = np.uint8(255 * I_f)  # uint8
 
+            # Show phase map on slm
             error = self._disp.showData(I_u, self._show_flags)
+
+            # And check that no error occurred
             assert error == slmdisplaysdk.ErrorCode.NoError, self._disp.errorString(
                 error
             )
@@ -443,7 +472,7 @@ class HoloeyeDisplay(Display):
             # sleep for specified time
             time.sleep(self._show_time)
         else:
-
+            # Use a virual device
             import matplotlib.pyplot as plt
 
             # plot

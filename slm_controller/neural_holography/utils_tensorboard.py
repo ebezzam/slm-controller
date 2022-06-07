@@ -18,10 +18,13 @@ import tensorboardX
 import matplotlib.pyplot as plt
 from slm_controller.hardware import SlmDevices, SlmParam, slm_devices
 
-import utils as utils
+import slm_controller.neural_holography.utils as utils
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from propagation_ASM import compute_zernike_basis, combine_zernike_basis
+from slm_controller.neural_holography.propagation_ASM import (
+    compute_zernike_basis,
+    combine_zernike_basis,
+)
 
 
 class SummaryModelWriter(tensorboardX.SummaryWriter):
