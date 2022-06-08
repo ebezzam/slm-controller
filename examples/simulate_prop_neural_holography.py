@@ -5,7 +5,7 @@ Simulated propagation of slm patterns generated using the neural holography code
 from examples.utils import show_plot
 from slm_controller.simulate_prop import lens_prop, lensless_prop
 from slm_controller.transform_fields import (
-    neural_holography_to_lens_setting,
+    lensless_to_lens,
     extend_to_complex,
 )
 import torch
@@ -37,7 +37,7 @@ def simulate_prop_neural_holography():
 
     # Initialize image loader
     image_loader = ImageLoader(
-        "images/holoeye_outputs",
+        "images/test",
         image_res=image_res,
         homography_res=roi_res,
         shuffle=False,
@@ -57,6 +57,7 @@ def simulate_prop_neural_holography():
     init_phase = (-0.5 + 1.0 * torch.rand(1, 1, *slm_res)).to(device)
 
     # Run Gerchberg-Saxton
+    print("--- Run Gerchberg-Saxton ---")
     gs = GS(distance, wavelength, feature_size, iterations, device=device)
     angles = gs(target_amp, init_phase).cpu().detach()
 
@@ -64,7 +65,7 @@ def simulate_prop_neural_holography():
     neural_holography_slm_field = extend_to_complex(angles)
 
     # Transform the results to the hardware setting using a lens
-    temp = neural_holography_to_lens_setting(neural_holography_slm_field)
+    temp = lensless_to_lens(neural_holography_slm_field)
 
     # Simulate the propagation in the lens setting and show the results
     slm_field = temp[0, 0, :, :]
@@ -77,6 +78,7 @@ def simulate_prop_neural_holography():
     show_plot(slm_field, propped_slm_field, "Neural Holography GS without lens")
 
     # Run Stochastic Gradient Descent based method
+    print("--- Run SGD ---")
     sgd = SGD(distance, wavelength, feature_size, iterations, roi_res, device=device)
     angles = sgd(target_amp, init_phase).cpu().detach()
 
@@ -84,7 +86,7 @@ def simulate_prop_neural_holography():
     neural_holography_slm_field = extend_to_complex(angles)
 
     # Transform the results to the hardware setting using a lens
-    temp = neural_holography_to_lens_setting(neural_holography_slm_field)
+    temp = lensless_to_lens(neural_holography_slm_field)
 
     # Simulate the propagation in the lens setting and show the results
     slm_field = temp[0, 0, :, :]
@@ -96,7 +98,9 @@ def simulate_prop_neural_holography():
     propped_slm_field = lensless_prop(neural_holography_slm_field)[0, 0, :, :]
     show_plot(slm_field, propped_slm_field, "Neural Holography SGD without lens")
 
-    # Run Double Phase Amplitude Coding #TODO does not work, not even out of the box
+    # Run Double Phase Amplitude Coding #TODO does not work, not even out of the
+    # box
+    print("--- Run DPAC (buggy) ---")
     dpac = DPAC(distance, wavelength, feature_size, device=device)
     _, angles = dpac(target_amp)
     angles = angles.cpu().detach()
@@ -105,7 +109,7 @@ def simulate_prop_neural_holography():
     neural_holography_slm_field = extend_to_complex(angles)
 
     # Transform the results to the hardware setting using a lens
-    temp = neural_holography_to_lens_setting(neural_holography_slm_field)
+    temp = lensless_to_lens(neural_holography_slm_field)
 
     # Simulate the propagation in the lens setting and show the results
     slm_field = temp[0, 0, :, :]

@@ -401,7 +401,7 @@ class HoloeyeDisplay(Display):
         # Detect slms and open a window on the selected slm
         error = (
             self._disp.open()
-        )  # TODO check if can set max wait time when no SLM is found!
+        )  # TODO check if can set max wait time when no SLM is found
 
         # Check if the opening the window was successful
         if error != slmdisplaysdk.ErrorCode.NoError:

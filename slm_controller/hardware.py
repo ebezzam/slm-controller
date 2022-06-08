@@ -71,7 +71,10 @@ slm_devices = {
     # 1.8 inch diagonal, 36.9 x 27.6 mm
     # datasheet: same link
     SlmDevices.HOLOEYE_LC_2012.value: {
-        SlmParam.CELL_DIM: (0.36e-4, 0.36e-4,),  # Computed 0.359375e-4, 0.3603515625e-4
+        SlmParam.CELL_DIM: (
+            0.36e-4,
+            0.36e-4,
+        ),  # Computed: 0.359375e-4, 0.3603515625e-4
         SlmParam.SLM_SHAPE: (768, 1024),
         SlmParam.MONOCHROME: True,
         SlmParam.FILL_FACTOR: 0.58,

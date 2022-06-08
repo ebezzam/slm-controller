@@ -13,19 +13,23 @@ from slm_controller.hardware import (
 import slm_controller.neural_holography.utils as utils
 
 
-def load_holoeye_slm_pattern(path="images/holoeye_logo_slm_pattern.png"):
+def load_holoeye_slm_pattern(
+    path="images/holoeye_outputs/holoeye_logo_slm_pattern.png",
+):
     """
-    _summary_ #TODO
+    Load a phase map generate with holoeye software and transform it into a
+    compliant form.
 
     Parameters
     ----------
     path : str, optional
-        _description_, by default "images/holoeye_logo_slm_pattern.png"
+        The path to the phase map to load, by default
+        "images/holoeye_outputs/holoeye_logo_slm_pattern.png"
 
     Returns
     -------
-    _type_
-        _description_
+    torch.Tensor
+        The phase map transformed into a compliant form
     """
     im = Image.open(path)
     im = torch.from_numpy(np.array(im)).type(torch.FloatTensor)
@@ -41,17 +45,19 @@ def load_holoeye_slm_pattern(path="images/holoeye_logo_slm_pattern.png"):
 
 def extend_to_complex(angles):
     """
-    _summary_ #TODO
+    Extend a tensor of angles into a complex tensor where the angles are used in
+    the polar form for complex numbers and the respective magnitudes are set to
+    1.
 
     Parameters
     ----------
-    angles : _type_
-        _description_
+    angles : torch.Tensor
+        The tensor of angles to be used in the polar form
 
     Returns
     -------
-    _type_
-        _description_
+    torch.Tensor
+        The extended complex tensor
     """
     mags = torch.ones_like(angles)
     return torch.polar(mags, angles)
@@ -59,13 +65,14 @@ def extend_to_complex(angles):
 
 def compute_H():
     """
-    _summary_ #TODO
+    Compute H which is used in neural holography code and is needed to undo
+    certain operations.
 
     Returns
     -------
-    _type_
-        _description_
-    """  #
+    torch.Tensor
+        H (#TODO probably for homography)
+    """
     prop_dist = physical_params[PhysicalParams.PROPAGATION_DISTANCE]
     wavelength = physical_params[PhysicalParams.WAVELENGTH]
 
@@ -115,19 +122,20 @@ def compute_H():
     return H
 
 
-def holoeye_to_lensless_setting(holoeye_slm_field):
+def lens_to_lensless(holoeye_slm_field):
     """
-    _summary_ #TODO
+    Transform from the lens setting (holoeye) to the lensless setting (neural
+    holography).
 
     Parameters
     ----------
-    holoeye_slm_field : _type_
-        _description_
+    holoeye_slm_field : torch.Tensor
+        The phase map that needs to be transformed
 
     Returns
     -------
-    _type_
-        _description_
+    torch.Tensor
+        The transformed phase map
     """
     H = compute_H()
 
@@ -145,20 +153,21 @@ def holoeye_to_lensless_setting(holoeye_slm_field):
     )
 
 
-def neural_holography_to_lens_setting(neural_holography_slm_field):
+def lensless_to_lens(neural_holography_slm_field):
     """
-    _summary_ #TODO
+    Transform from the lensless setting (neural holography) to the lens setting
+    (holoeye).
 
     Parameters
     ----------
-    neural_holography_slm_field : _type_
-        _description_
+    neural_holography_slm_field : torch.Tensor
+        The phase map that needs to be transformed
 
     Returns
     -------
-    _type_
-        _description_
-    """  #
+    torch.Tensor
+        The transformed phase map
+    """
     H = compute_H()
 
     return torch.fft.ifftn(

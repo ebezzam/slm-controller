@@ -53,6 +53,8 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
     Set aperture on a physical device.
     """
 
+    # TODO handle device == null
+
     if rect_shape is None:
         rect_shape = []
     if center is None:

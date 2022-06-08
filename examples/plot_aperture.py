@@ -71,8 +71,8 @@ def plot_aperture(
 
     if device is None:
         device_config = {
-            SlmParam.CELL_DIM: (0.18e-3, 0.18e-3) if len(cell_dim) == 0 else cell_dim,
-            SlmParam.SLM_SHAPE: (128, 160) if len(slm_shape) == 0 else slm_shape,
+            SlmParam.CELL_DIM: (0.18e-3, 0.18e-3) if cell_dim is None else cell_dim,
+            SlmParam.SLM_SHAPE: (128, 160) if slm_shape is None else slm_shape,
         }
     else:
         device_config = slm_devices[device]
@@ -80,7 +80,7 @@ def plot_aperture(
     # create aperture
     ap = None
     if shape == ApertureOptions.RECT.value:
-        if len(rect_shape) == 0:
+        if rect_shape is None:
             # not provided
             rect_shape = (n_cells, n_cells)
         print(f"Shape : {rect_shape}")

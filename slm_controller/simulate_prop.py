@@ -15,15 +15,15 @@ def lens_prop(slm_field):
     """
     Simulated propagation with a lens (holoeye setting) between slm and target plane.
 
-    Parameters #TODO
+    Parameters
     ----------
-    slm_field : _type_
-        _description_
+    slm_field : torch.Tensor
+        The phase map to be propagated
 
     Returns
     -------
-    _type_
-        _description_
+    torch.Tensor
+        The result of the propagation at the target plane
     """
     return utils.fftshift(torch.fft.fftn(slm_field, dim=(-2, -1), norm="ortho"))
 
@@ -32,15 +32,15 @@ def lensless_prop(slm_field):
     """
     Simulated propagation with a no lens (neural holography setting) between slm and target plane.
 
-    Parameters #TODO
+    Parameters
     ----------
-    slm_field : _type_
-        _description_
+    slm_field : torch.Tensor
+        The phase map to be propagated
 
     Returns
     -------
-    _type_
-        _description_
+    torch.Tensor
+        The result of the propagation at the target plane
     """
     return utils.propagate_field(
         slm_field,

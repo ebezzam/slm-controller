@@ -6,7 +6,7 @@ from examples.utils import show_plot
 from slm_controller.simulate_prop import lens_prop, lensless_prop
 from slm_controller.transform_fields import (
     load_holoeye_slm_pattern,
-    holoeye_to_lensless_setting,
+    lens_to_lensless,
 )
 
 
@@ -22,7 +22,7 @@ def simulate_prop_holoeye():
     show_plot(slm_field, propped_slm_field, "Holoeye with lens")
 
     # Transform the initial phase map to the lensless setting
-    holoeye_slm_field = holoeye_to_lensless_setting(holoeye_slm_field)
+    holoeye_slm_field = lens_to_lensless(holoeye_slm_field)
     slm_field = holoeye_slm_field[0, 0, :, :]
 
     # Simulate the propagation in the lensless setting and show the results

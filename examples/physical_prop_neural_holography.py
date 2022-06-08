@@ -13,7 +13,7 @@ from slm_controller.hardware import (
     PhysicalParams,
 )
 from slm_controller.transform_fields import (
-    neural_holography_to_lens_setting,
+    lensless_to_lens,
     extend_to_complex,
 )
 from slm_controller.neural_holography.module import GS, SGD, DPAC
@@ -40,13 +40,16 @@ def physical_prop_neural_holography(show_time):
 
     # Initialize image loader
     image_loader = ImageLoader(
-        "images/holoeye_outputs",
+        "images/test",
         image_res=image_res,
         homography_res=roi_res,
         shuffle=False,
         vertical_flips=False,
         horizontal_flips=False,
     )
+
+    # Instantiate display object
+    D = display.HoloeyeDisplay(show_time)
 
     # Load the the first image in the folder
     target_amp, _, _ = image_loader.load_image(0)
@@ -62,6 +65,7 @@ def physical_prop_neural_holography(show_time):
     init_phase = (-0.5 + 1.0 * torch.rand(1, 1, *slm_res)).to(device)
 
     # Run Gerchberg-Saxton
+    print("--- Run Gerchberg-Saxton ---")
     gs = GS(distance, wavelength, feature_size, iterations, device=device)
     angles = gs(target_amp, init_phase).cpu().detach()
 
@@ -69,12 +73,16 @@ def physical_prop_neural_holography(show_time):
     extended = extend_to_complex(angles)
 
     # Transform the results to the hardware setting using a lens
-    final_phase_gs = neural_holography_to_lens_setting(extended).angle()
+    final_phase_gs = lensless_to_lens(extended).angle()
 
     # Quantize the the angles, aka phase values, to a bit values
     phase_out_8bit_gs = phasemap_8bit(final_phase_gs)
 
+    # Display
+    D.imshow(phase_out_8bit_gs)
+
     # Run Stochastic Gradient Descent based method
+    print("--- Run SGD ---")
     sgd = SGD(distance, wavelength, feature_size, iterations, roi_res, device=device)
     angles = sgd(target_amp, init_phase).cpu().detach()
 
@@ -82,12 +90,17 @@ def physical_prop_neural_holography(show_time):
     extended = extend_to_complex(angles)
 
     # Transform the results to the hardware setting using a lens
-    final_phase_sgd = neural_holography_to_lens_setting(extended).angle()
+    final_phase_sgd = lensless_to_lens(extended).angle()
 
     # Quantize the the angles, aka phase values, to a bit values
     phase_out_8bit_sgd = phasemap_8bit(final_phase_sgd)
 
-    # Run Double Phase Amplitude Coding #TODO does not work, not even out of the box
+    # Display
+    D.imshow(phase_out_8bit_sgd)
+
+    # Run Double Phase Amplitude Coding #TODO does not work, not even out of the
+    # box
+    print("--- Run DPAC (buggy) ---")
     dpac = DPAC(distance, wavelength, feature_size, device=device)
     _, angles = dpac(target_amp)
     angles = angles.cpu().detach()
@@ -96,17 +109,12 @@ def physical_prop_neural_holography(show_time):
     extended = extend_to_complex(angles)
 
     # Transform the results to the hardware setting using a lens
-    final_phase_dpac = neural_holography_to_lens_setting(extended).angle()
+    final_phase_dpac = lensless_to_lens(extended).angle()
 
     # Quantize the the angles, aka phase values, to a bit values
     phase_out_8bit_dpac = phasemap_8bit(final_phase_dpac)
 
-    # instantiate display object
-    D = display.HoloeyeDisplay(show_time)
-
-    # display all results
-    D.imshow(phase_out_8bit_gs)
-    D.imshow(phase_out_8bit_sgd)
+    # Display
     D.imshow(phase_out_8bit_dpac)
 
 
