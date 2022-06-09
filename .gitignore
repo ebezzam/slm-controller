@@ -133,6 +133,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+slm_pattern.npy
+
 # Cam in the loop
 runs
 data

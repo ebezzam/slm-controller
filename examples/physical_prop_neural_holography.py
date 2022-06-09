@@ -6,9 +6,9 @@ import torch
 import click
 from slm_controller import display
 from slm_controller.hardware import (
-    SlmDevices,
+    SlmDisplayDevices,
     SlmParam,
-    slm_devices,
+    slm_display_devices,
     physical_params,
     PhysicalParams,
 )
@@ -23,10 +23,10 @@ from slm_controller.neural_holography.augmented_image_loader import ImageLoader
 # Set parameters
 distance = physical_params[PhysicalParams.PROPAGATION_DISTANCE]
 wavelength = physical_params[PhysicalParams.WAVELENGTH]
-feature_size = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]
+feature_size = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]
 iterations = 500
 
-slm_res = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
+slm_res = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
 image_res = slm_res
 
 roi_res = (620, 850)  # TODO about 80%
@@ -40,7 +40,7 @@ def physical_prop_neural_holography(show_time):
 
     # Initialize image loader
     image_loader = ImageLoader(
-        "images/test",
+        "images/target_amplitude",
         image_res=image_res,
         homography_res=roi_res,
         shuffle=False,

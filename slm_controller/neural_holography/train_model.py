@@ -36,10 +36,10 @@ import torch.optim as optim
 from slm_controller.hardware import (
     CamDevices,
     CamParam,
-    SlmDevices,
+    SlmDisplayDevices,
     SlmParam,
     PhysicalParams,
-    slm_devices,
+    slm_display_devices,
     physical_params,
     cam_devices,
 )
@@ -100,9 +100,13 @@ prop_dist = physical_params[
     PhysicalParams.PROPAGATION_DISTANCE
 ]  # propagation distance from SLM plane to target plane
 wavelength = physical_params[PhysicalParams.WAVELENGTH]  # wavelength
-feature_size = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]  # SLM pitch
+feature_size = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][
+    SlmParam.CELL_DIM
+]  # SLM pitch
 
-slm_res = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]  # resolution of SLM
+slm_res = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][
+    SlmParam.SLM_SHAPE
+]  # resolution of SLM
 image_res = cam_devices[CamDevices.IDS.value][CamParam.IMG_SHAPE]  # TODO slm.shape == image.shape?
 roi_res = (620, 850)  # regions of interest (to penalize) # TODO about 80%
 
@@ -133,14 +137,14 @@ data_path = f"./data"  # path of targets
 
 # Hardware setup
 camera_prop = PhysicalProp(
-    channel,
+    # channel,
     # laser_arduino=True,
-    roi_res=(roi_res[1], roi_res[0]),  # TODO why inverted
+    # roi_res=(roi_res[1], roi_res[0]),  # TODO why inverted
     slm_settle_time=0.15,
     # range_row=(220, 1000),
     # range_col=(300, 1630),
     # patterns_path=opt.calibration_path,  # path of 21 x 12 calibration patterns, see Supplement.
-    show_preview=True,
+    # show_preview=True,
 )
 
 # Model instance to train

@@ -4,9 +4,9 @@ from PIL import Image
 import math
 
 from slm_controller.hardware import (
-    SlmDevices,
+    SlmDisplayDevices,
     SlmParam,
-    slm_devices,
+    slm_display_devices,
     physical_params,
     PhysicalParams,
 )
@@ -14,7 +14,7 @@ import slm_controller.neural_holography.utils as utils
 
 
 def load_holoeye_slm_pattern(
-    path="images/holoeye_outputs/holoeye_logo_slm_pattern.png",
+    path="images/holoeye_phase_map/holoeye_logo_slm_pattern.png",
 ):
     """
     Load a phase map generate with holoeye software and transform it into a
@@ -24,7 +24,7 @@ def load_holoeye_slm_pattern(
     ----------
     path : str, optional
         The path to the phase map to load, by default
-        "images/holoeye_outputs/holoeye_logo_slm_pattern.png"
+        "images/holoeye_phase_map/holoeye_logo_slm_pattern.png"
 
     Returns
     -------
@@ -65,8 +65,7 @@ def extend_to_complex(angles):
 
 def compute_H():
     """
-    Compute H which is used in neural holography code and is needed to undo
-    certain operations.
+    Compute H which is used in neural holography code, core is imported as is.
 
     Returns
     -------
@@ -77,10 +76,14 @@ def compute_H():
     wavelength = physical_params[PhysicalParams.WAVELENGTH]
 
     # number of pixels
-    num_y, num_x = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
+    num_y, num_x = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][
+        SlmParam.SLM_SHAPE
+    ]
 
     # sampling interval size
-    dy, dx = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]
+    dy, dx = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][
+        SlmParam.CELL_DIM
+    ]
 
     # size of the field
     y, x = (dy * float(num_y), dx * float(num_x))

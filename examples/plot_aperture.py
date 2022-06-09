@@ -11,7 +11,7 @@ from slm_controller.aperture import (
     square_aperture,
     circ_aperture,
 )
-from slm_controller.hardware import SlmDevices, slm_devices, SlmParam
+from slm_controller.hardware import SlmDisplayDevices, slm_display_devices, SlmParam
 
 
 @click.command()
@@ -59,7 +59,7 @@ from slm_controller.hardware import SlmDevices, slm_devices, SlmParam
 )
 @click.option(
     "--device",
-    type=click.Choice(SlmDevices.values()),
+    type=click.Choice(SlmDisplayDevices.values()),
     help="Which device to program with aperture.",
 )
 def plot_aperture(
@@ -75,7 +75,7 @@ def plot_aperture(
             SlmParam.SLM_SHAPE: (128, 160) if slm_shape is None else slm_shape,
         }
     else:
-        device_config = slm_devices[device]
+        device_config = slm_display_devices[device]
 
     # create aperture
     ap = None

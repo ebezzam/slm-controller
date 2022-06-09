@@ -11,7 +11,7 @@ from slm_controller.aperture import (
     circ_aperture,
     ApertureOptions,
 )
-from slm_controller.hardware import slm_devices, SlmDevices, SlmParam
+from slm_controller.hardware import slm_display_devices, SlmDisplayDevices, SlmParam
 
 
 @click.command()
@@ -45,7 +45,7 @@ from slm_controller.hardware import slm_devices, SlmDevices, SlmParam
 )
 @click.option(
     "--device",
-    type=click.Choice(SlmDevices.values()),
+    type=click.Choice(SlmDisplayDevices.values()),
     help="Which device to program with aperture.",
 )
 def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
@@ -67,7 +67,7 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
         raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
     # print device info
-    device_config = slm_devices[device]
+    device_config = slm_display_devices[device]
     cell_dim = device_config[SlmParam.CELL_DIM]
     print(f"SLM dimension : {device_config[SlmParam.SLM_SHAPE]}")
     print(f"Cell dim (m) : {cell_dim}")
@@ -126,7 +126,7 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
     assert ap is not None
 
     # set aperture to device
-    D = create_display(slm_device_key=device)
+    D = create_display(device_key=device)
     if device_config[SlmParam.MONOCHROME]:
         D.imshow(ap.grayscale_values)
     else:

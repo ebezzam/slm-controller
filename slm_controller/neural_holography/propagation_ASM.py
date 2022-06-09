@@ -1,7 +1,7 @@
 """
 https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/propagation_ASM.py
 
-This is the script that is used for the wave propagation using the angular spectrum method (ASM). Refer to 
+This is the script that is used for the wave propagation using the angular spectrum method (ASM). Refer to
 Goodman, Joseph W. Introduction to Fourier optics. Roberts and Company Publishers, 2005, for principle details.
 
 This code and data is released under the Creative Commons Attribution-NonCommercial 4.0 International license (CC BY-NC.) In a nutshell:

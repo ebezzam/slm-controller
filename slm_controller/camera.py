@@ -1,6 +1,7 @@
 import abc
-from ids_peak import ids_peak  # TODO installation
-from ids_peak_ipl import ids_peak_ipl  # TODO installation
+from ids_peak import ids_peak
+from ids_peak_ipl import ids_peak_ipl
+import numpy as np
 
 from slm_controller.hardware import CamDevices, CamParam, cam_devices
 
@@ -8,11 +9,12 @@ from slm_controller.hardware import CamDevices, CamParam, cam_devices
 class Camera:
     def __init__(self):
         """
-        Abstract capturing the functionalities of the cameras used in this project.
+        Abstract class capturing the functionalities of the cameras used in this project.
         """
         self._width = -1
         self._height = -1
-        self._frame = -1
+        self._frame_count = -1
+        self._exposure_time = -1
 
     @property
     def height(self):
@@ -24,7 +26,18 @@ class Camera:
 
     @property
     def frame(self):
-        return self._frame
+        return self._frame_count
+
+    @abc.abstractmethod
+    def set_exposure_time(self, time=200):
+        """
+        Set the exposure time of the camera to a specific value.
+
+        Parameters
+        ----------
+        time : int, optional
+            New exposure time in milliseconds, by default 200
+        """
 
     @abc.abstractmethod
     def acquire_images(self, number=1):
@@ -39,7 +52,59 @@ class Camera:
         pass
 
 
-class IDS(Camera):
+class DummyCamera(Camera):
+    def __init__(self):
+        """
+        Initializes the dummy camera.
+        """
+        super().__init__()
+
+        # Set height and width
+        self._height, self._width = cam_devices[CamDevices.DUMMY.value][
+            CamParam.IMG_SHAPE
+        ]
+
+        # Set frame count and exposure time
+        self._frame_count = 0
+        self.set_exposure_time()
+
+    def set_exposure_time(self, time=200):
+        """
+        Set the exposure time of the camera to a specific value.
+
+        Parameters
+        ----------
+        time : int, optional
+            New exposure time in milliseconds, by default 200
+        """
+        self._exposure_time = time
+
+    def acquire_images(self, number=1):
+        """
+        Acquire dummy image(s).
+
+        Parameters
+        ----------
+        number : int, optional
+            The number of images to be taken, by default 1
+
+        Returns
+        -------
+        list
+            The list of acquired dummy images
+        """
+        images = []
+
+        for _ in range(number):
+            self._frame_count += 1
+
+            # Append dummy images as numpy array to list of acquired images
+            images.append(np.zeros((self._height, self._width)))
+
+        return images
+
+
+class IDSCamera(Camera):
     def __init__(self):
         """
         Initializes the camera and sets all the parameters such that acquisition
@@ -66,7 +131,12 @@ class IDS(Camera):
         self.__datastream = None
 
         # Update device manager
-        device_manager.Update()
+        try:
+            device_manager.Update()
+        except:
+            raise IOError(
+                "Failed to update the IDS device manager. Check its connection and setup."
+            )
 
         # Raise exception if no device was found
         if device_manager.Devices().empty():
@@ -90,11 +160,8 @@ class IDS(Camera):
             node_map.FindNode("EnumEntry_AcquisitionMode_SingleFrame")
         )
 
-        # Change exposure time (in milliseconds)
-        node_map.FindNode("ExposureTime").SetValue(200)
-
-        # Lock critical features to prevent them from changing during acquisition
-        node_map.FindNode("TLParamsLocked").SetValue(1)
+        # Set the exposure time to 200 ms
+        self.set_exposure_time()
 
         # Open standard data stream
         self.__datastream = self.__device.DataStreams()[0].OpenDataStream()
@@ -113,6 +180,30 @@ class IDS(Camera):
         # Hacky fix for a bug with exposure time
         self.acquire_images()  # TODO Bug, first image seems not use newly set parameters
 
+    def set_exposure_time(self, time=200):
+        """
+        Set the exposure time of the camera to a specific value.
+
+        Parameters
+        ----------
+        time : int, optional
+            New exposure time in milliseconds, by default 200
+        """
+        # Store the new exposure time
+        self._exposure_time = time
+
+        # Get nodemap of the remote device for all accesses to the genicam nodemap tree
+        node_map = self.__device.RemoteDevice().NodeMaps()[0]
+
+        # Unlock the parameters lock
+        node_map.FindNode("TLParamsLocked").SetValue(0)
+
+        # Change exposure time (in milliseconds)
+        node_map.FindNode("ExposureTime").SetValue(time)
+
+        # Lock critical features to prevent them from changing during acquisition
+        node_map.FindNode("TLParamsLocked").SetValue(1)
+
     def acquire_images(self, number=1):
         """
         Acquire image(s).
@@ -130,7 +221,7 @@ class IDS(Camera):
         images = []
 
         for _ in range(number):
-            self._frame += 1
+            self._frame_count += 1
 
             # Get nodemap of the remote device for all accesses to the genicam nodemap tree
             node_map = self.__device.RemoteDevice().NodeMaps()[0]
@@ -180,3 +271,24 @@ class IDS(Camera):
                 self.__datastream.RevokeBuffer(buffer)
 
         ids_peak.Library.Close()
+
+
+def create_camera(device_key):
+    """
+    Factory method to create `Camera` object.
+
+    Parameters
+    ----------
+    device_key : str
+        Option from `CamDevices`.
+    """
+    assert device_key in CamDevices.values()
+
+    cam = None
+    if device_key == CamDevices.DUMMY.value:
+        cam = DummyCamera()
+    elif device_key == CamDevices.IDS.value:
+        cam = IDSCamera()
+
+    assert cam is not None
+    return cam

@@ -2,7 +2,7 @@
 Simulated propagation of slm patterns generated using the neural holography code.
 """
 
-from examples.utils import show_plot
+from slm_controller.util import show_plot
 from slm_controller.simulate_prop import lens_prop, lensless_prop
 from slm_controller.transform_fields import (
     lensless_to_lens,
@@ -11,9 +11,9 @@ from slm_controller.transform_fields import (
 import torch
 
 from slm_controller.hardware import (
-    SlmDevices,
+    SlmDisplayDevices,
     SlmParam,
-    slm_devices,
+    slm_display_devices,
     physical_params,
     PhysicalParams,
 )
@@ -25,10 +25,10 @@ def simulate_prop_neural_holography():
     # Set parameters
     distance = physical_params[PhysicalParams.PROPAGATION_DISTANCE]
     wavelength = physical_params[PhysicalParams.WAVELENGTH]
-    feature_size = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]
+    feature_size = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]
     iterations = 500
 
-    slm_res = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
+    slm_res = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
     image_res = slm_res
     roi_res = (620, 850)  # TODO about 80%
 
@@ -37,7 +37,7 @@ def simulate_prop_neural_holography():
 
     # Initialize image loader
     image_loader = ImageLoader(
-        "images/test",
+        "images/target_amplitude",
         image_res=image_res,
         homography_res=roi_res,
         shuffle=False,

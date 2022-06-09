@@ -4,8 +4,8 @@ import warnings
 from PIL import Image, ImageDraw
 import time
 
-from slm_controller.hardware import SlmDevices, SlmParam, slm_devices
-import slm_controller.holoeye.detect_heds_module_path  # TODO add in setup
+from slm_controller.hardware import SlmDisplayDevices, SlmParam, slm_display_devices
+import slm_controller.holoeye.detect_heds_module_path
 from holoeye import slmdisplaysdk
 
 
@@ -114,9 +114,9 @@ class RGBDisplay(Display):
                 self._height = self._disp.height
         except:
             self._virtual = True
-            self._height, self._width = slm_devices[SlmDevices.ADAFRUIT_RGB.value][
-                SlmParam.SLM_SHAPE
-            ]
+            self._height, self._width = slm_display_devices[
+                SlmDisplayDevices.ADAFRUIT_RGB.value
+            ][SlmParam.SLM_SHAPE]
 
             warnings.warn("Failed to load display. Using virtual device...")
 
@@ -206,9 +206,9 @@ class BinaryDisplay(Display):
 
             cs_pin = cs_pin if (cs_pin is not None) else board.D6
 
-            self._height, self._width = slm_devices[SlmDevices.ADAFRUIT_BINARY.value][
-                SlmParam.SLM_SHAPE
-            ]
+            self._height, self._width = slm_display_devices[
+                SlmDisplayDevices.ADAFRUIT_BINARY.value
+            ][SlmParam.SLM_SHAPE]
 
             spi = busio.SPI(board.SCK, MOSI=board.MOSI)
             scs = digitalio.DigitalInOut(cs_pin)  # inverted chip select
@@ -312,9 +312,9 @@ class NokiaDisplay(Display):
                 baudrate=baudrate,
             )
 
-            self._height, self._width = slm_devices[SlmDevices.NOKIA_5110.value][
-                SlmParam.SLM_SHAPE
-            ]
+            self._height, self._width = slm_display_devices[
+                SlmDisplayDevices.NOKIA_5110.value
+            ][SlmParam.SLM_SHAPE]
 
         except:
             raise IOError("Failed to load display.")
@@ -377,9 +377,9 @@ class HoloeyeDisplay(Display):
 
         # Initialize parameters of the holoeye slm display
         self._virtual = False
-        self._height, self._width = slm_devices[SlmDevices.HOLOEYE_LC_2012.value][
-            SlmParam.SLM_SHAPE
-        ]
+        self._height, self._width = slm_display_devices[
+            SlmDisplayDevices.HOLOEYE_LC_2012.value
+        ][SlmParam.SLM_SHAPE]
 
         self._show_time = show_time
 
@@ -481,25 +481,25 @@ class HoloeyeDisplay(Display):
             plt.show()
 
 
-def create_display(slm_device_key):
+def create_display(device_key):
     """
     Factory method to create `Display` object.
 
     Parameters
     ----------
     device_key : str
-        Option from `SlmDevices`.
+        Option from `SlmDisplayDevices`.
     """
-    assert slm_device_key in SlmDevices.values()
+    assert device_key in SlmDisplayDevices.values()
 
     slm_display = None
-    if slm_device_key == SlmDevices.ADAFRUIT_RGB.value:
+    if device_key == SlmDisplayDevices.ADAFRUIT_RGB.value:
         slm_display = RGBDisplay()
-    elif slm_device_key == SlmDevices.ADAFRUIT_BINARY.value:
+    elif device_key == SlmDisplayDevices.ADAFRUIT_BINARY.value:
         slm_display = BinaryDisplay()
-    elif slm_device_key == SlmDevices.NOKIA_5110.value:
+    elif device_key == SlmDisplayDevices.NOKIA_5110.value:
         slm_display = NokiaDisplay()
-    elif slm_device_key == SlmDevices.HOLOEYE_LC_2012.value:
+    elif device_key == SlmDisplayDevices.HOLOEYE_LC_2012.value:
         slm_display = HoloeyeDisplay()
     assert slm_display is not None
     return slm_display

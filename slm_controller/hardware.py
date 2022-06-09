@@ -16,8 +16,8 @@ physical_params = {
     PhysicalParams.PROPAGATION_DISTANCE: 0.34,
 }
 
-# Slm devices that are implemented in this project
-class SlmDevices(Enum):
+# Slm display devices that are implemented in this project
+class SlmDisplayDevices(Enum):
     ADAFRUIT_RGB = "rgb"
     ADAFRUIT_BINARY = "binary"
     NOKIA_5110 = "nokia"
@@ -25,10 +25,10 @@ class SlmDevices(Enum):
 
     @staticmethod
     def values():
-        return [slm.value for slm in SlmDevices]
+        return [slm.value for slm in SlmDisplayDevices]
 
 
-# Parameters of those slms
+# Parameters of those display slms
 class SlmParam:
     CELL_DIM = "cell_dim"
     SLM_SHAPE = "slm_shape"
@@ -38,10 +38,10 @@ class SlmParam:
 
 
 # Actual values of those parameters for all the slms
-slm_devices = {
+slm_display_devices = {
     # 1.8 inch RGB display by Adafruit: https://learn.adafruit.com/1-8-tft-display/overview
     # datasheet: https://cdn-shop.adafruit.com/datasheets/JD-T1800.pdf
-    SlmDevices.ADAFRUIT_RGB.value: {
+    SlmDisplayDevices.ADAFRUIT_RGB.value: {
         SlmParam.CELL_DIM: (0.18e-3, 0.18e-3),
         SlmParam.SLM_SHAPE: (128, 160),
         SlmParam.MONOCHROME: False,
@@ -49,7 +49,7 @@ slm_devices = {
     # 1.3 inch monochrome display by Adafruit:
     # https://learn.adafruit.com/adafruit-sharp-memory-display-breakout
     # datasheet: https://cdn-shop.adafruit.com/product-files/3502/Data+sheet.pdf
-    SlmDevices.ADAFRUIT_BINARY.value: {
+    SlmDisplayDevices.ADAFRUIT_BINARY.value: {
         SlmParam.CELL_DIM: (0.145e-3, 0.145e-3),
         SlmParam.SLM_SHAPE: (144, 168),
         SlmParam.MONOCHROME: True,
@@ -58,7 +58,7 @@ slm_devices = {
     # https://www.sparkfun.com/products/10168
     # 1.5 inch diagonal: https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd
     # datasheet: https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf
-    SlmDevices.NOKIA_5110.value: {
+    SlmDisplayDevices.NOKIA_5110.value: {
         SlmParam.CELL_DIM: (
             0.339e-3,
             0.396e-3,
@@ -70,7 +70,7 @@ slm_devices = {
     # https://holoeye.com/lc-2012-spatial-light-modulator/
     # 1.8 inch diagonal, 36.9 x 27.6 mm
     # datasheet: same link
-    SlmDevices.HOLOEYE_LC_2012.value: {
+    SlmDisplayDevices.HOLOEYE_LC_2012.value: {
         SlmParam.CELL_DIM: (
             0.36e-4,
             0.36e-4,
@@ -84,6 +84,7 @@ slm_devices = {
 
 # Camera devices that are implemented in this project
 class CamDevices(Enum):
+    DUMMY = "dummy"  # TODO for development only! Remove!
     IDS = "ids"
 
     @staticmethod
@@ -98,5 +99,10 @@ class CamParam:
 
 # Actual values of those parameters for all the cameras
 cam_devices = {
+    CamDevices.DUMMY.value: {
+        CamParam.IMG_SHAPE: slm_display_devices[
+            SlmDisplayDevices.HOLOEYE_LC_2012.value
+        ][SlmParam.SLM_SHAPE]
+    },
     CamDevices.IDS.value: {CamParam.IMG_SHAPE: (1216, 1936)},
 }
