@@ -12,11 +12,15 @@ Technical Paper:
 Y. Peng, S. Choi, N. Padmanaban, G. Wetzstein. Neural Holography with Camera-in-the-loop Training. ACM TOG (SIGGRAPH Asia), 2020.
 """
 
-from hardware import CamDevices, SlmDisplayDevices
+from slm_controller.hardware import DisplayDevices
+from slm_design.hardware import CamDevices
+
 import torch
 import torch.nn as nn
-from slm_controller import display, camera
-from slm_controller.neural_holography.algorithms import (
+from slm_controller import display
+from slm_design import camera
+
+from slm_design.neural_holography.algorithms import (
     gerchberg_saxton,
     stochastic_gradient_descent,
     double_phase_amplitude_coding,
@@ -25,21 +29,23 @@ from slm_controller.neural_holography.algorithms import (
 import os
 import time
 import skimage.io
-import slm_controller.neural_holography.utils as utils
-from slm_controller.neural_holography.propagation_ASM import propagation_ASM
-from slm_controller.neural_holography.calibration_module import Calibration
+import slm_design.neural_holography.utils as utils
+from slm_design.neural_holography.propagation_ASM import propagation_ASM
+from slm_design.neural_holography.calibration_module import Calibration
 
 import platform
 
+cam_device = CamDevices.DUMMY.value
+slm_device = DisplayDevices.HOLOEYE_LC_2012.value
 
 # my_os = platform.system()
 # if my_os == "Windows":
-#     from slm_controller.neural_holography.arduino_laser_control_module import (
+#     from slm_design.neural_holography.arduino_laser_control_module import (
 #         ArduinoLaserControl,
 #     )
-#     from slm_controller.neural_holography.camera_capture_module import CameraCapture
-#     from slm_controller.neural_holography.calibration_module import Calibration
-#     from slm_controller.neural_holography.slm_display_module import SLMDisplay
+#     from slm_design.neural_holography.camera_capture_module import CameraCapture
+#     from slm_design.neural_holography.calibration_module import Calibration
+#     from slm_design.neural_holography.slm_display_module import SLMDisplay
 
 
 class GS(nn.Module):
@@ -422,14 +428,14 @@ class PhysicalProp(nn.Module):
 
         # 1. Connect Camera
         # self.camera = CameraCapture()
-        self.camera = camera.create_camera(CamDevices.IDS.value)
+        self.camera = camera.create_camera(cam_device)
         # self.camera.connect(0)  # specify the camera to use, 0 for main cam, 1 for the second cam
 
         # 2. Connect SLM
         # self.slm = SLMDisplay()
         # self.slm.connect()
         self.slm_settle_time = slm_settle_time
-        self.slm = display.create_display(SlmDisplayDevices.HOLOEYE_LC_2012.value)
+        self.slm = display.create_display(slm_device)
         self.slm.set_show_time(slm_settle_time)
 
         # # 3. Connect to the Arduino that switches rgb color through the laser control box.
@@ -548,7 +554,7 @@ class PhysicalProp(nn.Module):
 
         # display on SLM and sleep for 0.1s
         # self.slm.show_data_from_array(slm_phase)
-        self.slm.imshow(slm_phase)
+        self.slm.imshow(slm_phase)  # TODO emulate show time in matplotlib
 
         time.sleep(self.slm_settle_time)
 

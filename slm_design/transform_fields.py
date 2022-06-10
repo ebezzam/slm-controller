@@ -4,13 +4,19 @@ from PIL import Image
 import math
 
 from slm_controller.hardware import (
-    SlmDisplayDevices,
+    DisplayDevices,
     SlmParam,
-    slm_display_devices,
+    display_devices,
+)
+
+from slm_design.hardware import (
     physical_params,
     PhysicalParams,
 )
-import slm_controller.neural_holography.utils as utils
+
+import slm_design.neural_holography.utils as utils
+
+slm_device = DisplayDevices.HOLOEYE_LC_2012.value
 
 
 def load_holoeye_slm_pattern(
@@ -89,14 +95,10 @@ def compute_H():
     wavelength = physical_params[PhysicalParams.WAVELENGTH]
 
     # number of pixels
-    num_y, num_x = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][
-        SlmParam.SLM_SHAPE
-    ]
+    num_y, num_x = display_devices[slm_device][SlmParam.SLM_SHAPE]
 
     # sampling interval size
-    dy, dx = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][
-        SlmParam.CELL_DIM
-    ]
+    dy, dx = display_devices[slm_device][SlmParam.CELL_DIM]
 
     # size of the field
     y, x = (dy * float(num_y), dx * float(num_x))

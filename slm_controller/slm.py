@@ -1,8 +1,8 @@
 import numpy as np
-from slm_controller.util import _prepare_index_vals, rgb2gray
+from slm_controller.utils import _prepare_index_vals, rgb2gray
 
 
-class SLM:
+class SLM:  # TODO part of mask design?
     def __init__(self, shape, cell_dim):
         """
         Class for defining SLM.

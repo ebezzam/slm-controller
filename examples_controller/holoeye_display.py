@@ -2,7 +2,7 @@
 Holoeye display example.
 """
 
-from hardware import SlmDisplayDevices
+from slm_controller.hardware import DisplayDevices
 import numpy as np
 import click
 from slm_controller import display
@@ -13,7 +13,7 @@ from slm_controller import display
 def holoeye_display_example(show_time):
 
     # Instantiate display object
-    D = display.create_display(SlmDisplayDevices.HOLOEYE_LC_2012.value)
+    D = display.create_display(DisplayDevices.HOLOEYE_LC_2012.value)
     D.set_show_time(show_time)
 
     # Show a 1x1 checkerboard pattern on the SLM

@@ -16,15 +16,17 @@ import torch
 import numpy as np
 import tensorboardX
 import matplotlib.pyplot as plt
-from slm_controller.hardware import SlmDisplayDevices, SlmParam, slm_display_devices
+from slm_controller.hardware import DisplayDevices, SlmParam, display_devices
 
-import slm_controller.neural_holography.utils as utils
+import slm_design.neural_holography.utils as utils
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from slm_controller.neural_holography.propagation_ASM import (
+from slm_design.neural_holography.propagation_ASM import (
     compute_zernike_basis,
     combine_zernike_basis,
 )
+
+slm_device = DisplayDevices.HOLOEYE_LC_2012.value
 
 
 class SummaryModelWriter(tensorboardX.SummaryWriter):
@@ -149,15 +151,11 @@ class SummaryModelWriter(tensorboardX.SummaryWriter):
 
         if domain == "fourier":
             zernike_coeffs = self.model.coeffs_fourier
-            slm_res = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][
-                SlmParam.SLM_SHAPE
-            ]
+            slm_res = display_devices[slm_device][SlmParam.SLM_SHAPE]
             map_size = [2 * slm_res[0], 2 * slm_res[1]]
         elif domain == "primal":
             zernike_coeffs = self.model.coeffs
-            slm_res = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][
-                SlmParam.SLM_SHAPE
-            ]
+            slm_res = display_devices[slm_device][SlmParam.SLM_SHAPE]
             map_size = [slm_res[0], slm_res[1]]
 
         if zernike_coeffs is not None:

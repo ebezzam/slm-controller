@@ -15,8 +15,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 
-import slm_controller.neural_holography.utils as utils
-from slm_controller.neural_holography.propagation_ASM import (
+import slm_design.neural_holography.utils as utils
+from slm_design.neural_holography.propagation_ASM import (
     compute_zernike_basis,
     combine_zernike_basis,
     propagation_ASM,
@@ -24,7 +24,7 @@ from slm_controller.neural_holography.propagation_ASM import (
     propagation_ASM_zernike_fourier,
 )
 
-from slm_controller.neural_holography.pytorch_prototyping.pytorch_prototyping import Conv2dSame
+from slm_design.neural_holography.pytorch_prototyping.pytorch_prototyping import Conv2dSame
 
 
 class LatentCodedMLP(nn.Module):

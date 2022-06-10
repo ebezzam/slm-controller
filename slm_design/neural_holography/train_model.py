@@ -32,23 +32,30 @@ import configargparse
 import skimage.util
 import torch.nn as nn
 import torch.optim as optim
+from PIL import Image
 
 from slm_controller.hardware import (
+    DisplayDevices,
+    SlmParam,
+    display_devices,
+)
+
+from slm_design.hardware import (
     CamDevices,
     CamParam,
-    SlmDisplayDevices,
-    SlmParam,
     PhysicalParams,
-    slm_display_devices,
     physical_params,
     cam_devices,
 )
 
-import slm_controller.neural_holography.utils as utils
-from slm_controller.neural_holography.module import PhysicalProp
-from slm_controller.neural_holography.propagation_model import ModelPropagate
-from slm_controller.neural_holography.augmented_image_loader import ImageLoader
-from slm_controller.neural_holography.utils_tensorboard import SummaryModelWriter
+import slm_design.neural_holography.utils as utils
+from slm_design.neural_holography.module import PhysicalProp
+from slm_design.neural_holography.propagation_model import ModelPropagate
+from slm_design.neural_holography.augmented_image_loader import ImageLoader
+from slm_design.neural_holography.utils_tensorboard import SummaryModelWriter
+
+cam_device = CamDevices.DUMMY.value
+slm_device = DisplayDevices.HOLOEYE_LC_2012.value
 
 
 # Command line argument processing
@@ -100,14 +107,10 @@ prop_dist = physical_params[
     PhysicalParams.PROPAGATION_DISTANCE
 ]  # propagation distance from SLM plane to target plane
 wavelength = physical_params[PhysicalParams.WAVELENGTH]  # wavelength
-feature_size = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][
-    SlmParam.CELL_DIM
-]  # SLM pitch
+feature_size = display_devices[slm_device][SlmParam.CELL_DIM]  # SLM pitch
 
-slm_res = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][
-    SlmParam.SLM_SHAPE
-]  # resolution of SLM
-image_res = cam_devices[CamDevices.IDS.value][CamParam.IMG_SHAPE]  # TODO slm.shape == image.shape?
+slm_res = display_devices[slm_device][SlmParam.SLM_SHAPE]  # resolution of SLM
+image_res = cam_devices[cam_device][CamParam.IMG_SHAPE]  # TODO slm.shape == image.shape?
 roi_res = (620, 850)  # regions of interest (to penalize) # TODO about 80%
 
 dtype = torch.float32  # default datatype (results may differ if using, e.g., float64)
@@ -317,6 +320,32 @@ for e in range(opt.num_epochs):
             model_amp = utils.crop_image(
                 recon_amp, target_shape=roi_res, pytorch=True, stacked_complex=False
             )
+
+            # TODO not sure about rescaling etc.
+            camera_amp_scaled = torch.empty(
+                (camera_amp.shape[0], camera_amp.shape[1], slm_res[0], slm_res[1])
+            )
+
+            # print(camera_amp_scaled.shape)
+
+            for p in range(camera_amp.shape[0]):
+                for c in range(camera_amp.shape[1]):
+                    im = Image.fromarray(camera_amp[p, c].numpy())
+                    # print(im.size)
+                    im = im.resize(
+                        (slm_res[1], slm_res[0]), Image.BICUBIC,  # Pillow uses width, height
+                    )
+                    # print(im.size)
+                    camera_amp_scaled[p, c] = torch.from_numpy(np.array(im))
+
+            camera_amp = utils.crop_image(
+                camera_amp_scaled, target_shape=roi_res, pytorch=True, stacked_complex=False,
+            )
+            # print(camera_amp.shape)
+            # print(model_amp.shape)
+
+            # TODO WARNING:root:NaN or Inf found in input tensor.
+            # ---------------------------------
 
             # calculate loss and backpropagate to model parameters
             loss_value_model = loss_model(model_amp, camera_amp)

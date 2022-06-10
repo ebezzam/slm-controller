@@ -3,7 +3,7 @@ from ids_peak import ids_peak
 from ids_peak_ipl import ids_peak_ipl
 import numpy as np
 
-from slm_controller.hardware import CamDevices, CamParam, cam_devices
+from slm_design.hardware import CamDevices, CamParam, cam_devices
 
 
 class Camera:
@@ -60,6 +60,10 @@ class DummyCamera(Camera):
         super().__init__()
 
         # Set height and width
+        self._height, self._width = cam_devices[CamDevices.DUMMY.value][
+            CamParam.IMG_SHAPE
+        ]
+
         self._height, self._width = cam_devices[CamDevices.DUMMY.value][
             CamParam.IMG_SHAPE
         ]

@@ -1,23 +1,7 @@
 from enum import Enum
 
-# Physical parameters relevant for the propagation
-class PhysicalParams(Enum):
-    WAVELENGTH = "wavelength"
-    PROPAGATION_DISTANCE = "prop_distance"
-
-    @staticmethod
-    def values():
-        return [param.value for param in PhysicalParams]
-
-
-# Actual values of those physical parameters
-physical_params = {
-    PhysicalParams.WAVELENGTH: 532e-9,
-    PhysicalParams.PROPAGATION_DISTANCE: 0.34,
-}
-
 # Slm display devices that are implemented in this project
-class SlmDisplayDevices(Enum):
+class DisplayDevices(Enum):
     ADAFRUIT_RGB = "rgb"
     ADAFRUIT_BINARY = "binary"
     NOKIA_5110 = "nokia"
@@ -25,7 +9,7 @@ class SlmDisplayDevices(Enum):
 
     @staticmethod
     def values():
-        return [slm.value for slm in SlmDisplayDevices]
+        return [slm.value for slm in DisplayDevices]
 
 
 # Parameters of those display slms
@@ -38,10 +22,10 @@ class SlmParam:
 
 
 # Actual values of those parameters for all the slms
-slm_display_devices = {
+display_devices = {
     # 1.8 inch RGB display by Adafruit: https://learn.adafruit.com/1-8-tft-display/overview
     # datasheet: https://cdn-shop.adafruit.com/datasheets/JD-T1800.pdf
-    SlmDisplayDevices.ADAFRUIT_RGB.value: {
+    DisplayDevices.ADAFRUIT_RGB.value: {
         SlmParam.CELL_DIM: (0.18e-3, 0.18e-3),
         SlmParam.SLM_SHAPE: (128, 160),
         SlmParam.MONOCHROME: False,
@@ -49,7 +33,7 @@ slm_display_devices = {
     # 1.3 inch monochrome display by Adafruit:
     # https://learn.adafruit.com/adafruit-sharp-memory-display-breakout
     # datasheet: https://cdn-shop.adafruit.com/product-files/3502/Data+sheet.pdf
-    SlmDisplayDevices.ADAFRUIT_BINARY.value: {
+    DisplayDevices.ADAFRUIT_BINARY.value: {
         SlmParam.CELL_DIM: (0.145e-3, 0.145e-3),
         SlmParam.SLM_SHAPE: (144, 168),
         SlmParam.MONOCHROME: True,
@@ -58,7 +42,7 @@ slm_display_devices = {
     # https://www.sparkfun.com/products/10168
     # 1.5 inch diagonal: https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd
     # datasheet: https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf
-    SlmDisplayDevices.NOKIA_5110.value: {
+    DisplayDevices.NOKIA_5110.value: {
         SlmParam.CELL_DIM: (
             0.339e-3,
             0.396e-3,
@@ -70,7 +54,7 @@ slm_display_devices = {
     # https://holoeye.com/lc-2012-spatial-light-modulator/
     # 1.8 inch diagonal, 36.9 x 27.6 mm
     # datasheet: same link
-    SlmDisplayDevices.HOLOEYE_LC_2012.value: {
+    DisplayDevices.HOLOEYE_LC_2012.value: {
         SlmParam.CELL_DIM: (
             0.36e-4,
             0.36e-4,
@@ -82,27 +66,3 @@ slm_display_devices = {
     },
 }
 
-# Camera devices that are implemented in this project
-class CamDevices(Enum):
-    DUMMY = "dummy"  # TODO for development only! Remove!
-    IDS = "ids"
-
-    @staticmethod
-    def values():
-        return [cam.value for cam in CamDevices]
-
-
-# Parameters of those cameras
-class CamParam:
-    IMG_SHAPE = "img_shape"
-
-
-# Actual values of those parameters for all the cameras
-cam_devices = {
-    CamDevices.DUMMY.value: {
-        CamParam.IMG_SHAPE: slm_display_devices[
-            SlmDisplayDevices.HOLOEYE_LC_2012.value
-        ][SlmParam.SLM_SHAPE]
-    },
-    CamDevices.IDS.value: {CamParam.IMG_SHAPE: (1216, 1936)},
-}

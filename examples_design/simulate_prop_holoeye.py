@@ -2,9 +2,9 @@
 Simulated propagation of the slm pattern generated using the holoeye software.
 """
 
-from slm_controller.util import show_plot
-from slm_controller.simulate_prop import lens_prop, lensless_prop
-from slm_controller.transform_fields import (
+from slm_design.utils import show_plot
+from slm_design.simulate_prop import lens_prop, lensless_prop
+from slm_design.transform_fields import (
     load_holoeye_slm_pattern,
     lens_to_lensless,
 )

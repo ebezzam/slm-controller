@@ -2,33 +2,37 @@
 Simulated propagation of slm patterns generated using the neural holography code.
 """
 
-from slm_controller.util import show_plot
-from slm_controller.simulate_prop import lens_prop, lensless_prop
-from slm_controller.transform_fields import (
+from slm_design.utils import show_plot
+from slm_design.simulate_prop import lens_prop, lensless_prop
+from slm_design.transform_fields import (
     lensless_to_lens,
     extend_to_complex,
 )
 import torch
 
 from slm_controller.hardware import (
-    SlmDisplayDevices,
+    DisplayDevices,
     SlmParam,
-    slm_display_devices,
+    display_devices,
+)
+from slm_design.hardware import (
     physical_params,
     PhysicalParams,
 )
-from slm_controller.neural_holography.module import GS, SGD, DPAC
-from slm_controller.neural_holography.augmented_image_loader import ImageLoader
+from slm_design.neural_holography.module import GS, SGD, DPAC
+from slm_design.neural_holography.augmented_image_loader import ImageLoader
+
+slm_device = DisplayDevices.HOLOEYE_LC_2012.value
 
 
 def simulate_prop_neural_holography():
     # Set parameters
     distance = physical_params[PhysicalParams.PROPAGATION_DISTANCE]
     wavelength = physical_params[PhysicalParams.WAVELENGTH]
-    feature_size = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]
+    feature_size = display_devices[slm_device][SlmParam.CELL_DIM]
     iterations = 500
 
-    slm_res = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
+    slm_res = display_devices[slm_device][SlmParam.SLM_SHAPE]
     image_res = slm_res
     roi_res = (620, 850)  # TODO about 80%
 

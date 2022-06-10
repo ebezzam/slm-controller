@@ -2,10 +2,10 @@
 Binary display example.
 """
 
-from hardware import SlmDisplayDevices
+from slm_controller.hardware import DisplayDevices
 import numpy as np
 import click
-from slm_controller import display, util
+from slm_controller import display, utils
 
 
 @click.command()
@@ -14,12 +14,12 @@ from slm_controller import display, util
 def monochrome_display_example(file_path, not_original_ratio):
 
     # instantiate display object
-    D = display.create_display(SlmDisplayDevices.ADAFRUIT_BINARY.value)
+    D = display.create_display(DisplayDevices.ADAFRUIT_BINARY.value)
 
     # prepare image data
     if file_path is not None:
         keep_aspect_ratio = not not_original_ratio
-        image = util.load_image(
+        image = utils.load_image(
             file_path, output_shape=D.shape, keep_aspect_ratio=keep_aspect_ratio, grayscale=True,
         )
     else:

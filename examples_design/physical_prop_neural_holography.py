@@ -6,27 +6,33 @@ import torch
 import click
 from slm_controller import display
 from slm_controller.hardware import (
-    SlmDisplayDevices,
+    DisplayDevices,
     SlmParam,
-    slm_display_devices,
+    display_devices,
+)
+
+from slm_design.hardware import (
     physical_params,
     PhysicalParams,
 )
-from slm_controller.transform_fields import (
+from slm_design.transform_fields import (
     lensless_to_lens,
     extend_to_complex,
 )
-from slm_controller.neural_holography.module import GS, SGD, DPAC
-from slm_controller.neural_holography.utils import phasemap_8bit
-from slm_controller.neural_holography.augmented_image_loader import ImageLoader
+from slm_design.neural_holography.module import GS, SGD, DPAC
+from slm_design.neural_holography.utils import phasemap_8bit
+from slm_design.neural_holography.augmented_image_loader import ImageLoader
+
+slm_device = DisplayDevices.HOLOEYE_LC_2012.value
+
 
 # Set parameters
 distance = physical_params[PhysicalParams.PROPAGATION_DISTANCE]
 wavelength = physical_params[PhysicalParams.WAVELENGTH]
-feature_size = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][SlmParam.CELL_DIM]
+feature_size = display_devices[slm_device][SlmParam.CELL_DIM]
 iterations = 500
 
-slm_res = slm_display_devices[SlmDisplayDevices.HOLOEYE_LC_2012.value][SlmParam.SLM_SHAPE]
+slm_res = display_devices[slm_device][SlmParam.SLM_SHAPE]
 image_res = slm_res
 
 roi_res = (620, 850)  # TODO about 80%
@@ -49,7 +55,7 @@ def physical_prop_neural_holography(show_time):
     )
 
     # Instantiate display object
-    D = display.create_display(SlmDisplayDevices.HOLOEYE_LC_2012.value)
+    D = display.create_display(slm_device)
     D.set_show_time(show_time)
 
     # Load the the first image in the folder

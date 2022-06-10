@@ -18,8 +18,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from slm_controller.neural_holography.propagation_ASM import propagation_ASM
-import slm_controller.neural_holography.utils as utils
+from slm_design.neural_holography.propagation_ASM import propagation_ASM
+import slm_design.neural_holography.utils as utils
 
 # 1. GS
 def gerchberg_saxton(

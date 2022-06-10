@@ -2,8 +2,8 @@
 IDS camera single image capture example.
 """
 
-from hardware import CamDevices
-from slm_controller import camera
+from slm_design.hardware import CamDevices
+from slm_design import camera
 import matplotlib.pyplot as plt
 
 
