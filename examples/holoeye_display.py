@@ -2,11 +2,10 @@
 Holoeye display example.
 """
 
+from hardware import SlmDisplayDevices
 import numpy as np
 import click
 from slm_controller import display
-
-# TODO use factory methods to create both cameras and displays
 
 
 @click.command()
@@ -14,7 +13,8 @@ from slm_controller import display
 def holoeye_display_example(show_time):
 
     # Instantiate display object
-    D = display.HoloeyeDisplay(show_time)
+    D = display.create_display(SlmDisplayDevices.HOLOEYE_LC_2012.value)
+    D.set_show_time(show_time)
 
     # Show a 1x1 checkerboard pattern on the SLM
     phaseData = (np.indices((D.height, D.width)).sum(axis=0) % 2) * 255

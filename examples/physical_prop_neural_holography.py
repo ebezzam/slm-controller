@@ -49,7 +49,8 @@ def physical_prop_neural_holography(show_time):
     )
 
     # Instantiate display object
-    D = display.HoloeyeDisplay(show_time)
+    D = display.create_display(SlmDisplayDevices.HOLOEYE_LC_2012.value)
+    D.set_show_time(show_time)
 
     # Load the the first image in the folder
     target_amp, _, _ = image_loader.load_image(0)

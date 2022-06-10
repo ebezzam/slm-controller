@@ -2,6 +2,7 @@
 Binary display example.
 """
 
+from hardware import SlmDisplayDevices
 import numpy as np
 import click
 from slm_controller import display, util
@@ -13,7 +14,7 @@ from slm_controller import display, util
 def nokia_display_example(file_path, not_original_ratio):
 
     # instantiate display object
-    D = display.NokiaDisplay()
+    D = display.create_display(SlmDisplayDevices.NOKIA_5110.value)
 
     # prepare image data
     if file_path is not None:

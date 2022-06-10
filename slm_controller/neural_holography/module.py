@@ -12,10 +12,10 @@ Technical Paper:
 Y. Peng, S. Choi, N. Padmanaban, G. Wetzstein. Neural Holography with Camera-in-the-loop Training. ACM TOG (SIGGRAPH Asia), 2020.
 """
 
+from hardware import CamDevices, SlmDisplayDevices
 import torch
 import torch.nn as nn
-from slm_controller import display
-from slm_controller.camera import IDSCamera
+from slm_controller import display, camera
 from slm_controller.neural_holography.algorithms import (
     gerchberg_saxton,
     stochastic_gradient_descent,
@@ -422,14 +422,15 @@ class PhysicalProp(nn.Module):
 
         # 1. Connect Camera
         # self.camera = CameraCapture()
-        self.camera = IDSCamera()
+        self.camera = camera.create_camera(CamDevices.IDS.value)
         # self.camera.connect(0)  # specify the camera to use, 0 for main cam, 1 for the second cam
 
         # 2. Connect SLM
         # self.slm = SLMDisplay()
         # self.slm.connect()
         self.slm_settle_time = slm_settle_time
-        self.slm = display.HoloeyeDisplay(slm_settle_time)
+        self.slm = display.create_display(SlmDisplayDevices.HOLOEYE_LC_2012.value)
+        self.slm.set_show_time(slm_settle_time)
 
         # # 3. Connect to the Arduino that switches rgb color through the laser control box.
         # if laser_arduino:

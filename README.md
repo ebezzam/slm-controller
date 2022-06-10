@@ -123,7 +123,10 @@ with the remainder of the project and where to find them:
 GS, SGD and DPAC are all implemented inside `slm_controller/neural_holography/algorithms.py`
 and PyTorch modules that go along with them are provided in
 `slm_controller/neural_holography/module.py`. CITL on the other hand is located in a separate
-script `slm_controller/neural_holography/train_model.py`. Usage examples will be presented in the
+script `slm_controller/neural_holography/train_model.py`. This script is
+currently not fully compatible with our setup and hence does crash for now when
+computing the loss. This will be fixed in a next step. Usage examples of all
+those features will be presented in the
 subsequent [Example scripts](#example-scripts) section. Note that for now those methods are only
 intended to be used with the `Holoeye LC 2012` and the `Thorlabs DCC3260M` camera,
 hence some parameters are hardcoded to use those devices. In a later stage of the

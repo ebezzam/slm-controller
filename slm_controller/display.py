@@ -362,11 +362,6 @@ class HoloeyeDisplay(Display):
     def __init__(self, show_time=2):
         """
         Initialize a new holoeye slm instance
-
-        Parameters
-        ----------
-        show_time : int, optional
-            Specifies the amount of time the phase pattern is shown on the slm, by default 2
         """
         super().__init__()
 
@@ -381,7 +376,7 @@ class HoloeyeDisplay(Display):
             SlmDisplayDevices.HOLOEYE_LC_2012.value
         ][SlmParam.SLM_SHAPE]
 
-        self._show_time = show_time
+        self._show_time = 5.0
 
         try:
             # Initializes the SLM library
@@ -416,6 +411,17 @@ class HoloeyeDisplay(Display):
         Destructor
         """
         self._disp.__del__()
+
+    def set_show_time(self, time=5.0):
+        """
+        Set the time a pattern is shown.
+
+        Parameters
+        ----------
+        show_time : float, optional
+            Specifies the amount of time the phase pattern is shown on the slm, by default 5.0
+        """
+        self._show_time = time
 
     def clear(self):
         """
@@ -472,7 +478,7 @@ class HoloeyeDisplay(Display):
             # sleep for specified time
             time.sleep(self._show_time)
         else:
-            # Use a virual device
+            # Use a virtual device
             import matplotlib.pyplot as plt
 
             # plot

@@ -2,6 +2,7 @@
 RGB display example.
 """
 
+from hardware import SlmDisplayDevices
 import numpy as np
 import click
 from slm_controller import display, util
@@ -14,7 +15,7 @@ from slm_controller import display, util
 def rgb_display_example(fp, rgb, not_original_ratio):
 
     # instantiate display object
-    D = display.RGBDisplay()
+    D = display.create_display(SlmDisplayDevices.ADAFRUIT_RGB.value)
 
     # prepare image data
     if fp is not None:
