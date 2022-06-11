@@ -133,9 +133,14 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Example scripts results
 slm_pattern.npy
 
 # Cam in the loop
 runs
 data
 models
+
+# TODO remove
+waveprop
+waveprop_notes.txt

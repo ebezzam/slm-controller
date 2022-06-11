@@ -11,7 +11,7 @@ from slm_controller.aperture import (
     square_aperture,
     circ_aperture,
 )
-from slm_controller.hardware import DisplayDevices, display_devices, SlmParam
+from slm_controller.hardware import DisplayDevices, display_devices, DisplayParam
 
 
 @click.command()
@@ -71,8 +71,8 @@ def plot_aperture(
 
     if device is None:
         device_config = {
-            SlmParam.CELL_DIM: (0.18e-3, 0.18e-3) if cell_dim is None else cell_dim,
-            SlmParam.SLM_SHAPE: (128, 160) if slm_shape is None else slm_shape,
+            DisplayParam.CELL_DIM: (0.18e-3, 0.18e-3) if cell_dim is None else cell_dim,
+            DisplayParam.SLM_SHAPE: (128, 160) if slm_shape is None else slm_shape,
         }
     else:
         device_config = display_devices[device]
@@ -85,40 +85,40 @@ def plot_aperture(
             rect_shape = (n_cells, n_cells)
         print(f"Shape : {rect_shape}")
         apert_dim = (
-            rect_shape[0] * device_config[SlmParam.CELL_DIM][0],
-            rect_shape[1] * device_config[SlmParam.CELL_DIM][1],
+            rect_shape[0] * device_config[DisplayParam.CELL_DIM][0],
+            rect_shape[1] * device_config[DisplayParam.CELL_DIM][1],
         )
         ap = rect_aperture(
             apert_dim=apert_dim,
-            slm_shape=device_config[SlmParam.SLM_SHAPE],
-            cell_dim=device_config[SlmParam.CELL_DIM],
+            slm_shape=device_config[DisplayParam.SLM_SHAPE],
+            cell_dim=device_config[DisplayParam.CELL_DIM],
         )
     elif shape == ApertureOptions.LINE.value:
         print(f"Length : {n_cells}")
         length = (
-            n_cells * device_config[SlmParam.CELL_DIM][0]
+            n_cells * device_config[DisplayParam.CELL_DIM][0]
             if vertical
-            else n_cells * device_config[SlmParam.CELL_DIM][1]
+            else n_cells * device_config[DisplayParam.CELL_DIM][1]
         )
         ap = line_aperture(
             length=length,
             vertical=vertical,
-            slm_shape=device_config[SlmParam.SLM_SHAPE],
-            cell_dim=device_config[SlmParam.CELL_DIM],
+            slm_shape=device_config[DisplayParam.SLM_SHAPE],
+            cell_dim=device_config[DisplayParam.CELL_DIM],
         )
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
         ap = square_aperture(
-            side=n_cells * device_config[SlmParam.CELL_DIM][0],
-            slm_shape=device_config[SlmParam.SLM_SHAPE],
-            cell_dim=device_config[SlmParam.CELL_DIM],
+            side=n_cells * device_config[DisplayParam.CELL_DIM][0],
+            slm_shape=device_config[DisplayParam.SLM_SHAPE],
+            cell_dim=device_config[DisplayParam.CELL_DIM],
         )
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
         ap = circ_aperture(
-            radius=n_cells * device_config[SlmParam.CELL_DIM][0],
-            slm_shape=device_config[SlmParam.SLM_SHAPE],
-            cell_dim=device_config[SlmParam.CELL_DIM],
+            radius=n_cells * device_config[DisplayParam.CELL_DIM][0],
+            slm_shape=device_config[DisplayParam.SLM_SHAPE],
+            cell_dim=device_config[DisplayParam.CELL_DIM],
         )
 
     assert ap is not None

@@ -4,7 +4,7 @@ import warnings
 from PIL import Image, ImageDraw
 import time
 
-from slm_controller.hardware import DisplayDevices, SlmParam, display_devices
+from slm_controller.hardware import DisplayDevices, DisplayParam, display_devices
 import slm_controller.holoeye.detect_heds_module_path
 from holoeye import slmdisplaysdk
 
@@ -116,7 +116,7 @@ class RGBDisplay(Display):
             self._virtual = True
             self._height, self._width = display_devices[
                 DisplayDevices.ADAFRUIT_RGB.value
-            ][SlmParam.SLM_SHAPE]
+            ][DisplayParam.SLM_SHAPE]
 
             warnings.warn("Failed to load display. Using virtual device...")
 
@@ -208,7 +208,7 @@ class BinaryDisplay(Display):
 
             self._height, self._width = display_devices[
                 DisplayDevices.ADAFRUIT_BINARY.value
-            ][SlmParam.SLM_SHAPE]
+            ][DisplayParam.SLM_SHAPE]
 
             spi = busio.SPI(board.SCK, MOSI=board.MOSI)
             scs = digitalio.DigitalInOut(cs_pin)  # inverted chip select
@@ -314,7 +314,7 @@ class NokiaDisplay(Display):
 
             self._height, self._width = display_devices[
                 DisplayDevices.NOKIA_5110.value
-            ][SlmParam.SLM_SHAPE]
+            ][DisplayParam.SLM_SHAPE]
 
         except:
             raise IOError("Failed to load display.")
@@ -374,7 +374,7 @@ class HoloeyeDisplay(Display):
         self._virtual = False
         self._height, self._width = display_devices[
             DisplayDevices.HOLOEYE_LC_2012.value
-        ][SlmParam.SLM_SHAPE]
+        ][DisplayParam.SLM_SHAPE]
 
         self._show_time = 5.0
 

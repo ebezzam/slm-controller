@@ -1,5 +1,5 @@
 """
-Physical propagation of slm patterns generated using the neural holography code.
+Physical propagation of slm patterns generated using the GS algorithm.
 """
 
 import torch
@@ -7,7 +7,7 @@ import click
 from slm_controller import display
 from slm_controller.hardware import (
     DisplayDevices,
-    SlmParam,
+    DisplayParam,
     display_devices,
 )
 
@@ -19,28 +19,28 @@ from slm_design.transform_fields import (
     lensless_to_lens,
     extend_to_complex,
 )
-from slm_design.neural_holography.module import GS, SGD, DPAC
+from slm_design.neural_holography.modules import GS
 from slm_design.neural_holography.utils import phasemap_8bit
 from slm_design.neural_holography.augmented_image_loader import ImageLoader
 
-slm_device = DisplayDevices.HOLOEYE_LC_2012.value
+display_device = DisplayDevices.HOLOEYE_LC_2012.value
 
 
 # Set parameters
 distance = physical_params[PhysicalParams.PROPAGATION_DISTANCE]
 wavelength = physical_params[PhysicalParams.WAVELENGTH]
-feature_size = display_devices[slm_device][SlmParam.CELL_DIM]
+feature_size = display_devices[display_device][DisplayParam.CELL_DIM]
 iterations = 500
 
-slm_res = display_devices[slm_device][SlmParam.SLM_SHAPE]
+slm_res = display_devices[display_device][DisplayParam.SLM_SHAPE]
 image_res = slm_res
 
-roi_res = (620, 850)  # TODO about 80%
+roi_res = (round(slm_res[0] * 0.8), round(slm_res[1] * 0.8))
 
 
 @click.command()
 @click.option("--show_time", type=float, default=5.0, help="Time to show the pattern on the SLM.")
-def physical_prop_neural_holography(show_time):
+def physical_prop_gs(show_time):
     # Use GPU if detected in system
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -55,7 +55,7 @@ def physical_prop_neural_holography(show_time):
     )
 
     # Instantiate display object
-    D = display.create_display(slm_device)
+    D = display.create_display(display_device)
     D.set_show_time(show_time)
 
     # Load the the first image in the folder
@@ -72,7 +72,6 @@ def physical_prop_neural_holography(show_time):
     init_phase = (-0.5 + 1.0 * torch.rand(1, 1, *slm_res)).to(device)
 
     # Run Gerchberg-Saxton
-    print("--- Run Gerchberg-Saxton ---")
     gs = GS(distance, wavelength, feature_size, iterations, device=device)
     angles = gs(target_amp, init_phase).cpu().detach()
 
@@ -83,47 +82,11 @@ def physical_prop_neural_holography(show_time):
     final_phase_gs = lensless_to_lens(extended).angle()
 
     # Quantize the the angles, aka phase values, to a bit values
-    phase_out_8bit_gs = phasemap_8bit(final_phase_gs)
+    phase_out_8bit = phasemap_8bit(final_phase_gs)
 
     # Display
-    D.imshow(phase_out_8bit_gs)
-
-    # Run Stochastic Gradient Descent based method
-    print("--- Run SGD ---")
-    sgd = SGD(distance, wavelength, feature_size, iterations, roi_res, device=device)
-    angles = sgd(target_amp, init_phase).cpu().detach()
-
-    # Extend the computed angles, aka the phase values, to a complex tensor again
-    extended = extend_to_complex(angles)
-
-    # Transform the results to the hardware setting using a lens
-    final_phase_sgd = lensless_to_lens(extended).angle()
-
-    # Quantize the the angles, aka phase values, to a bit values
-    phase_out_8bit_sgd = phasemap_8bit(final_phase_sgd)
-
-    # Display
-    D.imshow(phase_out_8bit_sgd)
-
-    # Run Double Phase Amplitude Coding #TODO does not work, not even out of the
-    # box
-    print("--- Run DPAC (buggy) ---")
-    dpac = DPAC(distance, wavelength, feature_size, device=device)
-    _, angles = dpac(target_amp)
-    angles = angles.cpu().detach()
-
-    # Extend the computed angles, aka the phase values, to a complex tensor again
-    extended = extend_to_complex(angles)
-
-    # Transform the results to the hardware setting using a lens
-    final_phase_dpac = lensless_to_lens(extended).angle()
-
-    # Quantize the the angles, aka phase values, to a bit values
-    phase_out_8bit_dpac = phasemap_8bit(final_phase_dpac)
-
-    # Display
-    D.imshow(phase_out_8bit_dpac)
+    D.imshow(phase_out_8bit)
 
 
 if __name__ == "__main__":
-    physical_prop_neural_holography()
+    physical_prop_gs()

@@ -36,7 +36,7 @@ from PIL import Image
 
 from slm_controller.hardware import (
     DisplayDevices,
-    SlmParam,
+    DisplayParam,
     display_devices,
 )
 
@@ -49,13 +49,13 @@ from slm_design.hardware import (
 )
 
 import slm_design.neural_holography.utils as utils
-from slm_design.neural_holography.module import PhysicalProp
+from slm_design.neural_holography.modules import PhysicalProp
 from slm_design.neural_holography.propagation_model import ModelPropagate
 from slm_design.neural_holography.augmented_image_loader import ImageLoader
 from slm_design.neural_holography.utils_tensorboard import SummaryModelWriter
 
 cam_device = CamDevices.DUMMY.value
-slm_device = DisplayDevices.HOLOEYE_LC_2012.value
+display_device = DisplayDevices.HOLOEYE_LC_2012.value
 
 
 # Command line argument processing
@@ -107,11 +107,11 @@ prop_dist = physical_params[
     PhysicalParams.PROPAGATION_DISTANCE
 ]  # propagation distance from SLM plane to target plane
 wavelength = physical_params[PhysicalParams.WAVELENGTH]  # wavelength
-feature_size = display_devices[slm_device][SlmParam.CELL_DIM]  # SLM pitch
+feature_size = display_devices[display_device][DisplayParam.CELL_DIM]  # SLM pitch
 
-slm_res = display_devices[slm_device][SlmParam.SLM_SHAPE]  # resolution of SLM
+slm_res = display_devices[display_device][DisplayParam.SLM_SHAPE]  # resolution of SLM
 image_res = cam_devices[cam_device][CamParam.IMG_SHAPE]  # TODO slm.shape == image.shape?
-roi_res = (620, 850)  # regions of interest (to penalize) # TODO about 80%
+roi_res = (round(slm_res[0] * 0.8), round(slm_res[1] * 0.8))
 
 dtype = torch.float32  # default datatype (results may differ if using, e.g., float64)
 # device = "cuda" if torch.cuda.is_available() else "cpu" # TODO use gpu

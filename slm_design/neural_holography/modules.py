@@ -36,7 +36,7 @@ from slm_design.neural_holography.calibration_module import Calibration
 import platform
 
 cam_device = CamDevices.DUMMY.value
-slm_device = DisplayDevices.HOLOEYE_LC_2012.value
+display_device = DisplayDevices.HOLOEYE_LC_2012.value
 
 # my_os = platform.system()
 # if my_os == "Windows":
@@ -314,7 +314,7 @@ class DPAC(nn.Module):
     Functions as a pytorch module:
 
     >>> dpac = DPAC(...)
-    >>> _, final_phase = dpac(target_amp, target_phase)
+    >>> final_phase = dpac(target_amp, target_phase)
 
     target_amp: amplitude at the target plane, with dimensions [batch, 1, height, width]
     target_amp (optional): phase at the target plane, with dimensions [batch, 1, height, width]
@@ -357,7 +357,7 @@ class DPAC(nn.Module):
             self.precomputed_H = self.precomputed_H.to(self.dev).detach()
             self.precomputed_H.requires_grad = False
 
-        final_phase = double_phase_amplitude_coding(
+        return double_phase_amplitude_coding(
             target_phase,
             target_amp,
             self.prop_dist,
@@ -367,7 +367,6 @@ class DPAC(nn.Module):
             propagator=self.prop,
             precomputed_H=self.precomputed_H,
         )
-        return None, final_phase
 
     @property
     def phase_path(self):
@@ -435,7 +434,7 @@ class PhysicalProp(nn.Module):
         # self.slm = SLMDisplay()
         # self.slm.connect()
         self.slm_settle_time = slm_settle_time
-        self.slm = display.create_display(slm_device)
+        self.slm = display.create_display(display_device)
         self.slm.set_show_time(slm_settle_time)
 
         # # 3. Connect to the Arduino that switches rgb color through the laser control box.

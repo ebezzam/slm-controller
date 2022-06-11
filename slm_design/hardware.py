@@ -1,7 +1,7 @@
 from enum import Enum
 
 # Physical parameters relevant for the propagation
-class PhysicalParams(Enum):  # TODO better place
+class PhysicalParams(Enum):  # TODO better place?
     WAVELENGTH = "wavelength"
     PROPAGATION_DISTANCE = "prop_distance"
 

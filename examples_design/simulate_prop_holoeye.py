@@ -3,7 +3,14 @@ Simulated propagation of the slm pattern generated using the holoeye software.
 """
 
 from slm_design.utils import show_plot
-from slm_design.simulate_prop import lens_prop, lensless_prop
+from slm_design.simulate_prop import (
+    lens_prop,
+    lensless_prop,
+    wave_prop_angular_spectrum,
+    wave_prop_direct_integration,
+    wave_prop_fraunhofer,
+    wave_prop_fresnel,
+)
 from slm_design.transform_fields import (
     load_holoeye_slm_pattern,
     lens_to_lensless,
@@ -15,11 +22,30 @@ def simulate_prop_holoeye():
     holoeye_slm_field = load_holoeye_slm_pattern()
 
     # Make it compliant with the data structure used in the project
-    slm_field = holoeye_slm_field[0, 0, :, :]
+    slm_field = holoeye_slm_field[0, 0, :, :]  # TODO improve this data structure!
 
     # Simulate the propagation in the lens setting and show the results
     propped_slm_field = lens_prop(holoeye_slm_field)[0, 0, :, :]
     show_plot(slm_field, propped_slm_field, "Holoeye with lens")
+
+    # TODO test this
+    # ==========================================================================
+    # Simulate the propagation in the lens setting and show the results
+    propped_slm_field = wave_prop_fraunhofer(holoeye_slm_field)[0, 0, :, :]
+    show_plot(slm_field, propped_slm_field, "Holoeye with lens")
+
+    # Simulate the propagation in the lens setting and show the results
+    propped_slm_field = wave_prop_angular_spectrum(holoeye_slm_field)[0, 0, :, :]
+    show_plot(slm_field, propped_slm_field, "Holoeye with lens")
+
+    # Simulate the propagation in the lens setting and show the results
+    propped_slm_field = wave_prop_fresnel(holoeye_slm_field)[0, 0, :, :]
+    show_plot(slm_field, propped_slm_field, "Holoeye with lens")
+
+    # Simulate the propagation in the lens setting and show the results
+    propped_slm_field = wave_prop_direct_integration(holoeye_slm_field)[0, 0, :, :]
+    show_plot(slm_field, propped_slm_field, "Holoeye with lens")
+    # ==========================================================================
 
     # Transform the initial phase map to the lensless setting
     holoeye_slm_field = lens_to_lensless(holoeye_slm_field)
