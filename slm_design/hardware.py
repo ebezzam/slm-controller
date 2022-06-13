@@ -23,7 +23,7 @@ class CamDevices(Enum):
 
     @staticmethod
     def values():
-        return [cam.value for cam in CamDevices]
+        return [device.value for device in CamDevices]
 
 
 # Parameters of those cameras
@@ -33,11 +33,6 @@ class CamParam:
 
 # Actual values of those parameters for all the cameras
 cam_devices = {
-    CamDevices.DUMMY.value: {
-        # CamParam.IMG_SHAPE: slm_display_devices[
-        #     SlmDisplayDevices.HOLOEYE_LC_2012.value
-        # ][SlmParam.SLM_SHAPE]
-        CamParam.IMG_SHAPE: (1216, 1936)
-    },
+    CamDevices.DUMMY.value: {CamParam.IMG_SHAPE: (1216, 1936)},
     CamDevices.IDS.value: {CamParam.IMG_SHAPE: (1216, 1936)},
 }

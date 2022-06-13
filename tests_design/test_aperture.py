@@ -1,11 +1,11 @@
 import pytest
-from slm_controller.slm import SLM
-from slm_controller.aperture import rect_aperture
+from slm_design.slm import SLM
+from slm_design.aperture import rect_aperture
 
 
 class TestAperture:
     """
-    Test :py:module:`~slm_controller.aperture`.
+    Test :py:module:`~slm_design.aperture`.
     """
 
     def test_rect_aperture(self):

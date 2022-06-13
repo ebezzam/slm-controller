@@ -2,18 +2,15 @@
 Simulated propagation of slm patterns generated using the DPAC algorithm.
 """
 
-from slm_design.utils import show_plot
+from slm_design.utils import extend_to_complex, show_plot
 from slm_design.simulate_prop import lens_prop, lensless_prop
-from slm_design.transform_fields import (
-    lensless_to_lens,
-    extend_to_complex,
-)
+from slm_design.transform_fields import lensless_to_lens
 import torch
 
 from slm_controller.hardware import (
-    DisplayDevices,
-    DisplayParam,
-    display_devices,
+    SLMDevices,
+    SLMParam,
+    slm_devices,
 )
 from slm_design.hardware import (
     physical_params,
@@ -22,16 +19,16 @@ from slm_design.hardware import (
 from slm_design.neural_holography.modules import DPAC
 from slm_design.neural_holography.augmented_image_loader import ImageLoader
 
-display_device = DisplayDevices.HOLOEYE_LC_2012.value
+slm_device = SLMDevices.HOLOEYE_LC_2012.value
 
 
 def simulate_prop_dpac():
     # Set parameters
     distance = physical_params[PhysicalParams.PROPAGATION_DISTANCE]
     wavelength = physical_params[PhysicalParams.WAVELENGTH]
-    feature_size = display_devices[display_device][DisplayParam.CELL_DIM]
+    feature_size = slm_devices[slm_device][SLMParam.CELL_DIM]
 
-    slm_res = display_devices[display_device][DisplayParam.SLM_SHAPE]
+    slm_res = slm_devices[slm_device][SLMParam.SLM_SHAPE]
     image_res = slm_res
     roi_res = (round(slm_res[0] * 0.8), round(slm_res[1] * 0.8))
 

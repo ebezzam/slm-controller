@@ -35,9 +35,9 @@ import torch.optim as optim
 from PIL import Image
 
 from slm_controller.hardware import (
-    DisplayDevices,
-    DisplayParam,
-    display_devices,
+    SLMDevices,
+    SLMParam,
+    slm_devices,
 )
 
 from slm_design.hardware import (
@@ -55,7 +55,7 @@ from slm_design.neural_holography.augmented_image_loader import ImageLoader
 from slm_design.neural_holography.utils_tensorboard import SummaryModelWriter
 
 cam_device = CamDevices.DUMMY.value
-display_device = DisplayDevices.HOLOEYE_LC_2012.value
+slm_device = SLMDevices.HOLOEYE_LC_2012.value
 
 
 # Command line argument processing
@@ -107,15 +107,15 @@ prop_dist = physical_params[
     PhysicalParams.PROPAGATION_DISTANCE
 ]  # propagation distance from SLM plane to target plane
 wavelength = physical_params[PhysicalParams.WAVELENGTH]  # wavelength
-feature_size = display_devices[display_device][DisplayParam.CELL_DIM]  # SLM pitch
+feature_size = slm_devices[slm_device][SLMParam.CELL_DIM]  # SLM pitch
 
-slm_res = display_devices[display_device][DisplayParam.SLM_SHAPE]  # resolution of SLM
+slm_res = slm_devices[slm_device][SLMParam.SLM_SHAPE]  # resolution of SLM
 image_res = cam_devices[cam_device][CamParam.IMG_SHAPE]  # TODO slm.shape == image.shape?
 roi_res = (round(slm_res[0] * 0.8), round(slm_res[1] * 0.8))
 
 dtype = torch.float32  # default datatype (results may differ if using, e.g., float64)
-# device = "cuda" if torch.cuda.is_available() else "cpu" # TODO use gpu
-device = torch.device("cpu")
+# device = "cuda" if torch.cuda.is_available() else "cpu" #TODO gpu is too small
+device = "cpu"
 
 # Options for the algorithm
 lr_s_phase = opt.lr_phase / 200
@@ -321,30 +321,23 @@ for e in range(opt.num_epochs):
                 recon_amp, target_shape=roi_res, pytorch=True, stacked_complex=False
             )
 
+            # ---------------------------------
             # TODO not sure about rescaling etc.
             camera_amp_scaled = torch.empty(
-                (camera_amp.shape[0], camera_amp.shape[1], slm_res[0], slm_res[1])
+                (camera_amp.shape[0], camera_amp.shape[1], slm_res[0], slm_res[1]), device=device,
             )
-
-            # print(camera_amp_scaled.shape)
 
             for p in range(camera_amp.shape[0]):
                 for c in range(camera_amp.shape[1]):
-                    im = Image.fromarray(camera_amp[p, c].numpy())
-                    # print(im.size)
+                    im = Image.fromarray(camera_amp[p, c].cpu().numpy())
                     im = im.resize(
                         (slm_res[1], slm_res[0]), Image.BICUBIC,  # Pillow uses width, height
                     )
-                    # print(im.size)
-                    camera_amp_scaled[p, c] = torch.from_numpy(np.array(im))
+                    camera_amp_scaled[p, c] = torch.from_numpy(np.array(im)).to(device)
 
             camera_amp = utils.crop_image(
                 camera_amp_scaled, target_shape=roi_res, pytorch=True, stacked_complex=False,
             )
-            # print(camera_amp.shape)
-            # print(model_amp.shape)
-
-            # TODO WARNING:root:NaN or Inf found in input tensor.
             # ---------------------------------
 
             # calculate loss and backpropagate to model parameters
@@ -352,7 +345,7 @@ for e in range(opt.num_epochs):
             loss_value_model.backward()
             optimizer_model.step()
 
-        # write to tensorboard
+        # write to tensorboard #TODO WARNING:root:NaN or Inf found in input tensor.
         with torch.no_grad():
             if i % 50 == 0:
                 writer.add_scalar("Scale/sa", sa, i_acc)

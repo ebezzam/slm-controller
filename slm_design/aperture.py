@@ -1,7 +1,7 @@
 import numpy as np
 from enum import Enum
 
-from slm_controller.slm import SLM
+from slm_design.slm import SLM
 
 
 class ApertureOptions(Enum):
@@ -33,7 +33,7 @@ def rect_aperture(slm_shape, cell_dim, apert_dim, center=None):
 
     Returns
     -------
-    slm : :py:class:`~slm_controller.slm.SLM`
+    slm : :py:class:`~slm_design.slm.SLM`
         SLM object with cells programmed to desired rectangular aperture.
 
     """
@@ -97,7 +97,7 @@ def line_aperture(slm_shape, cell_dim, length, vertical=True, center=None):
 
     Returns
     -------
-    slm : :py:class:`~slm_controller.slm.SLM`
+    slm : :py:class:`~slm_design.slm.SLM`
         SLM object with cells programmed to desired line aperture.
 
     """
@@ -125,7 +125,7 @@ def square_aperture(slm_shape, cell_dim, side, center=None):
 
     Returns
     -------
-    slm : :py:class:`~slm_controller.slm.SLM`
+    slm : :py:class:`~slm_design.slm.SLM`
         SLM object with cells programmed to desired square aperture.
 
     """
@@ -150,7 +150,7 @@ def circ_aperture(slm_shape, cell_dim, radius, center=None):
 
     Returns
     -------
-    slm : :py:class:`~slm_controller.slm.SLM`
+    slm : :py:class:`~slm_design.slm.SLM`
         SLM object with cells programmed to desired circle aperture.
 
     """

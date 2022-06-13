@@ -2,16 +2,17 @@
 Set aperture example.
 """
 
+from email.policy import default
 import click
-from slm_controller.display import create_display
-from slm_controller.aperture import (
+from slm import create_slm
+from slm_design.aperture import (
     rect_aperture,
     line_aperture,
     square_aperture,
     circ_aperture,
     ApertureOptions,
 )
-from slm_controller.hardware import display_devices, DisplayDevices, DisplayParam
+from slm_controller.hardware import slm_devices, SLMDevices, SLMParam
 
 
 @click.command()
@@ -45,7 +46,7 @@ from slm_controller.hardware import display_devices, DisplayDevices, DisplayPara
 )
 @click.option(
     "--device",
-    type=click.Choice(DisplayDevices.values()),
+    type=click.Choice(SLMDevices.values()),
     help="Which device to program with aperture.",
 )
 def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
@@ -53,8 +54,8 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
     Set aperture on a physical device.
     """
 
-    # TODO handle device == null
-
+    if device is None:
+        device = SLMDevices.ADAFRUIT_RGB.value
     if rect_shape is None:
         rect_shape = []
     if center is None:
@@ -67,9 +68,9 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
         raise ValueError("Received [vertical] flag, but [shape] parameters is not 'line'.")
 
     # print device info
-    device_config = display_devices[device]
-    cell_dim = device_config[DisplayParam.CELL_DIM]
-    print(f"SLM dimension : {device_config[DisplayParam.SLM_SHAPE]}")
+    device_config = slm_devices[device]
+    cell_dim = device_config[SLMParam.CELL_DIM]
+    print(f"SLM dimension : {device_config[SLMParam.SLM_SHAPE]}")
     print(f"Cell dim (m) : {cell_dim}")
     if shape == ApertureOptions.LINE.value:
         if vertical:
@@ -91,24 +92,24 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
         ap = line_aperture(
             length=length,
             vertical=vertical,
-            slm_shape=device_config[DisplayParam.SLM_SHAPE],
-            cell_dim=device_config[DisplayParam.CELL_DIM],
+            slm_shape=device_config[SLMParam.SLM_SHAPE],
+            cell_dim=device_config[SLMParam.CELL_DIM],
             center=center,
         )
     elif shape == ApertureOptions.SQUARE.value:
         print(f"Side length : {n_cells}")
         ap = square_aperture(
             side=n_cells * cell_dim[0],
-            slm_shape=device_config[DisplayParam.SLM_SHAPE],
-            cell_dim=device_config[DisplayParam.CELL_DIM],
+            slm_shape=device_config[SLMParam.SLM_SHAPE],
+            cell_dim=device_config[SLMParam.CELL_DIM],
             center=center,
         )
     elif shape == ApertureOptions.CIRC.value:
         print(f"Radius : {n_cells}")
         ap = circ_aperture(
             radius=n_cells * cell_dim[0],
-            slm_shape=device_config[DisplayParam.SLM_SHAPE],
-            cell_dim=device_config[DisplayParam.CELL_DIM],
+            slm_shape=device_config[SLMParam.SLM_SHAPE],
+            cell_dim=device_config[SLMParam.CELL_DIM],
             center=center,
         )
     elif shape == ApertureOptions.RECT.value:
@@ -119,18 +120,18 @@ def set_aperture(shape, n_cells, rect_shape, center, vertical, device):
         apert_dim = rect_shape[0] * cell_dim[0], rect_shape[1] * cell_dim[1]
         ap = rect_aperture(
             apert_dim=apert_dim,
-            slm_shape=device_config[DisplayParam.SLM_SHAPE],
-            cell_dim=device_config[DisplayParam.CELL_DIM],
+            slm_shape=device_config[SLMParam.SLM_SHAPE],
+            cell_dim=device_config[SLMParam.CELL_DIM],
             center=center,
         )
     assert ap is not None
 
     # set aperture to device
-    D = create_display(device_key=device)
-    if device_config[DisplayParam.MONOCHROME]:
-        D.imshow(ap.grayscale_values)
+    slm = create_slm(device_key=device)
+    if device_config[SLMParam.MONOCHROME]:
+        slm.imshow(ap.grayscale_values)
     else:
-        D.imshow(ap.values)
+        slm.imshow(ap.values)
 
 
 if __name__ == "__main__":

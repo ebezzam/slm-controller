@@ -12,12 +12,12 @@ Technical Paper:
 Y. Peng, S. Choi, N. Padmanaban, G. Wetzstein. Neural Holography with Camera-in-the-loop Training. ACM TOG (SIGGRAPH Asia), 2020.
 """
 
-from slm_controller.hardware import DisplayDevices
+from slm_controller.hardware import SLMDevices
 from slm_design.hardware import CamDevices
 
 import torch
 import torch.nn as nn
-from slm_controller import display
+from slm_controller import slm
 from slm_design import camera
 
 from slm_design.neural_holography.algorithms import (
@@ -36,7 +36,7 @@ from slm_design.neural_holography.calibration_module import Calibration
 import platform
 
 cam_device = CamDevices.DUMMY.value
-display_device = DisplayDevices.HOLOEYE_LC_2012.value
+slm_device = SLMDevices.HOLOEYE_LC_2012.value
 
 # my_os = platform.system()
 # if my_os == "Windows":
@@ -434,7 +434,7 @@ class PhysicalProp(nn.Module):
         # self.slm = SLMDisplay()
         # self.slm.connect()
         self.slm_settle_time = slm_settle_time
-        self.slm = display.create_display(display_device)
+        self.slm = slm.create_slm(slm_device)
         self.slm.set_show_time(slm_settle_time)
 
         # # 3. Connect to the Arduino that switches rgb color through the laser control box.
@@ -553,7 +553,7 @@ class PhysicalProp(nn.Module):
 
         # display on SLM and sleep for 0.1s
         # self.slm.show_data_from_array(slm_phase)
-        self.slm.imshow(slm_phase)  # TODO emulate show time in matplotlib
+        self.slm.imshow(slm_phase)
 
         time.sleep(self.slm_settle_time)
 

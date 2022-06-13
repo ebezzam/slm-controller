@@ -4,10 +4,10 @@ Physical propagation of the slm pattern generated using the holoeye software.
 
 
 import click
-from slm_controller.hardware import DisplayDevices
-from slm_controller import display
+from slm_controller.hardware import SLMDevices
+from slm_controller import slm
 import slm_design.neural_holography.utils as utils
-from slm_design.transform_fields import load_holoeye_slm_pattern
+from slm_design.utils import load_holoeye_slm_pattern
 
 
 @click.command()
@@ -18,11 +18,11 @@ def physical_prop_holoeye(show_time):
     holoeye_slm_field = utils.phasemap_8bit(holoeye_slm_field)
 
     # Initialize slm
-    D = display.create_display(DisplayDevices.HOLOEYE_LC_2012.value)
-    D.set_show_time(show_time)
+    s = slm.create_slm(SLMDevices.HOLOEYE_LC_2012.value)
+    s.set_show_time(show_time)
 
     # display
-    D.imshow(holoeye_slm_field)
+    s.imshow(holoeye_slm_field)
 
 
 if __name__ == "__main__":

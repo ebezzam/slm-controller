@@ -1,12 +1,11 @@
 import torch
 import numpy as np
-from PIL import Image
 import math
 
 from slm_controller.hardware import (
-    DisplayDevices,
-    DisplayParam,
-    display_devices,
+    SLMDevices,
+    SLMParam,
+    slm_devices,
 )
 
 from slm_design.hardware import (
@@ -16,89 +15,37 @@ from slm_design.hardware import (
 
 import slm_design.neural_holography.utils as utils
 
-display_device = DisplayDevices.HOLOEYE_LC_2012.value
+slm_device = SLMDevices.HOLOEYE_LC_2012.value
 
 
-def load_holoeye_slm_pattern(
-    path="images/holoeye_phase_map/holoeye_logo_slm_pattern.png",
-):
+def __compute_H():
     """
-    Load a phase map generate with holoeye software and transform it into a
-    compliant form.
+    https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/propagation_ASM.py
 
-    Parameters
-    ----------
-    path : str, optional
-        The path to the phase map to load, by default
-        "images/holoeye_phase_map/holoeye_logo_slm_pattern.png"
-
-    Returns
-    -------
-    torch.Tensor
-        The phase map transformed into a compliant form
-    """
-    im = Image.open(path)
-    im = torch.from_numpy(np.array(im)).type(torch.FloatTensor)
-    im = torch.mean(im, axis=2)
-
-    max_val = torch.max(im)
-    angles = (im / max_val) * (2 * np.pi) - np.pi
-
-    holoeye_slm_field = extend_to_complex(angles)
-
-    return holoeye_slm_field[None, None, :, :]
-
-
-def extend_to_complex(angles):
-    """
-    Extend a tensor of angles into a complex tensor where the angles are used in
-    the polar form for complex numbers and the respective magnitudes are set to
-    1.
-
-    Parameters
-    ----------
-    angles : torch.Tensor
-        The tensor of angles to be used in the polar form
-
-    Returns
-    -------
-    torch.Tensor
-        The extended complex tensor
-    """
-    mags = torch.ones_like(angles)
-    return torch.polar(mags, angles)
-
-
-"""
-https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/propagation_ASM.py
-
-This code and data is released under the Creative Commons Attribution-NonCommercial 4.0 International license (CC BY-NC.) In a nutshell:
-    # The license is only for non-commercial use (commercial licenses can be obtained from Stanford).
-    # The material is provided as-is, with no warranties whatsoever.
-    # If you publish any code, data, or scientific work based on this, please cite our work.
-
-Technical Paper:
-Y. Peng, S. Choi, N. Padmanaban, G. Wetzstein. Neural Holography with Camera-in-the-loop Training. ACM TOG (SIGGRAPH Asia), 2020.
-"""
-
-
-def compute_H():
-    """
     Compute H which is used in neural holography code, core is imported as is.
+
+    This code and data is released under the Creative Commons Attribution-NonCommercial 4.0 International license (CC BY-NC.) In a nutshell:
+        # The license is only for non-commercial use (commercial licenses can be obtained from Stanford).
+        # The material is provided as-is, with no warranties whatsoever.
+        # If you publish any code, data, or scientific work based on this, please cite our work.
+
+    Technical Paper:
+    Y. Peng, S. Choi, N. Padmanaban, G. Wetzstein. Neural Holography with Camera-in-the-loop Training. ACM TOG (SIGGRAPH Asia), 2020.
 
     Returns
     -------
     torch.Tensor
         H (#TODO probably for homography)
     """
+
     prop_dist = physical_params[PhysicalParams.PROPAGATION_DISTANCE]
     wavelength = physical_params[PhysicalParams.WAVELENGTH]
 
     # number of pixels
-    num_y, num_x = display_devices[display_device][DisplayParam.SLM_SHAPE]
+    num_y, num_x = slm_devices[slm_device][SLMParam.SLM_SHAPE]
 
     # sampling interval size
-    dy, dx = display_devices[display_device][DisplayParam.CELL_DIM]
+    dy, dx = slm_devices[slm_device][SLMParam.CELL_DIM]
 
     # size of the field
     y, x = (dy * float(num_y), dx * float(num_x))
@@ -155,7 +102,8 @@ def lens_to_lensless(holoeye_slm_field):
     torch.Tensor
         The transformed phase map
     """
-    H = compute_H()
+
+    H = __compute_H()
 
     return utils.fftshift(
         torch.fft.ifftn(
@@ -186,7 +134,7 @@ def lensless_to_lens(neural_holography_slm_field):
     torch.Tensor
         The transformed phase map
     """
-    H = compute_H()
+    H = __compute_H()
 
     return torch.fft.ifftn(
         torch.fft.ifftn(

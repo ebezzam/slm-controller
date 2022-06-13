@@ -2,10 +2,10 @@
 Binary display example.
 """
 
-from slm_controller.hardware import DisplayDevices
+from slm_controller.hardware import SLMDevices
 import numpy as np
 import click
-from slm_controller import display, utils
+from slm_controller import utils, slm
 
 
 @click.command()
@@ -14,20 +14,20 @@ from slm_controller import display, utils
 def nokia_display_example(file_path, not_original_ratio):
 
     # instantiate display object
-    D = display.create_display(DisplayDevices.NOKIA_5110.value)
+    s = slm.create_slm(SLMDevices.NOKIA_5110.value)
 
     # prepare image data
     if file_path is not None:
         keep_aspect_ratio = not not_original_ratio
         image = utils.load_image(
-            file_path, output_shape=D.shape, keep_aspect_ratio=keep_aspect_ratio, grayscale=True,
+            file_path, output_shape=s.shape, keep_aspect_ratio=keep_aspect_ratio, grayscale=True,
         )
     else:
         # random mask
-        image = np.random.rand(*D.shape)
+        image = np.random.rand(*s.shape)
 
     # display
-    D.imshow(image)
+    s.imshow(image)
 
 
 if __name__ == "__main__":

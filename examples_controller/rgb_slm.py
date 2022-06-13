@@ -2,10 +2,10 @@
 RGB display example.
 """
 
-from slm_controller.hardware import DisplayDevices
+from slm_controller.hardware import SLMDevices
 import numpy as np
 import click
-from slm_controller import display, utils
+from slm_controller import utils, slm
 
 
 @click.command()
@@ -15,15 +15,15 @@ from slm_controller import display, utils
 def rgb_display_example(fp, rgb, not_original_ratio):
 
     # instantiate display object
-    D = display.create_display(DisplayDevices.ADAFRUIT_RGB.value)
+    s = slm.create_slm(SLMDevices.ADAFRUIT_RGB.value)
 
     # prepare image data
     if fp is not None:
         keep_aspect_ratio = not not_original_ratio
-        image = utils.load_image(fp, output_shape=D.shape, keep_aspect_ratio=keep_aspect_ratio)
+        image = utils.load_image(fp, output_shape=s.shape, keep_aspect_ratio=keep_aspect_ratio)
 
     else:
-        image = np.random.rand(3, *D.shape) if rgb else np.random.rand(*D.shape)
+        image = np.random.rand(3, *s.shape) if rgb else np.random.rand(*s.shape)
         # save new pattern
         fp = "slm_pattern.npy"
         np.save(fp, image)
@@ -31,7 +31,7 @@ def rgb_display_example(fp, rgb, not_original_ratio):
 
     # display
     print(f"Image shape : {image.shape}")
-    D.imshow(image)
+    s.imshow(image)
 
 
 if __name__ == "__main__":

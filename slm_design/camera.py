@@ -288,11 +288,11 @@ def create_camera(device_key):
     """
     assert device_key in CamDevices.values()
 
-    cam = None
+    cam_device = None
     if device_key == CamDevices.DUMMY.value:
-        cam = DummyCamera()
+        cam_device = DummyCamera()
     elif device_key == CamDevices.IDS.value:
-        cam = IDSCamera()
+        cam_device = IDSCamera()
 
-    assert cam is not None
-    return cam
+    assert cam_device is not None
+    return cam_device

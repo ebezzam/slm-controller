@@ -1,4 +1,4 @@
-from slm_controller.slm import SLM
+from slm_design.slm import SLM
 import numpy as np
 
 
@@ -8,7 +8,7 @@ s = SLM(shape=(dim, dim), cell_dim=(1, 1))
 
 class TestSLM:
     """
-    Test :py:module:`~slm_controller.slm.SLM`.
+    Test :py:module:`~slm_design.slm.SLM`.
     """
 
     def test_row_indexing(self):

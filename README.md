@@ -392,12 +392,12 @@ python examples/simulate_prop_neural_holography.py
 
 ### Adding a new SLM
 
-1. Add configuration in `slm_controller/hardware.py:slm_display_devices`.
-2. Create class in `slm_controller/display.py`.
-3. Add to factory method `create_display` in `slm_controller/display.py`.
+1. Add configuration in `slm_controller/hardware.py:slm_devices`.
+2. Create class in `slm_controller/slm.py`.
+3. Add to factory method `create_slm` in `slm_controller/slm.py`.
 
 ### Adding a new camera
 
-1. Add configuration in `slm_controller/hardware.py:cam_devices`.
-2. Create class in `slm_controller/camera.py`.
-3. Add to factory method `create_camera` in `slm_controller/camera.py`.
+1. Add configuration in `slm_design/hardware.py:cam_devices`.
+2. Create class in `slm_design/camera.py`.
+3. Add to factory method `create_camera` in `slm_design/camera.py`.
