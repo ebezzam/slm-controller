@@ -8,12 +8,15 @@ setuptools.setup(
     version="0.0.1",
     author="Eric Bezzam",
     author_email="ebezzam@gmail.com",
-    description="Package to control spatial light modulator with Raspberry Pi.",
+    description="Package to control spatial light modulators with Raspberry Pi.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ebezzam/slm-controller",
     packages=setuptools.find_packages(),
-    classifiers=["Programming Language :: Python :: 3", "Operating System :: OS Independent",],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent",
+    ],  # TODO Windows dependent
     python_requires=">=3.6",
     install_requires=[
         "adafruit-circuitpython-rgb-display",

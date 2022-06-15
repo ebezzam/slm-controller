@@ -1,6 +1,6 @@
 from enum import Enum
 
-# Slm display devices that are implemented in this project
+# Slm devices that are implemented in this project
 class SLMDevices(Enum):
     ADAFRUIT_RGB = "rgb"
     ADAFRUIT_BINARY = "binary"
@@ -12,7 +12,7 @@ class SLMDevices(Enum):
         return [device.value for device in SLMDevices]
 
 
-# Parameters of those display slms
+# Parameters of those slms
 class SLMParam:
     CELL_DIM = "cell_dim"
     SLM_SHAPE = "slm_shape"
@@ -23,14 +23,14 @@ class SLMParam:
 
 # Actual values of those parameters for all the slms
 slm_devices = {
-    # 1.8 inch RGB display by Adafruit: https://learn.adafruit.com/1-8-tft-display/overview
+    # 1.8 inch RGB SLM by Adafruit: https://learn.adafruit.com/1-8-tft-display/overview
     # datasheet: https://cdn-shop.adafruit.com/datasheets/JD-T1800.pdf
     SLMDevices.ADAFRUIT_RGB.value: {
         SLMParam.CELL_DIM: (0.18e-3, 0.18e-3),
         SLMParam.SLM_SHAPE: (128, 160),
         SLMParam.MONOCHROME: False,
     },
-    # 1.3 inch monochrome display by Adafruit:
+    # 1.3 inch monochrome SLM by Adafruit:
     # https://learn.adafruit.com/adafruit-sharp-memory-display-breakout
     # datasheet: https://cdn-shop.adafruit.com/product-files/3502/Data+sheet.pdf
     SLMDevices.ADAFRUIT_BINARY.value: {

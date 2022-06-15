@@ -1,5 +1,5 @@
 """
-Binary display example.
+Binary SLM example.
 """
 
 from slm_controller.hardware import SLMDevices
@@ -11,9 +11,9 @@ from slm_controller import slm, utils
 @click.command()
 @click.option("--file_path", type=str, default=None)
 @click.option("--not_original_ratio", is_flag=True)
-def monochrome_display_example(file_path, not_original_ratio):
+def monochrome_slm_example(file_path, not_original_ratio):
 
-    # instantiate display object
+    # instantiate SLM object
     s = slm.create_slm(SLMDevices.ADAFRUIT_BINARY.value)
 
     # prepare image data
@@ -31,4 +31,4 @@ def monochrome_display_example(file_path, not_original_ratio):
 
 
 if __name__ == "__main__":
-    monochrome_display_example()
+    monochrome_slm_example()

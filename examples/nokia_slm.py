@@ -1,5 +1,5 @@
 """
-Binary display example.
+Binary SLM example.
 """
 
 from slm_controller.hardware import SLMDevices
@@ -11,9 +11,9 @@ from slm_controller import utils, slm
 @click.command()
 @click.option("--file_path", type=str, default=None)
 @click.option("--not_original_ratio", is_flag=True)
-def nokia_display_example(file_path, not_original_ratio):
+def nokia_SLM_example(file_path, not_original_ratio):
 
-    # instantiate display object
+    # instantiate SLM object
     s = slm.create_slm(SLMDevices.NOKIA_5110.value)
 
     # prepare image data
@@ -31,4 +31,4 @@ def nokia_display_example(file_path, not_original_ratio):
 
 
 if __name__ == "__main__":
-    nokia_display_example()
+    nokia_SLM_example()

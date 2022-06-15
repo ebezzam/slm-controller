@@ -29,7 +29,7 @@ class SLM:
         Returns
         -------
         sh : tuple(int)
-            (N_height, N_width) display dimensions [pixels]
+            (N_height, N_width) SLM dimensions [pixels]
         """
         return self._height, self._width
 
@@ -120,11 +120,11 @@ class RGBSLM(SLM):
                 SLMParam.SLM_SHAPE
             ]
 
-            warnings.warn("Failed to load display. Using virtual device...")
+            warnings.warn("Failed to load SLM. Using virtual device...")
 
     def clear(self):
         """
-        Clear display.
+        Clear SLM.
         """
         I = Image.new("RGB", (self.width, self.height))
 
@@ -219,11 +219,11 @@ class BinarySLM(SLM):
             )
 
         except:
-            raise IOError("Failed to load display.")
+            raise IOError("Failed to load SLM.")
 
     def clear(self):
         """
-        Clear display.
+        Clear SLM.
         """
         self._slm.fill(1)
         self._slm.show()
@@ -319,11 +319,11 @@ class NokiaSLM(SLM):
             ]
 
         except:
-            raise IOError("Failed to load display.")
+            raise IOError("Failed to load SLM.")
 
     def clear(self):
         """
-        Clear display.
+        Clear SLM.
         """
         self._slm.fill(1)
         self._slm.show()
@@ -392,7 +392,7 @@ class HoloeyeSLM(SLM):
         if not self._virtual and not self._slm.requiresVersion(3):
             self._virtual = True
             warnings.warn(
-                "Failed to load display because the LC 2012 requires version 3 of its SDK. Using virtual device..."
+                "Failed to load SLM because the LC 2012 requires version 3 of its SDK. Using virtual device..."
             )
 
         # Detect slms and open a window on the selected slm
@@ -405,7 +405,7 @@ class HoloeyeSLM(SLM):
             # Otherwise use again a virtual device
             self._virtual = True
             warnings.warn(
-                f"Failed to load display: {self._slm.errorString(error)}. Using virtual device..."
+                f"Failed to load SLM: {self._slm.errorString(error)}. Using virtual device..."
             )
 
     def __del__(self):
@@ -427,7 +427,7 @@ class HoloeyeSLM(SLM):
 
     def clear(self):
         """
-        Clear display aka show black screen.
+        Clear SLM aka show black screen.
         """
 
         # Configure the blank screen value

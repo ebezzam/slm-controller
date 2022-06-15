@@ -1,5 +1,5 @@
 """
-RGB display example.
+RGB SLM example.
 """
 
 from slm_controller.hardware import SLMDevices
@@ -12,9 +12,9 @@ from slm_controller import utils, slm
 @click.option("--fp", type=str, default=None)
 @click.option("--rgb", is_flag=True)
 @click.option("--not_original_ratio", is_flag=True)
-def rgb_display_example(fp, rgb, not_original_ratio):
+def rgb_slm_example(fp, rgb, not_original_ratio):
 
-    # instantiate display object
+    # instantiate SLM object
     s = slm.create_slm(SLMDevices.ADAFRUIT_RGB.value)
 
     # prepare image data
@@ -35,4 +35,4 @@ def rgb_display_example(fp, rgb, not_original_ratio):
 
 
 if __name__ == "__main__":
-    rgb_display_example()
+    rgb_slm_example()
