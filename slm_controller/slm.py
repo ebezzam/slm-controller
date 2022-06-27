@@ -5,15 +5,18 @@ from PIL import Image, ImageDraw
 import time
 import matplotlib.pyplot as plt
 
-
 from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
-import slm_controller.holoeye.detect_heds_module_path
-from holoeye import slmdisplaysdk
+
+try:
+    import slm_controller.holoeye.detect_heds_module_path
+    from holoeye import slmdisplaysdk
+except ImportError:
+    warnings.warn("Failed to import Holoeye SLM SDK.")
 
 
 class SLM:
     def __init__(self):
-        pass
+        self._slm = None
 
     @property
     def height(self):
@@ -79,7 +82,10 @@ class RGBSLM(SLM):
 
         if rotation not in (0, 90, 180, 270):
             raise ValueError("Rotation must be 0/90/180/270")
-        self._virtual = False
+
+        self._height, self._width = slm_devices[SLMDevices.ADAFRUIT_RGB.value][
+            SLMParam.SLM_SHAPE
+        ]
 
         try:
             import board
@@ -115,25 +121,22 @@ class RGBSLM(SLM):
                 self._width = self._slm.width
                 self._height = self._slm.height
         except:
-            self._virtual = True
-            self._height, self._width = slm_devices[SLMDevices.ADAFRUIT_RGB.value][
-                SLMParam.SLM_SHAPE
-            ]
-
+            self._slm = None
             warnings.warn("Failed to load SLM. Using virtual device...")
 
     def clear(self):
         """
         Clear SLM.
         """
-        I = Image.new("RGB", (self.width, self.height))
+        if self._slm:
+            I = Image.new("RGB", (self.width, self.height))
 
-        # Get drawing object to draw on image.
-        draw = ImageDraw.Draw(I)
+            # Get drawing object to draw on image.
+            draw = ImageDraw.Draw(I)
 
-        # Draw a black filled box to clear the image.
-        draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
-        self._slm.image(I)
+            # Draw a black filled box to clear the image.
+            draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
+            self._slm.image(I)
 
     def imshow(self, I):
         """
@@ -154,8 +157,7 @@ class RGBSLM(SLM):
         assert I.ndim in (2, 3)
         assert I.shape[-2:] == self.shape
 
-        if not self._virtual:
-
+        if self._slm:
             self.clear()
 
             try:
@@ -171,10 +173,7 @@ class RGBSLM(SLM):
                 raise ValueError("Parameter[I]: unsupported data")
 
         else:
-
-            import matplotlib.pyplot as plt
-
-            fig, ax = plt.subplots()
+            _, ax = plt.subplots()
             if len(I.shape) == 3:
                 # if RGB, put channel dim in right place
                 I = I.transpose(1, 2, 0)
@@ -199,18 +198,17 @@ class BinarySLM(SLM):
         """
         super().__init__()
 
-        try:
+        self._height, self._width = slm_devices[SLMDevices.ADAFRUIT_BINARY.value][
+            SLMParam.SLM_SHAPE
+        ]
 
+        try:
             import board
             import busio
             import digitalio
             import adafruit_sharpmemorydisplay
 
             cs_pin = cs_pin if (cs_pin is not None) else board.D6
-
-            self._height, self._width = slm_devices[SLMDevices.ADAFRUIT_BINARY.value][
-                SLMParam.SLM_SHAPE
-            ]
 
             spi = busio.SPI(board.SCK, MOSI=board.MOSI)
             scs = digitalio.DigitalInOut(cs_pin)  # inverted chip select
@@ -219,14 +217,16 @@ class BinarySLM(SLM):
             )
 
         except:
-            raise IOError("Failed to load SLM.")
+            self._slm = None
+            warnings.warn("Failed to load SLM. Using virtual device...")
 
     def clear(self):
         """
         Clear SLM.
         """
-        self._slm.fill(1)
-        self._slm.show()
+        if self._slm:
+            self._slm.fill(1)
+            self._slm.show()
 
     def imshow(self, I):
         """
@@ -243,19 +243,24 @@ class BinarySLM(SLM):
         )
         assert np.all(I >= 0)
 
-        self.clear()
+        if self._slm:
+            self.clear()
 
-        try:
+            try:
+                I_max = I.max()
+                I_max = 1 if np.isclose(I_max, 0) else I_max
+                I_u = np.uint8(I / float(I_max) * 255)  # uint8, full range
+                I_p = Image.fromarray(I_u.T).convert("1")
+                self._slm.image(I_p)
+                self._slm.show()
 
-            I_max = I.max()
-            I_max = 1 if np.isclose(I_max, 0) else I_max
-            I_u = np.uint8(I / float(I_max) * 255)  # uint8, full range
-            I_p = Image.fromarray(I_u.T).convert("1")
-            self._slm.image(I_p)
-            self._slm.show()
+            except:
+                raise ValueError("Parameter[I]: unsupported data")
 
-        except:
-            raise ValueError("Parameter[I]: unsupported data")
+        else:
+            _, ax = plt.subplots()
+            ax.imshow(I, cmap="gray")
+            plt.show()
 
 
 class NokiaSLM(SLM):
@@ -289,8 +294,11 @@ class NokiaSLM(SLM):
         """
         super().__init__()
 
-        try:
+        self._height, self._width = slm_devices[SLMDevices.NOKIA_5110.value][
+            SLMParam.SLM_SHAPE
+        ]
 
+        try:
             import board
             import busio
             import digitalio
@@ -314,19 +322,17 @@ class NokiaSLM(SLM):
                 baudrate=baudrate,
             )
 
-            self._height, self._width = slm_devices[SLMDevices.NOKIA_5110.value][
-                SLMParam.SLM_SHAPE
-            ]
-
         except:
-            raise IOError("Failed to load SLM.")
+            self._slm = None
+            warnings.warn("Failed to load SLM. Using virtual device...")
 
     def clear(self):
         """
         Clear SLM.
         """
-        self._slm.fill(1)
-        self._slm.show()
+        if self._slm:
+            self._slm.fill(1)
+            self._slm.show()
 
     def imshow(self, I):
         """
@@ -343,21 +349,26 @@ class NokiaSLM(SLM):
         )
         assert np.all(I >= 0)
 
-        self.clear()
+        if self._slm:
+            self.clear()
 
-        try:
+            try:
+                I_max = I.max()
+                I_max = 1 if np.isclose(I_max, 0) else I_max
+                I_u = 255 - np.uint8(
+                    I / float(I_max) * 255
+                )  # uint8, full range, image is inverted
+                I_p = Image.fromarray(I_u.T).convert("1")
+                self._slm.image(I_p)
+                self._slm.show()
 
-            I_max = I.max()
-            I_max = 1 if np.isclose(I_max, 0) else I_max
-            I_u = 255 - np.uint8(
-                I / float(I_max) * 255
-            )  # uint8, full range, image is inverted
-            I_p = Image.fromarray(I_u.T).convert("1")
-            self._slm.image(I_p)
-            self._slm.show()
+            except:
+                raise ValueError("Parameter[I]: unsupported data")
 
-        except:
-            raise ValueError("Parameter[I]: unsupported data")
+        else:
+            _, ax = plt.subplots()
+            ax.imshow(I, cmap="gray")
+            plt.show()
 
 
 class HoloeyeSLM(SLM):
@@ -367,13 +378,7 @@ class HoloeyeSLM(SLM):
         """
         super().__init__()
 
-        # Similar to: https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/slm_display_module.py#L19
-        # TODO check those flags
-        self._show_flags = slmdisplaysdk.ShowFlags.PresentAutomatic
-        self._show_flags |= slmdisplaysdk.ShowFlags.PresentFitWithBars
-
         # Initialize parameters of the holoeye slm display
-        self._virtual = False
         self._height, self._width = slm_devices[SLMDevices.HOLOEYE_LC_2012.value][
             SLMParam.SLM_SHAPE
         ]
@@ -381,38 +386,50 @@ class HoloeyeSLM(SLM):
         self._show_time = None
 
         try:
-            # Initializes the SLM library
-            self._slm = slmdisplaysdk.SLMInstance()
-        except RuntimeError as ex:
-            # The library initialization failed so a virtual device is used instead
-            self._virtual = True
-            warnings.warn(f"{ex} Using virtual device...")
+            # Similar to: https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/slm_display_module.py#L19
+            # TODO check those flags
+            self._show_flags = slmdisplaysdk.ShowFlags.PresentAutomatic
+            self._show_flags |= slmdisplaysdk.ShowFlags.PresentFitWithBars
+        except:
+            self._slm = None
+            warnings.warn(f"Failed to load SLM. Using virtual device...")
+
+        if self._slm:
+            try:
+                # Initializes the SLM library
+                self._slm = slmdisplaysdk.SLMInstance()
+            except RuntimeError as ex:
+                # The library initialization failed so a virtual device is used instead
+                self._slm = None
+                warnings.warn(f"Failed to load SLM: {ex}. Using virtual device...")
 
         # Check that the holoeye sdk is up to date
-        if not self._virtual and not self._slm.requiresVersion(3):
-            self._virtual = True
+        if self._slm and not self._slm.requiresVersion(3):
+            self._slm = None
             warnings.warn(
                 "Failed to load SLM because the LC 2012 requires version 3 of its SDK. Using virtual device..."
             )
 
-        # Detect slms and open a window on the selected slm
-        error = (
-            self._slm.open()
-        )  # TODO check if can set max wait time when no SLM is found
+        if self._slm:
+            # Detect slms and open a window on the selected slm
+            error = (
+                self._slm.open()
+            )  # TODO check if can set max wait time when no SLM is found
 
-        # Check if the opening the window was successful
-        if error != slmdisplaysdk.ErrorCode.NoError:
-            # Otherwise use again a virtual device
-            self._virtual = True
-            warnings.warn(
-                f"Failed to load SLM: {self._slm.errorString(error)}. Using virtual device..."
-            )
+            # Check if the opening the window was successful
+            if error != slmdisplaysdk.ErrorCode.NoError:
+                # Otherwise use again a virtual device
+                warnings.warn(
+                    f"Failed to load SLM: {self._slm.errorString(error)}. Using virtual device..."
+                )
+                self._slm = None
 
     def __del__(self):
         """
         Destructor
         """
-        self._slm.__del__()
+        if self._slm:
+            self._slm.__del__()
 
     def set_show_time(self, time=5.0):
         """
@@ -429,15 +446,17 @@ class HoloeyeSLM(SLM):
         """
         Clear SLM aka show black screen.
         """
+        if self._slm:
+            # Configure the blank screen value
+            black = 0
 
-        # Configure the blank screen value
-        black = 0
+            # Show phase map on slm
+            error = self._slm.showBlankscreen(black)
 
-        # Show phase map on slm
-        error = self._slm.showBlankscreen(black)
-
-        # And check that no error occurred
-        assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
+            # And check that no error occurred
+            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(
+                error
+            )
 
     def imshow(self, I):
         """
@@ -457,7 +476,7 @@ class HoloeyeSLM(SLM):
         assert I.shape[-2:] == self.shape
 
         # If using a physical device
-        if not self._virtual:
+        if self._slm:
             # Reset devices phase pattern
             self.clear()
 

@@ -11,7 +11,6 @@ from slm_controller import slm
 @click.command()
 @click.option("--show_time", type=float, help="Time to show the pattern on the SLM.")
 def holoeye_slm_example(show_time):
-
     # Instantiate SLM object
     s = slm.create_slm(SLMDevices.HOLOEYE_LC_2012.value)
     if show_time is not None:

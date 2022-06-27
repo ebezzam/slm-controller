@@ -17,7 +17,7 @@ The target platform is a Raspberry Pi. After cloning this repository, you can
 install the necessary dependencies by running the following script:
 
 ```sh
-./pi_setup.sh
+./env_setup.sh
 ```
 
 The script will:
