@@ -57,7 +57,7 @@ class SLM:
         pass
 
 
-class RGBSLM(SLM):
+class AdafruitRGBSLM(SLM):
     def __init__(
         self, cs_pin=None, dc_pin=None, reset_pin=None, rotation=90, baudrate=24000000,
     ):
@@ -120,7 +120,7 @@ class RGBSLM(SLM):
             else:
                 self._width = self._slm.width
                 self._height = self._slm.height
-        except:
+        except Exception:
             self._slm = None
             warnings.warn("Failed to load SLM. Using virtual device...")
 
@@ -169,8 +169,8 @@ class RGBSLM(SLM):
 
                 I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
                 self._slm.image(I_p)
-            except:
-                raise ValueError("Parameter[I]: unsupported data")
+            except Exception as e:
+                raise ValueError("Parameter[I]: unsupported data") from e
 
         else:
             _, ax = plt.subplots()
@@ -183,7 +183,7 @@ class RGBSLM(SLM):
             plt.show()
 
 
-class BinarySLM(SLM):
+class AdafruitBinarySLM(SLM):
     def __init__(self, cs_pin=None, baudrate=2000000):
         """
         Object to display images on the Adafruit 1.3 inch monochrome display with a Raspberry Pi:
@@ -216,7 +216,7 @@ class BinarySLM(SLM):
                 spi, scs, self._height, self._width, baudrate=baudrate
             )
 
-        except:
+        except Exception:
             self._slm = None
             warnings.warn("Failed to load SLM. Using virtual device...")
 
@@ -254,8 +254,8 @@ class BinarySLM(SLM):
                 self._slm.image(I_p)
                 self._slm.show()
 
-            except:
-                raise ValueError("Parameter[I]: unsupported data")
+            except Exception as e:
+                raise ValueError("Parameter[I]: unsupported data") from e
 
         else:
             _, ax = plt.subplots()
@@ -322,7 +322,7 @@ class NokiaSLM(SLM):
                 baudrate=baudrate,
             )
 
-        except:
+        except Exception:
             self._slm = None
             warnings.warn("Failed to load SLM. Using virtual device...")
 
@@ -362,8 +362,8 @@ class NokiaSLM(SLM):
                 self._slm.image(I_p)
                 self._slm.show()
 
-            except:
-                raise ValueError("Parameter[I]: unsupported data")
+            except Exception as e:
+                raise ValueError("Parameter[I]: unsupported data") from e
 
         else:
             _, ax = plt.subplots()
@@ -390,11 +390,7 @@ class HoloeyeSLM(SLM):
             # TODO check those flags
             self._show_flags = slmdisplaysdk.ShowFlags.PresentAutomatic
             self._show_flags |= slmdisplaysdk.ShowFlags.PresentFitWithBars
-        except:
-            self._slm = None
-            warnings.warn(f"Failed to load SLM. Using virtual device...")
 
-        if self._slm:
             try:
                 # Initializes the SLM library
                 self._slm = slmdisplaysdk.SLMInstance()
@@ -402,6 +398,9 @@ class HoloeyeSLM(SLM):
                 # The library initialization failed so a virtual device is used instead
                 self._slm = None
                 warnings.warn(f"Failed to load SLM: {ex}. Using virtual device...")
+        except Exception:
+            self._slm = None
+            warnings.warn("Failed to load SLM. Using virtual device...")
 
         # Check that the holoeye sdk is up to date
         if self._slm and not self._slm.requiresVersion(3):
@@ -521,12 +520,12 @@ class HoloeyeSLM(SLM):
                 timer = fig.canvas.new_timer(interval=self._show_time * 1000)
                 timer.add_callback(on_timeout)
 
-                ax.imshow(I)
+                ax.imshow(I, cmap="gray")
                 timer.start()
                 plt.show()
 
             else:
-                ax.imshow(I)
+                ax.imshow(I, cmap="gray")
                 plt.show()
 
 
@@ -543,9 +542,9 @@ def create_slm(device_key):
 
     slm_device = None
     if device_key == SLMDevices.ADAFRUIT_RGB.value:
-        slm_device = RGBSLM()
+        slm_device = AdafruitRGBSLM()
     elif device_key == SLMDevices.ADAFRUIT_BINARY.value:
-        slm_device = BinarySLM()
+        slm_device = AdafruitBinarySLM()
     elif device_key == SLMDevices.NOKIA_5110.value:
         slm_device = NokiaSLM()
     elif device_key == SLMDevices.HOLOEYE_LC_2012.value:

@@ -16,7 +16,7 @@ class SLMDevices(Enum):
 class SLMParam:
     PIXEL_PITCH = "pixel_pitch"
     SLM_SHAPE = "slm_shape"
-    MONOCHROME = "monochrome"
+    MONOCHROME = "monochrome"  # TODO Does this make sense? For Phase etc.?
     FILL_FACTOR = "fill_factor"
     FRAME_RATE = "frame_rate"
     TYPE = "type"
