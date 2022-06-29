@@ -4,14 +4,24 @@ Scripts and modules to control SLMs using Python.
 
 Note that our convention for dimension order is (channels, height, width).
 
-## Overview
+- [slm-controller](#slm-controller)
+  - [Installation](#installation)
+    - [Adafruit and Nokia SLMs installation](#adafruit-and-nokia-slms-installation)
+    - [Holoeye SLM installation](#holoeye-slm-installation)
+    - [Manual installation for Holoeye SLM](#manual-installation-for-holoeye-slm)
+  - [Example scripts](#example-scripts)
+    - [Adafruit RGB SLM](#adafruit-rgb-slm)
+    - [Adafruit Monochrome SLM](#adafruit-monochrome-slm)
+    - [Nokia SLM](#nokia-slm)
+    - [Holoeye SLM](#holoeye-slm)
+  - [Adding a new SLM](#adding-a-new-slm)
 
 The main goal of the project is to provided an abstraction level for different
 SLM devices allowing to use them interchangeably for different applications.
 
 Generally speaking there are two different kinds of SLMs: amplitude and phase
 SLM. Both kinds simply modulate different properties of light. Currently the
-project supports 4 different SLMs devices:
+project supports 4 different SLMs device.
 
 Amplitude SLMs:
 
@@ -46,6 +56,8 @@ The script will:
 
 If you plan to use this code base more in depth you can install additional
 dependencies intended for developing.
+
+<!-- TODO check that not already done in bash script -->
 
 ```sh
 pip install -e .[dev]
@@ -97,7 +109,7 @@ source slm_controller_env/bin/activate
 
 You can exit the virtual environment by running `deactivate`.
 
-### RGB SLM
+### Adafruit RGB SLM
 
 To display a randomly generated grayscale image:
 
@@ -119,7 +131,7 @@ python examples/rgb_slm.py --fp images/blinka.jpg
 
 The original image will be rescaled and cropped to match the original aspect ratio.
 
-### Monochrome SLM
+### Adafruit Monochrome SLM
 
 To display a randomly generated monochrome image:
 
@@ -173,7 +185,7 @@ Options:
   --help             Show this message and exit.
 ```
 
-## Adding new SLM
+## Adding a new SLM
 
 1. Add configuration in `slm_controller/hardware.py:slm_devices`.
 2. Create class in `slm_controller/slm.py`.
