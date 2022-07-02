@@ -26,7 +26,7 @@ def rgb_slm_example(fp, rgb, not_original_ratio):
         image = np.random.rand(3, *s.shape) if rgb else np.random.rand(*s.shape)
         # save new pattern
         fp = "slm_pattern.npy"
-        np.save(fp, image)  # TOD why only here?
+        np.save(fp, image)  # TODO why only here?
         print(f"Created random pattern and saved to : {fp}")
 
     # display
