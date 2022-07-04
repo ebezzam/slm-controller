@@ -132,6 +132,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-# Example scripts results
-slm_pattern.npy

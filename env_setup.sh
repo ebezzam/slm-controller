@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Clone from GitHub
+git@github.com:ebezzam/slm-controller.git
+
 # OS requirements
 sudo apt-get -y install libatlas-base-dev
 sudo apt-get -y install ttf-dejavu
@@ -10,4 +13,4 @@ virtualenv -p python3 slm_controller_env
 source slm_controller_env/bin/activate
 
 # install package
-pip install -e .[dev]
+pip install -e . # TODO check script

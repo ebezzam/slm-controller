@@ -5,32 +5,38 @@ RGB SLM example.
 from slm_controller.hardware import SLMDevices
 import numpy as np
 import click
-from slm_controller import utils, slm
+from slm_controller import slm, utils
 
 
 @click.command()
-@click.option("--fp", type=str, default=None)
-@click.option("--rgb", is_flag=True)
-@click.option("--not_original_ratio", is_flag=True)
-def rgb_slm_example(fp, rgb, not_original_ratio):
-
+@click.option(
+    "--file_path",
+    type=str,
+    default=None,
+    help="Path to image to display, create random pattern if None.",
+)
+@click.option("--monochrome", is_flag=True, help="Show monochrome image, otherwise use RGB.")
+@click.option(
+    "--not_original_ratio",
+    is_flag=True,
+    help="Reshape which can distort the image, otherwise scale and crop to match original aspect ratio.",
+)
+def rgb_slm_example(file_path, monochrome, not_original_ratio):
     # instantiate SLM object
     s = slm.create_slm(SLMDevices.ADAFRUIT_RGB.value)
 
     # prepare image data
-    if fp is not None:
+    if file_path is not None:
         keep_aspect_ratio = not not_original_ratio
-        image = utils.load_image(fp, output_shape=s.shape, keep_aspect_ratio=keep_aspect_ratio)
+        image = utils.load_image(
+            file_path, output_shape=s.shape, keep_aspect_ratio=keep_aspect_ratio
+        )
 
     else:
-        image = np.random.rand(3, *s.shape) if rgb else np.random.rand(*s.shape)
-        # save new pattern
-        fp = "slm_pattern.npy"
-        np.save(fp, image)  # TODO why only here?
-        print(f"Created random pattern and saved to : {fp}")
+        # random mask
+        image = np.random.rand(*s.shape) if monochrome else np.random.rand(3, *s.shape)
 
     # display
-    print(f"Image shape : {image.shape}")
     s.imshow(image)
 
 

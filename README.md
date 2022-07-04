@@ -7,6 +7,7 @@ Note that our convention for dimension order is (channels, height, width).
 - [slm-controller](#slm-controller)
   - [Installation](#installation)
     - [Adafruit and Nokia SLMs installation](#adafruit-and-nokia-slms-installation)
+    - [No Raspberry Pi?](#no-raspberry-pi)
     - [Holoeye SLM installation](#holoeye-slm-installation)
     - [Manual installation for Holoeye SLM](#manual-installation-for-holoeye-slm)
   - [Example scripts](#example-scripts)
@@ -26,8 +27,12 @@ project supports 4 different SLMs device.
 Amplitude SLMs:
 
 - [Adafruit 1.8" TFT LCD](https://learn.adafruit.com/1-8-tft-display/overview) (RGB)
-- [Adafruit 1.3" Sharp Memory LCD](https://learn.adafruit.com/adafruit-sharp-memory-display-breakout) (Monochrome)
+- [Adafruit 1.3" Sharp Memory
+  LCD](https://learn.adafruit.com/adafruit-sharp-memory-display-breakout)
+  (Binary monochrome)
 - [Nokia 5110 LCD](https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd) (Monochrome)
+
+<!-- TODO Holoeye actually can do both via polarization modulation and combination with polarizer/analyzer -->
 
 Phase SLMs:
 
@@ -55,31 +60,28 @@ The script will:
 3. Install Python dependencies in the virtual environment.
 
 If you plan to use this code base more in depth you can install additional
-dependencies intended for developing.
-
-<!-- TODO check that not already done in bash script -->
+dependencies intended for developing while the virtual environment is activated.
 
 ```sh
 pip install -e .[dev]
 ```
 
-<!-- TODO needed? -->
-<!-- ### No Raspberry Pi?
+### No Raspberry Pi?
 
-You can still try out some features of this library by running:
-
-```sh
-pip install -e .[dev]
-```
-
-You won't be able to run any examples programs on use the physical SLMs. -->
+You can still try out some features of this library! You won't be able to run
+any examples programs on the physical SLMs but the results will be plotted to
+your screen instead as mentioned earlier.
 
 ### Holoeye SLM installation
 
 The SDK needed for [Holoeye LC
-2012](https://holoeye.com/lc-2012-spatial-light-modulator/) `is only supported on Windows operating systems!` Hence a Raspberry Pi is not an option. A device
-with
-a live Windows instance is needed to use the Holoeye SLM.
+2012](https://holoeye.com/lc-2012-spatial-light-modulator/) `is only supported on Windows operating systems!` Hence a Raspberry Pi directly is impossible. A
+device
+with a live Windows instance is needed to use the Holoeye SLM. In the future we will
+check if Windows running inside a container on a Raspberry Pi is an option
+though.
+
+<!-- TODO check windows in a container -->
 
 Additionally, you need to perform some manual installation, explained in the
 next section, after having run the script mentioned above.
@@ -97,9 +99,8 @@ SDK automatically at runtime whenever it is needed.
 
 ## Example scripts
 
-In `examples` are various example scripts to control an RGB and a monochrome
-(binary) SLMs produced by
-Adafruit, a Nokia SLM and Holoeye's SLM.
+In `examples` you can find various example scripts that control an RGB and a binary
+(monochrome) Adafruit SLM, a Nokia SLM and a Holoeye SLM.
 
 First, activate the virtual environment:
 
@@ -109,40 +110,78 @@ source slm_controller_env/bin/activate
 
 You can exit the virtual environment by running `deactivate`.
 
+<!-- TODO is it okay to call them SLMs instead of displays? -->
+
 ### Adafruit RGB SLM
+
+This script controls the [Adafruit 1.8" TFT
+LCD](https://learn.adafruit.com/1-8-tft-display/overview) SLM. It either allows
+to show an image specified by its path or a random pattern. By default RGB is
+used but you can also use grayscale images instead. Another flag allows to
+define how the aspect ratio is handled.
+
+```sh
+$ python examples/rgb_slm.py --help
+Usage: rgb_slm.py [OPTIONS]
+
+Options:
+  --file_path TEXT      Path to image to display, create random pattern if
+                        None.
+  --monochrome           Show monochrome image, otherwise use RGB.
+  --not_original_ratio  Reshape which can distort the image, otherwise scale
+                        and crop to match original aspect ratio.
+  --help                Show this message and exit.
+```
 
 To display a randomly generated grayscale image:
 
 ```sh
-python examples/rgb_slm.py
+python examples/rgb_display.py --monochrome
 ```
 
 For a randomly generated RGB image:
 
 ```sh
-python examples/rgb_slm.py --rgb
+python examples/rgb_display.py
 ```
 
-For a specific image, you can pass the file path:
+For an image, you can pass the file path:
 
 ```sh
-python examples/rgb_slm.py --fp images/blinka.jpg
+python examples/rgb_display.py --filepath images/blinka.jpg
 ```
 
 The original image will be rescaled and cropped to match the original aspect ratio.
 
 ### Adafruit Monochrome SLM
 
+This script controls the [Adafruit 1.3" Sharp Memory LCD](https://learn.adafruit.com/adafruit-sharp-memory-display-breakout) SLM. It either allows
+to show an image specified by its path or a random pattern. Note that only
+binary monochrome values are supported by this SLM. A flag allows to
+define how the aspect ratio is handled.
+
+```sh
+$ python examples/binary_slm.py --help
+Usage: binary_slm.py [OPTIONS]
+
+Options:
+  --file_path TEXT      Path to image to display, create random pattern if
+                        None.
+  --not_original_ratio  Reshape which can distort the image, otherwise scale
+                        and crop to match original aspect ratio.
+  --help                Show this message and exit.
+```
+
 To display a randomly generated monochrome image:
 
 ```sh
-python examples/binary_slm.py
+python examples/binary_display.py
 ```
 
-For a specific image, you can pass the file path:
+For an image, you can pass the file path:
 
 ```sh
-python examples/binary_slm.py --file_path images/blinka.jpg
+python examples/binary_display.py --file_path images/blinka.jpg
 ```
 
 The original image will be rescaled and cropped to match the original aspect ratio.
@@ -150,39 +189,50 @@ The original image will be rescaled and cropped to match the original aspect rat
 With the following command, a simple reshape will be performed which can distort the original image.
 
 ```sh
-python examples/binary_slm.py --file_path images/blinka.jpg --not_original_ratio
+python examples/binary_display.py --file_path images/blinka.jpg --not_original_ratio
 ```
 
 ### Nokia SLM
 
-<!-- TODO add documentation for nokia slm example -->
+This script controls the [Nokia 5110 LCD](https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd) SLM. It either allows
+to show an image specified by its path or a random pattern. Note that only
+monochrome values are supported by this SLM. A flag allows to
+define how the aspect ratio is handled.
 
 ```sh
->> python examples/nokia_slm.py --help
+$ python examples/nokia_slm.py --help
 Usage: nokia_slm.py [OPTIONS]
 
 Options:
-  --file_path TEXT
-  --not_original_ratio
+  --file_path TEXT      Path to image to display, create random pattern if
+                        None.
+  --not_original_ratio  Reshape which can distort the image, otherwise scale
+                        and crop to match original aspect ratio.
   --help                Show this message and exit.
 ```
 
 ### Holoeye SLM
 
-<!-- TODO add random pattern, and scaling -->
+This script controls the [Holoeye LC 2012](https://holoeye.com/lc-2012-spatial-light-modulator/) SLM. It either allows
+to show an image specified by its path or a random pattern. Note that only
+monochrome values are supported by this SLM. A flag allows to
+define how the aspect ratio is handled. A float argument permits to set the time
+how long the pattern is shown.
 
-This script is an example of how to use the Holoeye LC 2012 SLM. It does simply
-create a checkerboard phase map and sends it to the SLM. The checkerboard pattern was
-chosen because its resulting interference pattern at the target plane is highly
-different from the one produces by the blank SLM.
+<!-- TODO needed for CITL, add to other SLMs too? -->
 
 ```sh
->> python examples/holoeye_slm.py --help
+$ python examples/holoeye_slm.py --help
 Usage: holoeye_slm.py [OPTIONS]
 
 Options:
-  --show_time FLOAT  Time to show the pattern on the SLM.
-  --help             Show this message and exit.
+  --file_path TEXT      Path to image to display, create random pattern if
+                        None.
+  --not_original_ratio  Reshape which can distort the image, otherwise scale
+                        and crop to match original aspect ratio.
+  --show_time FLOAT     Time to show the pattern on the SLM, show indefinitely
+                        if None.
+  --help                Show this message and exit.
 ```
 
 ## Adding a new SLM

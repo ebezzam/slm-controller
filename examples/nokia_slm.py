@@ -5,14 +5,22 @@ Binary SLM example.
 from slm_controller.hardware import SLMDevices
 import numpy as np
 import click
-from slm_controller import utils, slm
+from slm_controller import slm, utils
 
 
 @click.command()
-@click.option("--file_path", type=str, default=None)
-@click.option("--not_original_ratio", is_flag=True)
-def nokia_SLM_example(file_path, not_original_ratio):
-
+@click.option(
+    "--file_path",
+    type=str,
+    default=None,
+    help="Path to image to display, create random pattern if None.",
+)
+@click.option(
+    "--not_original_ratio",
+    is_flag=True,
+    help="Reshape which can distort the image, otherwise scale and crop to match original aspect ratio.",
+)
+def nokia_slm_example(file_path, not_original_ratio):
     # instantiate SLM object
     s = slm.create_slm(SLMDevices.NOKIA_5110.value)
 
@@ -31,4 +39,4 @@ def nokia_SLM_example(file_path, not_original_ratio):
 
 
 if __name__ == "__main__":
-    nokia_SLM_example()
+    nokia_slm_example()
