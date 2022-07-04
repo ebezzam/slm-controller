@@ -56,14 +56,14 @@ install the necessary dependencies by running the following script:
 The script will:
 
 1. Install OS dependencies.
-2. Create a Python3 virtual environment called `slm_controller_env`.
+2. Create a Python3 virtual environment called `.slm_controller_env`.
 3. Install Python dependencies in the virtual environment.
 
 If you plan to use this code base more in depth you can install additional
 dependencies intended for developing while the virtual environment is activated.
 
 ```sh
-pip install -e .[dev]
+pip install -e .[dev] #TODO does not work, dev not found
 ```
 
 ### No Raspberry Pi?
@@ -105,7 +105,7 @@ In `examples` you can find various example scripts that control an RGB and a bin
 First, activate the virtual environment:
 
 ```sh
-source slm_controller_env/bin/activate
+source .slm_controller_env/bin/activate
 ```
 
 You can exit the virtual environment by running `deactivate`.

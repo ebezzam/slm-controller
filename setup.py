@@ -17,7 +17,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: Generally OS independent but the Holoeye SLM is only supported on Windows",
     ],
-    python_requires=">=3.6",  # TODO Newer dependencies?
+    python_requires=">=3.6",  # TODO Newer python version?
     install_requires=[
         "adafruit-circuitpython-rgb-display",
         "adafruit-circuitpython-sharpmemorydisplay",
@@ -26,5 +26,7 @@ setuptools.setup(
         "numpy",
         "matplotlib",
     ],
-    extra_requires={"dev": ["click", "pytest", "black"],},
+    extra_requires={  # TODO Does not seem to work on my machine, WARNING: slm-controller 0.0.2 does not provide the extra 'dev'
+        "dev": ["click", "pytest", "black"],
+    },
 )
