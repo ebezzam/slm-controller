@@ -11,7 +11,9 @@ try:
     import slm_controller.holoeye.detect_heds_module_path
     from holoeye import slmdisplaysdk
 except ImportError:
-    warnings.warn("Failed to import Holoeye SLM SDK.")
+    warnings.warn(
+        "Failed to import Holoeye SLM SDK."
+    )  # TODO triggers when this file is run separately, test
 
 
 class SLM:
@@ -508,8 +510,7 @@ class HoloeyeSLM(SLM):
                 # sleep for specified time
                 time.sleep(self._show_time)
         else:
-            # Use a virtual device
-            # plot
+            # Use a virtual device, plot
             fig, ax = plt.subplots()
 
             if self._show_time is not None:

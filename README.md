@@ -17,11 +17,11 @@ Note that our convention for dimension order is (channels, height, width).
     - [Holoeye SLM](#holoeye-slm)
   - [Adding a new SLM](#adding-a-new-slm)
 
-The main goal of the project is to provided an abstraction level for different
+The main goal of this repository is to provided a common abstraction level for different
 SLM devices allowing to use them interchangeably for different applications.
 
 Generally speaking there are two different kinds of SLMs: amplitude and phase
-SLM. Both kinds simply modulate different properties of light. Currently the
+SLM. Both kinds just modulate those different properties of light. Currently the
 project supports 4 different SLMs device.
 
 Amplitude SLMs:
@@ -63,28 +63,28 @@ If you plan to use this code base more in depth you can install additional
 dependencies intended for developing while the virtual environment is activated.
 
 ```sh
+source .slm_controller_env/bin/activate
 pip install -e .[dev] #TODO does not work, dev not found
 ```
 
 ### No Raspberry Pi?
 
 You can still try out some features of this library! You won't be able to run
-any examples programs on the physical SLMs but the results will be plotted to
-your screen instead as mentioned earlier.
+any example programs on the physical SLMs but the results will be plotted to
+your screen instead, as mentioned earlier.
 
 ### Holoeye SLM installation
 
 The SDK needed for [Holoeye LC
 2012](https://holoeye.com/lc-2012-spatial-light-modulator/) `is only supported on Windows operating systems!` Hence a Raspberry Pi directly is impossible. A
-device
-with a live Windows instance is needed to use the Holoeye SLM. In the future we will
-check if Windows running inside a container on a Raspberry Pi is an option
+device with a live Windows instance is needed to use the Holoeye SLM. In the
+future we will check if Windows running inside a container on a Raspberry Pi is an option
 though.
 
 <!-- TODO check windows in a container -->
 
-Additionally, you need to perform some manual installation, explained in the
-next section, after having run the script mentioned above.
+Additionally, you need to perform some manual installation steps, explained in the
+next section, after having run the installation script above.
 
 ### Manual installation for Holoeye SLM
 
@@ -95,7 +95,8 @@ SDK](https://customers.holoeye.com/slm-display-sdk-v3-0-for-python-windows/) and
 install it. Unfortunately, `only Windows operating systems are supported currently by the SDK!` Just
 follow the installation instructions. The script located at
 `slm_controller/holoeye` is then determining the specific path to your installation of the
-SDK automatically at runtime whenever it is needed.
+SDK automatically at runtime whenever it is needed. But note that this step is
+not a requirement for the other SLMs to work.
 
 ## Example scripts
 
@@ -117,7 +118,7 @@ You can exit the virtual environment by running `deactivate`.
 This script controls the [Adafruit 1.8" TFT
 LCD](https://learn.adafruit.com/1-8-tft-display/overview) SLM. It either allows
 to show an image specified by its path or a random pattern. By default RGB is
-used but you can also use grayscale images instead. Another flag allows to
+used but you can also use monochrome images instead. Another flag allows to
 define how the aspect ratio is handled.
 
 ```sh
@@ -127,7 +128,7 @@ Usage: rgb_slm.py [OPTIONS]
 Options:
   --file_path TEXT      Path to image to display, create random pattern if
                         None.
-  --monochrome           Show monochrome image, otherwise use RGB.
+  --monochrome          Show monochrome image, otherwise use RGB.
   --not_original_ratio  Reshape which can distort the image, otherwise scale
                         and crop to match original aspect ratio.
   --help                Show this message and exit.
@@ -155,7 +156,9 @@ The original image will be rescaled and cropped to match the original aspect rat
 
 ### Adafruit Monochrome SLM
 
-This script controls the [Adafruit 1.3" Sharp Memory LCD](https://learn.adafruit.com/adafruit-sharp-memory-display-breakout) SLM. It either allows
+This script controls the [Adafruit 1.3" Sharp Memory
+LCD](https://learn.adafruit.com/adafruit-sharp-memory-display-breakout) SLM.
+Again, it either allows
 to show an image specified by its path or a random pattern. Note that only
 binary monochrome values are supported by this SLM. A flag allows to
 define how the aspect ratio is handled.
@@ -194,9 +197,11 @@ python examples/binary_display.py --file_path images/blinka.jpg --not_original_r
 
 ### Nokia SLM
 
-This script controls the [Nokia 5110 LCD](https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd) SLM. It either allows
-to show an image specified by its path or a random pattern. Note that only
-monochrome values are supported by this SLM. A flag allows to
+This script controls the [Nokia 5110
+LCD](https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd) SLM. Like
+before, it either allows
+to show an image specified by its path or a random pattern. Note that this SLM
+only supports monochrome values. A flag allows to
 define how the aspect ratio is handled.
 
 ```sh
@@ -213,10 +218,11 @@ Options:
 
 ### Holoeye SLM
 
-This script controls the [Holoeye LC 2012](https://holoeye.com/lc-2012-spatial-light-modulator/) SLM. It either allows
-to show an image specified by its path or a random pattern. Note that only
+This script controls the [Holoeye LC
+2012](https://holoeye.com/lc-2012-spatial-light-modulator/) SLM. Here too, it either
+allows to show an image specified by its path or a random pattern. Note that only
 monochrome values are supported by this SLM. A flag allows to
-define how the aspect ratio is handled. A float argument permits to set the time
+define how the aspect ratio is handled. Another float argument permits to set the time
 how long the pattern is shown.
 
 <!-- TODO needed for CITL, add to other SLMs too? -->

@@ -28,10 +28,7 @@ def nokia_slm_example(file_path, not_original_ratio):
     if file_path is not None:
         keep_aspect_ratio = not not_original_ratio
         image = utils.load_image(
-            file_path,
-            output_shape=s.shape,
-            keep_aspect_ratio=keep_aspect_ratio,
-            grayscale=True,
+            file_path, output_shape=s.shape, keep_aspect_ratio=keep_aspect_ratio, grayscale=True,
         )
     else:
         # random mask
