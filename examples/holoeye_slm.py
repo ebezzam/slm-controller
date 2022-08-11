@@ -28,7 +28,7 @@ from slm_controller import slm, utils
 )
 def holoeye_slm_example(file_path, not_original_ratio, show_time):
     # instantiate SLM object
-    s = slm.create_slm(SLMDevices.HOLOEYE_LC_2012.value)
+    s = slm.create(SLMDevices.HOLOEYE_LC_2012.value)
     if show_time is not None:
         s.set_show_time(show_time)
 

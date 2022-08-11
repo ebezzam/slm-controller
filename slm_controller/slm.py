@@ -59,7 +59,7 @@ class SLM:
         pass
 
 
-class AdafruitRGBSLM(SLM):
+class AdafruitSLM(SLM):
     def __init__(
         self, cs_pin=None, dc_pin=None, reset_pin=None, rotation=90, baudrate=24000000,
     ):
@@ -85,7 +85,7 @@ class AdafruitRGBSLM(SLM):
         if rotation not in (0, 90, 180, 270):
             raise ValueError("Rotation must be 0/90/180/270")
 
-        self._height, self._width = slm_devices[SLMDevices.ADAFRUIT_RGB.value][
+        self._height, self._width = slm_devices[SLMDevices.ADAFRUIT.value][
             SLMParam.SLM_SHAPE
         ]
 
@@ -182,86 +182,6 @@ class AdafruitRGBSLM(SLM):
                 ax.imshow(I)
             else:
                 ax.imshow(I, cmap="gray")
-            plt.show()
-
-
-class AdafruitBinarySLM(SLM):
-    def __init__(self, cs_pin=None, baudrate=2000000):
-        """
-        Object to display images on the Adafruit 1.3 inch monochrome display with a Raspberry Pi:
-        https://learn.adafruit.com/adafruit-sharp-memory-display-breakout
-
-        Parameters
-        ----------
-        cs_pin : :py:class:`~adafruit_blinka.microcontroller.generic_linux.periphery_pin.Pin`
-            Raspberry Pi pin connected to TFT_CS pin on the display breakout.
-        baudrate : int
-            Baud rate.
-        """
-        super().__init__()
-
-        self._height, self._width = slm_devices[SLMDevices.ADAFRUIT_BINARY.value][
-            SLMParam.SLM_SHAPE
-        ]
-
-        try:
-            import board
-            import busio
-            import digitalio
-            import adafruit_sharpmemorydisplay
-
-            cs_pin = cs_pin if (cs_pin is not None) else board.D6
-
-            spi = busio.SPI(board.SCK, MOSI=board.MOSI)
-            scs = digitalio.DigitalInOut(cs_pin)  # inverted chip select
-            self._slm = adafruit_sharpmemorydisplay.SharpMemoryDisplay(
-                spi, scs, self._height, self._width, baudrate=baudrate
-            )
-
-        except Exception:
-            self._slm = None
-            warnings.warn("Failed to load SLM. Using virtual device...")
-
-    def clear(self):
-        """
-        Clear SLM.
-        """
-        if self._slm:
-            self._slm.fill(1)
-            self._slm.show()
-
-    def imshow(self, I):
-        """
-        Display monochrome data in binary format.
-
-        Parameters
-        ----------
-        I : :py:class:`~numpy.ndarray`
-            (N_height, N_width) monochrome data.
-        """
-        assert I.shape == self.shape
-        assert isinstance(I, np.ndarray) and (
-            np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
-        )
-        assert np.all(I >= 0)
-
-        if self._slm:
-            self.clear()
-
-            try:
-                I_max = I.max()
-                I_max = 1 if np.isclose(I_max, 0) else I_max
-                I_u = np.uint8(I / float(I_max) * 255)  # uint8, full range
-                I_p = Image.fromarray(I_u.T).convert("1")
-                self._slm.image(I_p)
-                self._slm.show()
-
-            except Exception as e:
-                raise ValueError("Parameter[I]: unsupported data") from e
-
-        else:
-            _, ax = plt.subplots()
-            ax.imshow(I, cmap="gray")
             plt.show()
 
 
@@ -432,7 +352,7 @@ class HoloeyeSLM(SLM):
         if self._slm:
             self._slm.__del__()
 
-    def set_show_time(self, time=5.0):
+    def set_show_time(self, time=5.0):  # TODO why 5 seconds?
         """
         Set the time a pattern is shown.
 
@@ -466,7 +386,7 @@ class HoloeyeSLM(SLM):
         Parameters
         ----------
         I : np.ndarray
-            The phase map to shw on the slm
+            The phase map to show on the SLM.
         """
         # Check that the phase map is valid
         assert isinstance(I, np.ndarray) and (
@@ -530,7 +450,7 @@ class HoloeyeSLM(SLM):
                 plt.show()
 
 
-def create_slm(device_key):
+def create(device_key):
     """
     Factory method to create `SLM` object.
 
@@ -542,10 +462,8 @@ def create_slm(device_key):
     assert device_key in SLMDevices.values()
 
     slm_device = None
-    if device_key == SLMDevices.ADAFRUIT_RGB.value:
-        slm_device = AdafruitRGBSLM()
-    elif device_key == SLMDevices.ADAFRUIT_BINARY.value:
-        slm_device = AdafruitBinarySLM()
+    if device_key == SLMDevices.ADAFRUIT.value:
+        slm_device = AdafruitSLM()
     elif device_key == SLMDevices.NOKIA_5110.value:
         slm_device = NokiaSLM()
     elif device_key == SLMDevices.HOLOEYE_LC_2012.value:

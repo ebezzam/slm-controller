@@ -22,7 +22,7 @@ from slm_controller import slm, utils
 )
 def nokia_slm_example(file_path, not_original_ratio):
     # instantiate SLM object
-    s = slm.create_slm(SLMDevices.NOKIA_5110.value)
+    s = slm.create(SLMDevices.NOKIA_5110.value)
 
     # prepare image data
     if file_path is not None:
