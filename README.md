@@ -201,5 +201,5 @@ done to avoid hard-coded values, but rather have global variables/definitions
 that are accessible throughout the whole code base.
 
 1. Add SLM configuration in `slm_controller/hardware.py:slm_devices`.
-2. Define a new class in `slm_controller/slm.py` for interfacing with the new SLM component (set parameters, patterns, etc).
+2. Define a new class in `slm_controller/slm.py` for interfacing with the new SLM component (set parameters, patterns, etc.).
 3. Add to factory method `create` in `slm_controller/slm.py` for a conveniently one-liner to instantiate an object of the new SLM component.

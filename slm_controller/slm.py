@@ -359,7 +359,7 @@ class HoloeyeSLM(SLM):
         Parameters
         ----------
         show_time : float, optional
-            Specifies the amount of time the phase pattern is shown on the slm, by default 5.0
+            Specifies the amount of time in seconds that the phase pattern is shown on the slm, by default 5.0
         """
         self._show_time = time
 
@@ -428,7 +428,12 @@ class HoloeyeSLM(SLM):
                 )
             else:
                 # sleep for specified time
-                time.sleep(self._show_time)
+                # time.sleep(self._show_time)  # TODO check this
+
+                error = self._slm.utilsWaitForCheckedS(self._show_time)
+                assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(
+                    error
+                )
         else:
             # Use a virtual device, plot
             fig, ax = plt.subplots()
