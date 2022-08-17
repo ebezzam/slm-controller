@@ -21,7 +21,7 @@ from slm_controller import slm, utils
     is_flag=True,
     help="Reshape which can distort the image, otherwise scale and crop to match original aspect ratio.",
 )
-def adafruit_slm_example(file_path, monochrome, not_original_ratio):
+def main(file_path, monochrome, not_original_ratio):
     # instantiate SLM object
     s = slm.create(SLMDevices.ADAFRUIT.value)
 
@@ -41,4 +41,4 @@ def adafruit_slm_example(file_path, monochrome, not_original_ratio):
 
 
 if __name__ == "__main__":
-    adafruit_slm_example()
+    main()

@@ -30,9 +30,7 @@ def load_image(fname, output_shape=None, keep_aspect_ratio=True, grayscale=False
     # rescale and resize if need be
     if output_shape is None:
         if not keep_aspect_ratio:
-            raise ValueError(
-                "Must provide [output_shape] if [keep_aspect_ratio] is False."
-            )
+            raise ValueError("Must provide [output_shape] if [keep_aspect_ratio] is False.")
 
     elif keep_aspect_ratio:
         height = output_shape[0]

@@ -2,7 +2,6 @@ import abc
 import numpy as np
 import warnings
 from PIL import Image, ImageDraw
-import time
 import matplotlib.pyplot as plt
 
 from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
@@ -85,9 +84,7 @@ class AdafruitSLM(SLM):
         if rotation not in (0, 90, 180, 270):
             raise ValueError("Rotation must be 0/90/180/270")
 
-        self._height, self._width = slm_devices[SLMDevices.ADAFRUIT.value][
-            SLMParam.SLM_SHAPE
-        ]
+        self._height, self._width = slm_devices[SLMDevices.ADAFRUIT.value][SLMParam.SLM_SHAPE]
 
         try:
             import board
@@ -108,12 +105,7 @@ class AdafruitSLM(SLM):
 
             # Create interface with board
             self._slm = st7735.ST7735R(
-                spi,
-                rotation=rotation,
-                cs=cs_pin,
-                dc=dc_pin,
-                rst=reset_pin,
-                baudrate=baudrate,
+                spi, rotation=rotation, cs=cs_pin, dc=dc_pin, rst=reset_pin, baudrate=baudrate,
             )
 
             if self._slm.rotation % 180 == 90:
@@ -187,13 +179,7 @@ class AdafruitSLM(SLM):
 
 class NokiaSLM(SLM):
     def __init__(
-        self,
-        dc_pin=None,
-        cs_pin=None,
-        reset_pin=None,
-        contrast=80,
-        bias=4,
-        baudrate=1000000,
+        self, dc_pin=None, cs_pin=None, reset_pin=None, contrast=80, bias=4, baudrate=1000000,
     ):
         """
         Object to display images on the Nokia 5110 monochrome display with a Raspberry Pi:
@@ -216,9 +202,7 @@ class NokiaSLM(SLM):
         """
         super().__init__()
 
-        self._height, self._width = slm_devices[SLMDevices.NOKIA_5110.value][
-            SLMParam.SLM_SHAPE
-        ]
+        self._height, self._width = slm_devices[SLMDevices.NOKIA_5110.value][SLMParam.SLM_SHAPE]
 
         try:
             import board
@@ -277,9 +261,7 @@ class NokiaSLM(SLM):
             try:
                 I_max = I.max()
                 I_max = 1 if np.isclose(I_max, 0) else I_max
-                I_u = 255 - np.uint8(
-                    I / float(I_max) * 255
-                )  # uint8, full range, image is inverted
+                I_u = 255 - np.uint8(I / float(I_max) * 255)  # uint8, full range, image is inverted
                 I_p = Image.fromarray(I_u.T).convert("1")
                 self._slm.image(I_p)
                 self._slm.show()
@@ -333,9 +315,7 @@ class HoloeyeSLM(SLM):
 
         if self._slm:
             # Detect slms and open a window on the selected slm
-            error = (
-                self._slm.open()
-            )  # TODO check if can set max wait time when no SLM is found
+            error = self._slm.open()  # TODO check if can set max wait time when no SLM is found
 
             # Check if the opening the window was successful
             if error != slmdisplaysdk.ErrorCode.NoError:
@@ -375,9 +355,7 @@ class HoloeyeSLM(SLM):
             error = self._slm.showBlankscreen(black)
 
             # And check that no error occurred
-            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(
-                error
-            )
+            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
 
     def imshow(self, I):
         """
@@ -410,12 +388,11 @@ class HoloeyeSLM(SLM):
             I_u = np.uint8(255 * I_f)  # uint8
 
             # Show phase map on slm
+            # TODO test self._slm.showPhasevalues
             error = self._slm.showData(I_u, self._show_flags)
 
             # And check that no error occurred
-            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(
-                error
-            )
+            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
 
             if self._show_time is None:
                 # Wait until the SLM process is closed:
@@ -423,17 +400,14 @@ class HoloeyeSLM(SLM):
                     "Waiting for SDK process to close. Please close the tray icon to continue ..."
                 )
                 error = self._slm.utilsWaitUntilClosed()
-                assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(
-                    error
-                )
+                assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
             else:
                 # sleep for specified time
+                # import time
                 # time.sleep(self._show_time)  # TODO check this
 
                 error = self._slm.utilsWaitForCheckedS(self._show_time)
-                assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(
-                    error
-                )
+                assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
         else:
             # Use a virtual device, plot
             fig, ax = plt.subplots()

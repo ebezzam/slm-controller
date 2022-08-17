@@ -26,7 +26,7 @@ from slm_controller import slm, utils
     default=None,
     help="Time to show the pattern on the SLM, show indefinitely if None.",
 )
-def holoeye_slm_example(file_path, not_original_ratio, show_time):
+def main(file_path, not_original_ratio, show_time):
     # instantiate SLM object
     s = slm.create(SLMDevices.HOLOEYE_LC_2012.value)
     if show_time is not None:
@@ -47,4 +47,4 @@ def holoeye_slm_example(file_path, not_original_ratio, show_time):
 
 
 if __name__ == "__main__":
-    holoeye_slm_example()
+    main()
