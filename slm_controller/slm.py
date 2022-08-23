@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw
 import matplotlib.pyplot as plt
 
 from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
+from slm_controller.utils import pad_image_to_shape
 
 try:
     import slm_controller.holoeye.detect_heds_module_path
@@ -60,12 +61,7 @@ class SLM:
 
 class AdafruitSLM(SLM):
     def __init__(
-        self,
-        cs_pin=None,
-        dc_pin=None,
-        reset_pin=None,
-        rotation=90,
-        baudrate=24000000,
+        self, cs_pin=None, dc_pin=None, reset_pin=None, rotation=90, baudrate=24000000,
     ):
         """
         Object to display images on the Adafruit 1.8 inch TFT Display Breakout with a Raspberry Pi:
@@ -110,12 +106,7 @@ class AdafruitSLM(SLM):
 
             # Create interface with board
             self._slm = st7735.ST7735R(
-                spi,
-                rotation=rotation,
-                cs=cs_pin,
-                dc=dc_pin,
-                rst=reset_pin,
-                baudrate=baudrate,
+                spi, rotation=rotation, cs=cs_pin, dc=dc_pin, rst=reset_pin, baudrate=baudrate,
             )
 
             if self._slm.rotation % 180 == 90:
@@ -194,13 +185,7 @@ class AdafruitSLM(SLM):
 
 class NokiaSLM(SLM):
     def __init__(
-        self,
-        dc_pin=None,
-        cs_pin=None,
-        reset_pin=None,
-        contrast=80,
-        bias=4,
-        baudrate=1000000,
+        self, dc_pin=None, cs_pin=None, reset_pin=None, contrast=80, bias=4, baudrate=1000000,
     ):
         """
         Object to display images on the Nokia 5110 monochrome display with a Raspberry Pi:
@@ -310,7 +295,7 @@ class HoloeyeSLM(SLM):
         self._height, self._width = slm_devices[SLMDevices.HOLOEYE_LC_2012.value][
             SLMParam.SLM_SHAPE
         ]
-
+        self._usable_shape = slm_devices[SLMDevices.HOLOEYE_LC_2012.value][SLMParam.USEABLE_SHAPE]
         self._show_time = None
 
         try:
@@ -397,7 +382,13 @@ class HoloeyeSLM(SLM):
         """
         # Check that the phase map is valid
         assert isinstance(I, np.ndarray) and np.issubdtype(I.dtype, np.uint8)
-        assert I.shape == self.shape
+        assert I.shape in [
+            self.shape,
+            self._usable_shape,
+        ]
+
+        if I.shape == self._usable_shape:
+            I = pad_image_to_shape(I, self.shape)
 
         # If using a physical device
         if self._slm:

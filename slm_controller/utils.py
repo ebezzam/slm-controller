@@ -72,3 +72,14 @@ def quantize(I):
 
     # Quantize those floats into a bit values
     return np.uint8(255 * I_f)  # uint8
+
+
+def pad_image_to_shape(image, shape):  # TODO doc, duplicate from mask-designer
+    top = (shape[0] - image.shape[0]) // 2
+    bottom = shape[0] - image.shape[0] - top
+    left = (shape[1] - image.shape[1]) // 2
+    right = shape[1] - image.shape[1] - left
+
+    pad_shape = ((top, bottom), (left, right))
+
+    return np.pad(image, pad_shape)
