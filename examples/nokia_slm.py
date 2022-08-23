@@ -1,8 +1,8 @@
 """
-Binary SLM example.
+Nokia SLM example.
 """
 
-from slm_controller.hardware import SLMDevices
+from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
 import numpy as np
 import click
 from slm_controller import slm, utils
@@ -13,7 +13,7 @@ from slm_controller import slm, utils
     "--file_path",
     type=str,
     default=None,
-    help="Path to image to display, create random pattern if None.",
+    help="Path to image to display, create random mask if None.",
 )
 @click.option(
     "--not_original_ratio",
@@ -21,18 +21,23 @@ from slm_controller import slm, utils
     help="Reshape which can distort the image, otherwise scale and crop to match original aspect ratio.",
 )
 def main(file_path, not_original_ratio):
-    # instantiate SLM object
-    s = slm.create(SLMDevices.NOKIA_5110.value)
-
     # prepare image data
+    shape = slm_devices[SLMDevices.NOKIA_5110.value][SLMParam.SLM_SHAPE]
+
     if file_path is not None:
         keep_aspect_ratio = not not_original_ratio
         image = utils.load_image(
-            file_path, output_shape=s.shape, keep_aspect_ratio=keep_aspect_ratio, grayscale=True,
+            file_path, output_shape=shape, keep_aspect_ratio=keep_aspect_ratio, grayscale=True,
         )
+
+        # TODO quantize image
     else:
         # random mask
-        image = np.random.rand(*s.shape)
+        rng = np.random.RandomState(1)
+        image = rng.rand(*shape)  # TODO quantized version
+
+    # instantiate SLM object
+    s = slm.create(SLMDevices.NOKIA_5110.value)
 
     # display
     s.imshow(image)

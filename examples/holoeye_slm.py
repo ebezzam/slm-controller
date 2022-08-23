@@ -2,7 +2,7 @@
 Holoeye SLM example.
 """
 
-from slm_controller.hardware import SLMDevices
+from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
 import numpy as np
 import click
 from slm_controller import slm, utils
@@ -13,7 +13,7 @@ from slm_controller import slm, utils
     "--file_path",
     type=str,
     default=None,
-    help="Path to image to display, create random pattern if None.",
+    help="Path to image to display, create random mask if None.",
 )
 @click.option(
     "--not_original_ratio",
@@ -24,23 +24,28 @@ from slm_controller import slm, utils
     "--show_time",
     type=float,
     default=None,
-    help="Time to show the pattern on the SLM, show indefinitely if None.",
+    help="Time to show the mask on the SLM, show indefinitely if None. In that case the user has to kill the script manually.",
 )
 def main(file_path, not_original_ratio, show_time):
-    # instantiate SLM object
-    s = slm.create(SLMDevices.HOLOEYE_LC_2012.value)
-    if show_time is not None:
-        s.set_show_time(show_time)
-
     # prepare image data
+    shape = slm_devices[SLMDevices.HOLOEYE_LC_2012.value][SLMParam.SLM_SHAPE]
+
     if file_path is not None:
         keep_aspect_ratio = not not_original_ratio
         image = utils.load_image(
-            file_path, output_shape=s.shape, keep_aspect_ratio=keep_aspect_ratio, grayscale=True,
+            file_path, output_shape=shape, keep_aspect_ratio=keep_aspect_ratio, grayscale=True,
         )
+
+        image = utils.quantize(image)
+
     else:
         # random mask
-        image = np.random.rand(*s.shape)
+        rng = np.random.RandomState(1)
+        image = rng.randint(low=0, high=np.iinfo(np.uint8).max, size=shape, dtype=np.uint8)
+
+    # instantiate SLM object
+    s = slm.create(SLMDevices.HOLOEYE_LC_2012.value)
+    s.set_show_time(show_time)
 
     # display
     s.imshow(image)

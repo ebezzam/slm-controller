@@ -144,7 +144,9 @@ class AdafruitSLM(SLM):
             2D inputs are interpreted as grayscale.
             3D inputs are interpreted as RGB.
         """
-        assert isinstance(I, np.ndarray) and (
+        assert isinstance(
+            I, np.ndarray
+        ) and (  # TODO adapt assert to preprocessing being done by caller
             np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
         )
         assert np.all(I >= 0)
@@ -155,11 +157,14 @@ class AdafruitSLM(SLM):
             self.clear()
 
             try:
+                # --------------------------------------------------------------
+                # TODO remove preprocessing, should be done by caller
                 I_max = I.max()
                 I_max = 1 if np.isclose(I_max, 0) else I_max
 
                 I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
                 I_u = np.uint8(255 * I_f)  # uint8
+                # --------------------------------------------------------------
 
                 I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
                 self._slm.image(I_p)
@@ -249,7 +254,7 @@ class NokiaSLM(SLM):
         I : :py:class:`~numpy.ndarray`
             (N_height, N_width) monochrome data.
         """
-        assert I.shape == self.shape
+        assert I.shape == self.shape  # TODO adapt assert to preprocessing being done by caller
         assert isinstance(I, np.ndarray) and (
             np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
         )
@@ -259,9 +264,12 @@ class NokiaSLM(SLM):
             self.clear()
 
             try:
+                # --------------------------------------------------------------
+                # TODO remove preprocessing, should be done by caller
                 I_max = I.max()
                 I_max = 1 if np.isclose(I_max, 0) else I_max
                 I_u = 255 - np.uint8(I / float(I_max) * 255)  # uint8, full range, image is inverted
+                # --------------------------------------------------------------
                 I_p = Image.fromarray(I_u.T).convert("1")
                 self._slm.image(I_p)
                 self._slm.show()
@@ -278,11 +286,11 @@ class NokiaSLM(SLM):
 class HoloeyeSLM(SLM):
     def __init__(self):
         """
-        Initialize a new holoeye slm instance
+        Initialize a new holoeye SLM instance
         """
         super().__init__()
 
-        # Initialize parameters of the holoeye slm display
+        # Initialize parameters of the holoeye SLM display
         self._height, self._width = slm_devices[SLMDevices.HOLOEYE_LC_2012.value][
             SLMParam.SLM_SHAPE
         ]
@@ -314,7 +322,7 @@ class HoloeyeSLM(SLM):
             )
 
         if self._slm:
-            # Detect slms and open a window on the selected slm
+            # Detect SLMs and open a window on the selected SLM
             error = self._slm.open()  # TODO check if can set max wait time when no SLM is found
 
             # Check if the opening the window was successful
@@ -330,16 +338,18 @@ class HoloeyeSLM(SLM):
         Destructor
         """
         if self._slm:
-            self._slm.__del__()
+            del self._slm
 
-    def set_show_time(self, time=5.0):  # TODO why 5 seconds?
+    def set_show_time(self, time=None):
         """
-        Set the time a pattern is shown.
+        Set the time a mask is shown.
 
         Parameters
         ----------
         show_time : float, optional
-            Specifies the amount of time in seconds that the phase pattern is shown on the slm, by default 5.0
+            Specifies the amount of time in seconds that the phase mask is shown
+            on the SLM, by default None which means that the mask is shown until
+            the user kills the script.
         """
         self._show_time = time
 
@@ -351,12 +361,15 @@ class HoloeyeSLM(SLM):
             # Configure the blank screen value
             black = 0
 
-            # Show phase map on slm
+            # Show phase map on SLM
             error = self._slm.showBlankscreen(black)
 
             # And check that no error occurred
             assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
 
+    # TODO yeah a flag to allow preview would be nice. And either printing in the
+    # command line and/or placing in the title of the figure if the pattern has been
+    # programmed on the SLM (or if there was an issue connecting)
     def imshow(self, I):
         """
         Display monochrome data.
@@ -367,29 +380,17 @@ class HoloeyeSLM(SLM):
             The phase map to show on the SLM.
         """
         # Check that the phase map is valid
-        assert isinstance(I, np.ndarray) and (
-            np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
-        )
-        assert np.all(I >= 0)
-        assert I.ndim in (2, 3)
-        assert I.shape[-2:] == self.shape
+        assert isinstance(I, np.ndarray) and np.issubdtype(I.dtype, np.uint8)
+        assert I.shape == self.shape
 
         # If using a physical device
         if self._slm:
-            # Reset devices phase pattern
+            # Reset devices mask
             self.clear()
 
-            # Normalize entries of the phase map
-            I_max = I.max()
-            I_max = 1 if np.isclose(I_max, 0) else I_max
-            I_f = I / I_max  # float64
-
-            # Quantize those floats into a bit values
-            I_u = np.uint8(255 * I_f)  # uint8
-
-            # Show phase map on slm
-            # TODO test self._slm.showPhasevalues
-            error = self._slm.showData(I_u, self._show_flags)
+            # Show phase map on SLM
+            # TODO test self._slm.showPhasevalues(I_u)
+            error = self._slm.showData(I, self._show_flags)
 
             # And check that no error occurred
             assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
@@ -404,7 +405,8 @@ class HoloeyeSLM(SLM):
             else:
                 # sleep for specified time
                 # import time
-                # time.sleep(self._show_time)  # TODO check this
+                # time.sleep(self._show_time)  # TODO check this native version
+                # of wait
 
                 error = self._slm.utilsWaitForCheckedS(self._show_time)
                 assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)

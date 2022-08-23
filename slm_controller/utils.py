@@ -61,25 +61,14 @@ def load_image(fname, output_shape=None, keep_aspect_ratio=True, grayscale=False
     return I
 
 
-# def save_image(I, fname): #TODO not used
-#     """
-#     Save image to a file.
+def quantize(I):
+    """
+    Quantize an image. #TODO doc
+    """
+    # Normalize entries of the mask to [0, 1]
+    I_max = I.max()
+    I_max = 1 if np.isclose(I_max, 0) else I_max
+    I_f = I / I_max  # float64
 
-#     Parameters
-#     ----------
-#     I : :py:class:`~numpy.ndarray`
-#         (N_channel, N_height, N_width) image.
-#     fname : str, path-like
-#         Valid image file (i.e. JPG, PNG, BMP, TIFF, etc.).
-#     """
-#     I_max = I.max()
-#     I_max = 1 if np.isclose(I_max, 0) else I_max
-
-#     I_f = I / I_max  # float64
-#     I_u = np.uint8(255 * I_f)  # uint8
-
-#     if I.ndim == 3:
-#         I_u = I_u.transpose(1, 2, 0)
-
-#     I_p = Image.fromarray(I_u)
-#     I_p.save(fname)
+    # Quantize those floats into a bit values
+    return np.uint8(255 * I_f)  # uint8

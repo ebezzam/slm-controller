@@ -17,7 +17,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: Generally OS independent but the Holoeye SLM is only supported on Windows",
     ],
-    python_requires=">=3.6",  # TODO Newer python version?
+    python_requires=">=3.9",
     install_requires=[
         "adafruit-circuitpython-rgb-display",
         "adafruit-circuitpython-sharpmemorydisplay",

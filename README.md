@@ -16,7 +16,7 @@ Note that our convention for dimension order is (channels, height, width).
   - [Adding a new SLM](#adding-a-new-slm)
 
 The main goal of this repository is to provide a common API for different
-display devices, allowing them to be used interchangeably for different applications.
+SLMs, allowing them to be used interchangeably for different applications.
 
 Generally speaking there are two different kinds of SLMs depending on the property of the wavefront that one wishes to modulator: amplitude and phase. Note that there do exist SLMs that are able to modulate both. Currently the
 project supports three different SLM devices.
@@ -35,7 +35,7 @@ Phase SLMs:
 - [Holoeye LC 2012](https://holoeye.com/lc-2012-spatial-light-modulator/)
 
 Note that if anything goes wrong with the communication with those devices, the
-phase maps are simply plotted to the screen using `matplotlib` instead of being
+SLM pattern is simply plotted to the screen using `matplotlib` instead of being
 shown on the devices themselves.
 
 ## Installation
@@ -56,14 +56,14 @@ running the following script:
 The script will:
 
 1. Install OS dependencies.
-2. Create a Python3 virtual environment called `.slm_controller_env`.
+2. Create a Python3 virtual environment called `slm_controller_env`.
 3. Install Python dependencies in the virtual environment.
 
 If you plan to use this code base more in depth you can install additional
 dependencies intended for developing while the virtual environment is activated.
 
 ```sh
-source .slm_controller_env/bin/activate
+source slm_controller_env/bin/activate
 # pip install -e .[dev] #TODO does not work, dev not found
 pip install click pytest black
 ```
@@ -102,7 +102,7 @@ supported SLMs.
 First, activate the virtual environment:
 
 ```sh
-source .slm_controller_env/bin/activate
+source slm_controller_env/bin/activate
 ```
 
 You can exit the virtual environment by running `deactivate`.
@@ -111,7 +111,7 @@ You can exit the virtual environment by running `deactivate`.
 
 This script controls the SLM isolated from the [Adafruit 1.8" TFT
 LCD](https://learn.adafruit.com/1-8-tft-display/overview). It either allows
-to show an image specified by its path or a random pattern. By default RGB is
+to show an image specified by its path or a random mask. By default RGB is
 used but you can also use monochrome images instead. Another flag allows to
 define how the aspect ratio is handled.
 
@@ -120,7 +120,7 @@ $ python examples/adafruit_slm.py --help
 Usage: adafruit_slm.py [OPTIONS]
 
 Options:
-  --file_path TEXT      Path to image to display, create random pattern if
+  --file_path TEXT      Path to image to display, create random mask if
                         None.
   --monochrome          Show monochrome image, otherwise use RGB.
   --not_original_ratio  Reshape which can distort the image, otherwise scale
@@ -153,7 +153,7 @@ The original image will be rescaled and cropped to match the original aspect rat
 This script controls the [Nokia 5110
 LCD](https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd) SLM. Like
 before, it either allows
-to show an image specified by its path or a random pattern. Note that this SLM
+to show an image specified by its path or a random mask. Note that this SLM
 only supports monochrome values. A flag allows to
 define how the aspect ratio is handled.
 
@@ -162,7 +162,7 @@ $ python examples/nokia_slm.py --help
 Usage: nokia_slm.py [OPTIONS]
 
 Options:
-  --file_path TEXT      Path to image to display, create random pattern if
+  --file_path TEXT      Path to image to display, create random mask if
                         None.
   --not_original_ratio  Reshape which can distort the image, otherwise scale
                         and crop to match original aspect ratio.
@@ -173,10 +173,10 @@ Options:
 
 This script controls the [Holoeye LC
 2012](https://holoeye.com/lc-2012-spatial-light-modulator/) SLM. Here too, it either
-allows to show an image specified by its path or a random pattern. Note that only
+allows to show an image specified by its path or a random mask. Note that only
 monochrome values are supported by this SLM. A flag allows to
 define how the aspect ratio is handled. Another float argument permits to set
-how long the pattern is shown for.
+how long the mask is shown for.
 
 <!-- TODO needed for CITL, add to other SLMs too? -->
 
@@ -185,12 +185,12 @@ $ python examples/holoeye_slm.py --help
 Usage: holoeye_slm.py [OPTIONS]
 
 Options:
-  --file_path TEXT      Path to image to display, create random pattern if
+  --file_path TEXT      Path to image to display, create random mask if
                         None.
   --not_original_ratio  Reshape which can distort the image, otherwise scale
                         and crop to match original aspect ratio.
-  --show_time FLOAT     Time to show the pattern on the SLM, show indefinitely
-                        if None.
+  --show_time FLOAT     Time to show the mask on the SLM, show indefinitely
+                        if None. In that case the user has to kill the script manually.
   --help                Show this message and exit.
 ```
 
@@ -201,5 +201,5 @@ done to avoid hard-coded values, but rather have global variables/definitions
 that are accessible throughout the whole code base.
 
 1. Add SLM configuration in `slm_controller/hardware.py:slm_devices`.
-2. Define a new class in `slm_controller/slm.py` for interfacing with the new SLM component (set parameters, patterns, etc.).
+2. Define a new class in `slm_controller/slm.py` for interfacing with the new SLM component (set parameters, masks, etc.).
 3. Add to factory method `create` in `slm_controller/slm.py` for a conveniently one-liner to instantiate an object of the new SLM component.
