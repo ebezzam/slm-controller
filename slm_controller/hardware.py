@@ -38,7 +38,10 @@ slm_devices = {
     # 1.5 inch diagonal: https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd
     # datasheet: https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf
     SLMDevices.NOKIA_5110.value: {
-        SLMParam.PIXEL_PITCH: (0.339e-3, 0.396e-3,),  # TODO measured by "hand", check elsewhere
+        SLMParam.PIXEL_PITCH: (
+            0.339e-3,
+            0.396e-3,
+        ),  # TODO measured by "hand", check elsewhere
         SLMParam.SLM_SHAPE: (84, 48),
         SLMParam.USEABLE_SHAPE: (84, 48),
         SLMParam.MONOCHROME: True,
@@ -49,7 +52,10 @@ slm_devices = {
     # 1.8 inch diagonal, 36.9 x 27.6 mm
     # datasheet: same link
     SLMDevices.HOLOEYE_LC_2012.value: {
-        SLMParam.PIXEL_PITCH: (0.36e-4, 0.36e-4,),  # Computed: 0.359375e-4, 0.3603515625e-4
+        SLMParam.PIXEL_PITCH: (
+            0.36e-4,
+            0.36e-4,
+        ),  # Computed: 0.359375e-4, 0.3603515625e-4
         SLMParam.SLM_SHAPE: (768, 1024),
         SLMParam.USEABLE_SHAPE: (  # TODO document this!
             284,

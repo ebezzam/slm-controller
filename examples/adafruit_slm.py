@@ -15,9 +15,7 @@ from slm_controller import slm, utils
     default=None,
     help="Path to image to display, create random mask if None.",
 )
-@click.option(
-    "--monochrome", is_flag=True, help="Show monochrome image, otherwise use RGB."
-)
+@click.option("--monochrome", is_flag=True, help="Show monochrome image, otherwise use RGB.")
 @click.option(
     "--not_original_ratio",
     is_flag=True,
@@ -29,16 +27,14 @@ def main(file_path, monochrome, not_original_ratio):
 
     if file_path is not None:
         keep_aspect_ratio = not not_original_ratio
-        image = utils.load_image(
-            file_path, output_shape=shape, keep_aspect_ratio=keep_aspect_ratio
-        )
-        
+        image = utils.load_image(file_path, output_shape=shape, keep_aspect_ratio=keep_aspect_ratio)
+
         # TODO quantize image
 
     else:
         # random mask
         rng = np.random.RandomState(1)
-        image = rng.rand(*shape) if monochrome else rng.rand(3, *shape) # TODO quantized version
+        image = rng.rand(*shape) if monochrome else rng.rand(3, *shape)  # TODO quantized version
 
     # instantiate SLM object
     s = slm.create(SLMDevices.ADAFRUIT.value)

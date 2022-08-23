@@ -60,7 +60,12 @@ class SLM:
 
 class AdafruitSLM(SLM):
     def __init__(
-        self, cs_pin=None, dc_pin=None, reset_pin=None, rotation=90, baudrate=24000000,
+        self,
+        cs_pin=None,
+        dc_pin=None,
+        reset_pin=None,
+        rotation=90,
+        baudrate=24000000,
     ):
         """
         Object to display images on the Adafruit 1.8 inch TFT Display Breakout with a Raspberry Pi:
@@ -105,7 +110,12 @@ class AdafruitSLM(SLM):
 
             # Create interface with board
             self._slm = st7735.ST7735R(
-                spi, rotation=rotation, cs=cs_pin, dc=dc_pin, rst=reset_pin, baudrate=baudrate,
+                spi,
+                rotation=rotation,
+                cs=cs_pin,
+                dc=dc_pin,
+                rst=reset_pin,
+                baudrate=baudrate,
             )
 
             if self._slm.rotation % 180 == 90:
@@ -184,7 +194,13 @@ class AdafruitSLM(SLM):
 
 class NokiaSLM(SLM):
     def __init__(
-        self, dc_pin=None, cs_pin=None, reset_pin=None, contrast=80, bias=4, baudrate=1000000,
+        self,
+        dc_pin=None,
+        cs_pin=None,
+        reset_pin=None,
+        contrast=80,
+        bias=4,
+        baudrate=1000000,
     ):
         """
         Object to display images on the Nokia 5110 monochrome display with a Raspberry Pi:

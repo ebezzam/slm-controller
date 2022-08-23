@@ -1,12 +1,10 @@
 #!/bin/bash
 
-black -l 100 --include $(find -name "*.py")
-
-# black *.py -l 100
-# black examples/*.py -l 100
-# black slm_controller/*.py -l 100
-# black slm_controller/**/*.py -l 100
-# black tests/*.py -l 100
+black -l 100 *.py
+black -l 100 examples/*.py
+black -l 100 slm_controller/*.py
+black -l 100 slm_controller/**/*.py
+black -l 100 tests/*.py
 
 # TODO black formats differently in Linux and Windows...
 # TODO better version for matching all files and all files in subdirectories
