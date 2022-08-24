@@ -295,7 +295,6 @@ class HoloeyeSLM(SLM):
         self._height, self._width = slm_devices[SLMDevices.HOLOEYE_LC_2012.value][
             SLMParam.SLM_SHAPE
         ]
-        self._usable_shape = slm_devices[SLMDevices.HOLOEYE_LC_2012.value][SLMParam.USEABLE_SHAPE]
         self._show_time = None
 
         try:
@@ -382,13 +381,7 @@ class HoloeyeSLM(SLM):
         """
         # Check that the phase map is valid
         assert isinstance(I, np.ndarray) and np.issubdtype(I.dtype, np.uint8)
-        assert I.shape in [
-            self.shape,
-            self._usable_shape,
-        ]
-
-        if I.shape == self._usable_shape:
-            I = pad_image_to_shape(I, self.shape)
+        assert I.shape == self.shape
 
         # If using a physical device
         if self._slm:
