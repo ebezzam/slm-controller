@@ -65,7 +65,7 @@ dependencies intended for developing while the virtual environment is activated.
 ```sh
 source slm_controller_env/bin/activate
 # pip install -e .[dev] #TODO does not work, dev not found
-pip install click pytest black
+pip install click black
 ```
 
 ### No Raspberry Pi for the Adafruit and Nokia SLMs?

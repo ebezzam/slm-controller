@@ -5,7 +5,6 @@ from PIL import Image, ImageDraw
 import matplotlib.pyplot as plt
 
 from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
-from slm_controller.utils import pad_image_to_shape
 
 try:
     import slm_controller.holoeye.detect_heds_module_path
@@ -19,10 +18,15 @@ except ImportError:
 class SLM:
     def __init__(self):
         self._slm = None
+        self._preview = False
 
     @property
     def height(self):
         return self._height
+
+    @property
+    def preview(self):
+        return self._preview
 
     @property
     def width(self):
@@ -57,6 +61,17 @@ class SLM:
             Interpretation of the optional 0-th dimension is class-dependent.
         """
         pass
+
+    def set_preview(self, preview):
+        """
+        Set whether to show the preview of the mask.
+
+        Parameters
+        ----------
+        preview : boolean
+            Whether to show the preview of the mask.
+        """
+        self._preview = preview
 
 
 class AdafruitSLM(SLM):
@@ -126,11 +141,11 @@ class AdafruitSLM(SLM):
         if self._slm:
             I = Image.new("RGB", (self.width, self.height))
 
-            # Get drawing object to draw on image.
-            draw = ImageDraw.Draw(I)
+            # # Get drawing object to draw on image. # TODO is this necessary?
+            # draw = ImageDraw.Draw(I)
 
-            # Draw a black filled box to clear the image.
-            draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
+            # # Draw a black filled box to clear the image.
+            # draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
             self._slm.image(I)
 
     def imshow(self, I):
@@ -145,34 +160,23 @@ class AdafruitSLM(SLM):
             2D inputs are interpreted as grayscale.
             3D inputs are interpreted as RGB.
         """
-        assert isinstance(
-            I, np.ndarray
-        ) and (  # TODO adapt assert to preprocessing being done by caller
-            np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
-        )
-        assert np.all(I >= 0)
-        assert I.ndim in (2, 3)
-        assert I.shape[-2:] == self.shape
+        # TODO adapt assert to preprocessing being done by caller
+        # assert isinstance(
+        #     I, np.ndarray
+        # ) and (
+        #     np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
+        # )
+        # assert np.all(I >= 0)
+        # assert I.ndim in (2, 3)
+        # assert I.shape[-2:] == self.shape
 
-        if self._slm:
-            self.clear()
+        assert isinstance(I, np.ndarray) and np.issubdtype(I.dtype, np.uint8)
+        assert I.shape == self.shape
 
-            try:
-                # --------------------------------------------------------------
-                # TODO remove preprocessing, should be done by caller
-                I_max = I.max()
-                I_max = 1 if np.isclose(I_max, 0) else I_max
+        preview = self._preview if self._slm else True
 
-                I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
-                I_u = np.uint8(255 * I_f)  # uint8
-                # --------------------------------------------------------------
-
-                I_p = Image.fromarray(I_u.transpose(1, 2, 0), mode="RGB")
-                self._slm.image(I_p)
-            except Exception as e:
-                raise ValueError("Parameter[I]: unsupported data") from e
-
-        else:
+        if preview:
+            print("Plot preview to screen.")
             _, ax = plt.subplots()
             if len(I.shape) == 3:
                 # if RGB, put channel dim in right place
@@ -181,6 +185,28 @@ class AdafruitSLM(SLM):
             else:
                 ax.imshow(I, cmap="gray")
             plt.show()
+
+        if self._slm:
+            self.clear()
+
+            try:
+                # --------------------------------------------------------------
+                # TODO remove preprocessing, should be done by caller
+                # I_max = I.max()
+                # I_max = 1 if np.isclose(I_max, 0) else I_max
+
+                # I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
+                # I_u = np.uint8(255 * I_f)  # uint8
+
+                # TODO keep this preprocessing in callee?
+                I = np.broadcast_to(I, (3, *I.shape[-2:]))
+                # --------------------------------------------------------------
+
+                I_p = Image.fromarray(I.transpose(1, 2, 0), mode="RGB")
+                print("Program mask onto the physical SLM.")
+                self._slm.image(I_p)
+            except Exception as e:
+                raise ValueError("Parameter[I]: unsupported data") from e
 
 
 class NokiaSLM(SLM):
@@ -255,11 +281,26 @@ class NokiaSLM(SLM):
         I : :py:class:`~numpy.ndarray`
             (N_height, N_width) monochrome data.
         """
-        assert I.shape == self.shape  # TODO adapt assert to preprocessing being done by caller
-        assert isinstance(I, np.ndarray) and (
-            np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
-        )
-        assert np.all(I >= 0)
+        # TODO adapt assert to preprocessing being done by caller
+        # assert (
+        #     I.shape == self.shape
+        # )
+        # assert isinstance(I, np.ndarray) and (
+        #     np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
+        # )
+        # assert np.all(I >= 0)
+
+        assert isinstance(I, np.ndarray) and np.issubdtype(I.dtype, np.uint8)
+        assert I.shape == self.shape
+
+        preview = self._preview if self._slm else True
+
+        if preview:
+            print("Plot preview to screen.")
+
+            _, ax = plt.subplots()
+            ax.imshow(I, cmap="gray")
+            plt.show()
 
         if self._slm:
             self.clear()
@@ -267,21 +308,25 @@ class NokiaSLM(SLM):
             try:
                 # --------------------------------------------------------------
                 # TODO remove preprocessing, should be done by caller
-                I_max = I.max()
-                I_max = 1 if np.isclose(I_max, 0) else I_max
-                I_u = 255 - np.uint8(I / float(I_max) * 255)  # uint8, full range, image is inverted
+                # I_max = I.max()
+                # I_max = 1 if np.isclose(I_max, 0) else I_max
+                # I_u = 255 - np.uint8(
+                #     I / float(I_max) * 255
+                # )  # uint8, full range, image is inverted
+                # I_u = I_u.T
+
+                # TODO keep this preprocessing in callee?
+                I = 255 - I
+                I = I.T
                 # --------------------------------------------------------------
-                I_p = Image.fromarray(I_u.T).convert("1")
+
+                I_p = Image.fromarray(I).convert("1")
                 self._slm.image(I_p)
+                print("Program mask onto the physical SLM.")
                 self._slm.show()
 
             except Exception as e:
                 raise ValueError("Parameter[I]: unsupported data") from e
-
-        else:
-            _, ax = plt.subplots()
-            ax.imshow(I, cmap="gray")
-            plt.show()
 
 
 class HoloeyeSLM(SLM):
@@ -295,11 +340,11 @@ class HoloeyeSLM(SLM):
         self._height, self._width = slm_devices[SLMDevices.HOLOEYE_LC_2012.value][
             SLMParam.SLM_SHAPE
         ]
+
         self._show_time = None
 
         try:
             # Similar to: https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/slm_display_module.py#L19
-            # TODO check those flags
             self._show_flags = slmdisplaysdk.ShowFlags.PresentAutomatic
             self._show_flags |= slmdisplaysdk.ShowFlags.PresentFitWithBars
 
@@ -323,7 +368,7 @@ class HoloeyeSLM(SLM):
 
         if self._slm:
             # Detect SLMs and open a window on the selected SLM
-            error = self._slm.open()  # TODO check if can set max wait time when no SLM is found
+            error = self._slm.open()
 
             # Check if the opening the window was successful
             if error != slmdisplaysdk.ErrorCode.NoError:
@@ -347,7 +392,7 @@ class HoloeyeSLM(SLM):
         Parameters
         ----------
         show_time : float, optional
-            Specifies the amount of time in seconds that the phase mask is shown
+            Specifies the amount of time in seconds that the mask is shown
             on the SLM, by default None which means that the mask is shown until
             the user kills the script.
         """
@@ -361,15 +406,12 @@ class HoloeyeSLM(SLM):
             # Configure the blank screen value
             black = 0
 
-            # Show phase map on SLM
+            # Show blank mask on SLM
             error = self._slm.showBlankscreen(black)
 
             # And check that no error occurred
             assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
 
-    # TODO yeah a flag to allow preview would be nice. And either printing in the
-    # command line and/or placing in the title of the figure if the pattern has been
-    # programmed on the SLM (or if there was an issue connecting)
     def imshow(self, I):
         """
         Display monochrome data.
@@ -377,41 +419,18 @@ class HoloeyeSLM(SLM):
         Parameters
         ----------
         I : np.ndarray
-            The phase map to show on the SLM.
+            The mask to show on the SLM.
         """
-        # Check that the phase map is valid
+        # Check that the mask is valid
         assert isinstance(I, np.ndarray) and np.issubdtype(I.dtype, np.uint8)
         assert I.shape == self.shape
 
-        # If using a physical device
-        if self._slm:
-            # Reset devices mask
-            self.clear()
+        preview = self._preview if self._slm else True
 
-            # Show phase map on SLM
-            # TODO test self._slm.showPhasevalues(I_u)
-            error = self._slm.showData(I, self._show_flags)
-
-            # And check that no error occurred
-            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
-
-            if self._show_time is None:
-                # Wait until the SLM process is closed:
-                print(
-                    "Waiting for SDK process to close. Please close the tray icon to continue ..."
-                )
-                error = self._slm.utilsWaitUntilClosed()
-                assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
-            else:
-                # sleep for specified time
-                # import time
-                # time.sleep(self._show_time)  # TODO check this native version
-                # of wait
-
-                error = self._slm.utilsWaitForCheckedS(self._show_time)
-                assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
-        else:
+        if preview:
             # Use a virtual device, plot
+            print("Plot preview to screen.")
+
             fig, ax = plt.subplots()
 
             if self._show_time is not None:
@@ -429,6 +448,30 @@ class HoloeyeSLM(SLM):
             else:
                 ax.imshow(I, cmap="gray")
                 plt.show()
+
+        # If using a physical device
+        if self._slm:
+            # Reset devices mask
+            self.clear()
+
+            # Show mask on SLM
+            error = self._slm.showData(I, self._show_flags)
+
+            # And check that no error occurred
+            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
+
+            print("Program mask onto the physical SLM.")
+
+            if self._show_time is None:
+                # Wait until the SLM process is closed:
+                print(
+                    "Waiting for SDK process to close. Please close the tray icon to continue ..."
+                )
+                error = self._slm.utilsWaitUntilClosed()
+            else:
+                error = self._slm.utilsWaitForCheckedS(self._show_time)
+
+            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
 
 
 def create(device_key):

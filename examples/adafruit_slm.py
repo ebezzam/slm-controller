@@ -21,7 +21,10 @@ from slm_controller import slm, utils
     is_flag=True,
     help="Reshape which can distort the image, otherwise scale and crop to match original aspect ratio.",
 )
-def main(file_path, monochrome, not_original_ratio):
+@click.option(
+    "--show_preview", is_flag=True, help="Show a preview of the mask on the screen.",
+)
+def main(file_path, monochrome, not_original_ratio, show_preview):
     # prepare image data
     shape = slm_devices[SLMDevices.ADAFRUIT.value][SLMParam.SLM_SHAPE]
 
@@ -29,15 +32,21 @@ def main(file_path, monochrome, not_original_ratio):
         keep_aspect_ratio = not not_original_ratio
         image = utils.load_image(file_path, output_shape=shape, keep_aspect_ratio=keep_aspect_ratio)
 
-        # TODO quantize image
+        image = utils.quantize(image)
 
     else:
         # random mask
         rng = np.random.RandomState(1)
-        image = rng.rand(*shape) if monochrome else rng.rand(3, *shape)  # TODO quantized version
+
+        shape = shape if monochrome else (3, *shape)
+
+        image = rng.randint(low=0, high=np.iinfo(np.uint8).max, size=shape, dtype=np.uint8)
 
     # instantiate SLM object
     s = slm.create(SLMDevices.ADAFRUIT.value)
+
+    # set the preview variable
+    s.set_preview(show_preview)
 
     # display
     s.imshow(image)

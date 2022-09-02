@@ -26,7 +26,10 @@ from slm_controller import slm, utils
     default=None,
     help="Time to show the mask on the SLM, show indefinitely if None. In that case the user has to kill the script manually.",
 )
-def main(file_path, not_original_ratio, show_time):
+@click.option(
+    "--show_preview", is_flag=True, help="Show a preview of the mask on the screen.",
+)
+def main(file_path, not_original_ratio, show_time, show_preview):
     # prepare image data
     shape = slm_devices[SLMDevices.HOLOEYE_LC_2012.value][SLMParam.SLM_SHAPE]
 
@@ -45,7 +48,10 @@ def main(file_path, not_original_ratio, show_time):
 
     # instantiate SLM object
     s = slm.create(SLMDevices.HOLOEYE_LC_2012.value)
+
+    # set the parameters
     s.set_show_time(show_time)
+    s.set_preview(show_preview)
 
     # display
     s.imshow(image)

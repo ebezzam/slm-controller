@@ -15,7 +15,7 @@ class SLMDevices(Enum):
 class SLMParam:
     PIXEL_PITCH = "pixel_pitch"
     SLM_SHAPE = "slm_shape"
-    MONOCHROME = "monochrome"  # TODO Does this make sense? For Phase etc.?
+    MONOCHROME = "monochrome"
     FILL_FACTOR = "fill_factor"
     FRAME_RATE = "frame_rate"
     TYPE = "type"
@@ -48,16 +48,6 @@ slm_devices = {
     SLMDevices.HOLOEYE_LC_2012.value: {
         SLMParam.PIXEL_PITCH: (0.36e-4, 0.36e-4,),  # Computed: 0.359375e-4, 0.3603515625e-4
         SLMParam.SLM_SHAPE: (768, 1024),
-        # TODO remove, computations
-        # Laser radius = 1cm := r
-        # cam ratio = 0.62809917355371900826446280991736 cm := a
-        # (w/2)^2 + (w*a/2)^2 <= r^2 <==> w^2(1+a^2)/4 <= 1
-        #                            <==> w <= sqrt(4/(1+a^2))
-        # ==> w <= 1,6936333680594274148320298206561 cm
-        #       <= 470,45371334984094856445272796003 px
-        # ==> h <= 295,49 px
-        # w = 452
-        # h = 284
         SLMParam.MONOCHROME: True,
         SLMParam.TYPE: "Phase",
         SLMParam.FILL_FACTOR: 0.58,
