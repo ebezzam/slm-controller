@@ -36,7 +36,10 @@ slm_devices = {
     # 1.5 inch diagonal: https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd
     # datasheet: https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf
     SLMDevices.NOKIA_5110.value: {
-        SLMParam.PIXEL_PITCH: (0.339e-3, 0.396e-3,),  # TODO measured by "hand", check elsewhere
+        SLMParam.PIXEL_PITCH: (
+            0.339e-3,
+            0.396e-3,
+        ),  # TODO measured by "hand", check elsewhere, remove?
         SLMParam.SLM_SHAPE: (84, 48),
         SLMParam.MONOCHROME: True,
         SLMParam.TYPE: "Amplitude",
