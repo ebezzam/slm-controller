@@ -3,7 +3,7 @@ import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
 
@@ -168,13 +168,12 @@ class AdafruitSLM(SLM):
         if self._slm:
             I = Image.new("RGB", (self.width, self.height))
 
-            # from PIL import ImageDraw # TODO remove?
+            # Get drawing object to draw on image.
+            draw = ImageDraw.Draw(I)
 
-            # # Get drawing object to draw on image. # TODO is this necessary?
-            # draw = ImageDraw.Draw(I)
+            # Draw a black filled box to clear the image.
+            draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
 
-            # # Draw a black filled box to clear the image.
-            # draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
             self._slm.image(I)
 
     def _show_preview(self, I):
