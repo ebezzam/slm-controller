@@ -61,7 +61,7 @@ def load_image(fname, output_shape=None, keep_aspect_ratio=True, grayscale=False
     return I
 
 
-def quantize(I):
+def quantize(I, nbits=8):
     """
     Quantize an image.
 
@@ -69,11 +69,13 @@ def quantize(I):
     ----------
     I : ndarray
         The image to be quantize.
+    nbits : int, optional
+        The number of bits used for the quantized values, by default 8.
 
     Returns
     -------
     ndarray
-        The image, quantized into a uint8 array.
+        The image, quantized into a unsigned integer array.
     """
     # Normalize entries of the mask to [0, 1]
     I_max = I.max()
@@ -81,4 +83,7 @@ def quantize(I):
     I_f = I / I_max  # float64
 
     # Quantize those floats into a bit values
-    return np.uint8(255 * I_f)  # uint8
+    if nbits <= 8:
+        return np.uint8(np.iinfo(np.uint8).max * I_f)
+    else:
+        return np.uint16(np.iinfo(np.uint16).max * I_f)

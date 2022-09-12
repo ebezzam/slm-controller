@@ -2,10 +2,10 @@
 Adafruit SLM example.
 """
 
-from slm_controller.hardware import SLMDevices, slm_devices, SLMParam
-import numpy as np
 import click
+import numpy as np
 from slm_controller import slm, utils
+from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
 
 
 @click.command()
@@ -37,7 +37,6 @@ def main(file_path, monochrome, not_original_ratio, show_preview):
     else:
         # random mask
         rng = np.random.RandomState(1)
-
         shape = shape if monochrome else (3, *shape)
 
         image = rng.randint(low=0, high=np.iinfo(np.uint8).max, size=shape, dtype=np.uint8)

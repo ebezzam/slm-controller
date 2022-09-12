@@ -1,18 +1,17 @@
 import abc
-import numpy as np
 import warnings
-from PIL import Image, ImageDraw
+
 import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 
 from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
 
 try:
-    import slm_controller.holoeye.detect_heds_module_path
+    import slm_controller.holoeye_sdk.detect_heds_module_path
     from holoeye import slmdisplaysdk
 except ImportError:
-    warnings.warn(
-        "Failed to import Holoeye SLM SDK."
-    )  # TODO triggers when this file is run separately, test
+    warnings.warn("Failed to import Holoeye SLM SDK.")
 
 
 class SLM:
@@ -72,6 +71,34 @@ class SLM:
             Whether to show the preview of the mask.
         """
         self._preview = preview
+
+    @abc.abstractmethod
+    def _show_preview(self, I):
+        """
+        Show preview of the mask.
+
+        Parameters
+        ----------
+        I : :py:class:`~numpy.ndarray`
+            ([3,] N_height, N_width) non-negative reals.
+            Interpretation of the optional 0-th dimension is class-dependent.
+        """
+        pass
+
+    def _handle_preview(self, I):
+        """
+        Check if the preview of the mask should be shown and show it if so.
+
+        Parameters
+        ----------
+        I : :py:class:`~numpy.ndarray`
+            ([3,] N_height, N_width) non-negative reals.
+            Interpretation of the optional 0-th dimension is class-dependent.
+        """
+        preview = self._preview if self._slm else True
+
+        if preview:
+            self._show_preview(I)
 
 
 class AdafruitSLM(SLM):
@@ -141,12 +168,25 @@ class AdafruitSLM(SLM):
         if self._slm:
             I = Image.new("RGB", (self.width, self.height))
 
+            # from PIL import ImageDraw # TODO remove?
+
             # # Get drawing object to draw on image. # TODO is this necessary?
             # draw = ImageDraw.Draw(I)
 
             # # Draw a black filled box to clear the image.
             # draw.rectangle((0, 0, self.width, self.height), outline=0, fill=(0, 0, 0))
             self._slm.image(I)
+
+    def _show_preview(self, I):
+        print("Plot preview to screen.")
+        _, ax = plt.subplots()
+        if len(I.shape) == 3:
+            # if RGB, put channel dim in right place
+            I = I.transpose(1, 2, 0)
+            ax.imshow(I)
+        else:
+            ax.imshow(I, cmap="gray")
+        plt.show()
 
     def imshow(self, I):
         """
@@ -160,47 +200,16 @@ class AdafruitSLM(SLM):
             2D inputs are interpreted as grayscale.
             3D inputs are interpreted as RGB.
         """
-        # TODO adapt assert to preprocessing being done by caller
-        # assert isinstance(
-        #     I, np.ndarray
-        # ) and (
-        #     np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
-        # )
-        # assert np.all(I >= 0)
-        # assert I.ndim in (2, 3)
-        # assert I.shape[-2:] == self.shape
-
         assert isinstance(I, np.ndarray) and np.issubdtype(I.dtype, np.uint8)
-        assert I.shape == self.shape
+        assert I.shape[-2:] == self.shape
 
-        preview = self._preview if self._slm else True
-
-        if preview:
-            print("Plot preview to screen.")
-            _, ax = plt.subplots()
-            if len(I.shape) == 3:
-                # if RGB, put channel dim in right place
-                I = I.transpose(1, 2, 0)
-                ax.imshow(I)
-            else:
-                ax.imshow(I, cmap="gray")
-            plt.show()
+        self._handle_preview(I)
 
         if self._slm:
             self.clear()
 
             try:
-                # --------------------------------------------------------------
-                # TODO remove preprocessing, should be done by caller
-                # I_max = I.max()
-                # I_max = 1 if np.isclose(I_max, 0) else I_max
-
-                # I_f = np.broadcast_to(I, (3, *I.shape[-2:])) / I_max  # float64
-                # I_u = np.uint8(255 * I_f)  # uint8
-
-                # TODO keep this preprocessing in callee?
                 I = np.broadcast_to(I, (3, *I.shape[-2:]))
-                # --------------------------------------------------------------
 
                 I_p = Image.fromarray(I.transpose(1, 2, 0), mode="RGB")
                 print("Program mask onto the physical SLM.")
@@ -272,6 +281,12 @@ class NokiaSLM(SLM):
             self._slm.fill(1)
             self._slm.show()
 
+    def _show_preview(self, I):
+        print("Plot preview to screen.")
+        _, ax = plt.subplots()
+        ax.imshow(I, cmap="gray")
+        plt.show()
+
     def imshow(self, I):
         """
         Display monochrome data in binary format.
@@ -281,44 +296,17 @@ class NokiaSLM(SLM):
         I : :py:class:`~numpy.ndarray`
             (N_height, N_width) monochrome data.
         """
-        # TODO adapt assert to preprocessing being done by caller
-        # assert (
-        #     I.shape == self.shape
-        # )
-        # assert isinstance(I, np.ndarray) and (
-        #     np.issubdtype(I.dtype, np.integer) or np.issubdtype(I.dtype, np.floating)
-        # )
-        # assert np.all(I >= 0)
-
         assert isinstance(I, np.ndarray) and np.issubdtype(I.dtype, np.uint8)
         assert I.shape == self.shape
 
-        preview = self._preview if self._slm else True
-
-        if preview:
-            print("Plot preview to screen.")
-
-            _, ax = plt.subplots()
-            ax.imshow(I, cmap="gray")
-            plt.show()
+        self._handle_preview(I)
 
         if self._slm:
             self.clear()
 
             try:
-                # --------------------------------------------------------------
-                # TODO remove preprocessing, should be done by caller
-                # I_max = I.max()
-                # I_max = 1 if np.isclose(I_max, 0) else I_max
-                # I_u = 255 - np.uint8(
-                #     I / float(I_max) * 255
-                # )  # uint8, full range, image is inverted
-                # I_u = I_u.T
-
-                # TODO keep this preprocessing in callee?
                 I = 255 - I
                 I = I.T
-                # --------------------------------------------------------------
 
                 I_p = Image.fromarray(I).convert("1")
                 self._slm.image(I_p)
@@ -412,6 +400,27 @@ class HoloeyeSLM(SLM):
             # And check that no error occurred
             assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
 
+    def _show_preview(self, I):
+        # Use a virtual device, plot
+        print("Plot preview to screen.")
+
+        fig, ax = plt.subplots()
+
+        if self._show_time is not None:
+
+            def on_timeout():
+                plt.close()
+
+            timer = fig.canvas.new_timer(interval=self._show_time * 1000)
+            timer.add_callback(on_timeout)
+
+            ax.imshow(I, cmap="gray")
+            timer.start()
+            plt.show()
+        else:
+            ax.imshow(I, cmap="gray")
+            plt.show()
+
     def imshow(self, I):
         """
         Display monochrome data.
@@ -425,29 +434,7 @@ class HoloeyeSLM(SLM):
         assert isinstance(I, np.ndarray) and np.issubdtype(I.dtype, np.uint8)
         assert I.shape == self.shape
 
-        preview = self._preview if self._slm else True
-
-        if preview:
-            # Use a virtual device, plot
-            print("Plot preview to screen.")
-
-            fig, ax = plt.subplots()
-
-            if self._show_time is not None:
-
-                def on_timeout():
-                    plt.close()
-
-                timer = fig.canvas.new_timer(interval=self._show_time * 1000)
-                timer.add_callback(on_timeout)
-
-                ax.imshow(I, cmap="gray")
-                timer.start()
-                plt.show()
-
-            else:
-                ax.imshow(I, cmap="gray")
-                plt.show()
+        self._handle_preview(I)
 
         # If using a physical device
         if self._slm:

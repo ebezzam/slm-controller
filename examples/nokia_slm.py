@@ -2,11 +2,10 @@
 Nokia SLM example.
 """
 
-from operator import inv
-from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
-import numpy as np
 import click
+import numpy as np
 from slm_controller import slm, utils
+from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
 
 
 @click.command()

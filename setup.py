@@ -26,7 +26,7 @@ setuptools.setup(
         "numpy",
         "matplotlib",
     ],
-    extra_requires={  # TODO Does not seem to work on my machine, WARNING: slm-controller 0.0.2 does not provide the extra 'dev'
+    extra_requires={  # TODO Does not work, WARNING: slm-controller 0.0.2 does not provide the extra 'dev'
         "dev": ["click", "black"],
     },
 )

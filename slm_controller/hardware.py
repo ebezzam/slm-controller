@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 # SLM devices that are implemented in this project
 class SLMDevices(Enum):
     ADAFRUIT = "adafruit"

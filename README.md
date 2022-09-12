@@ -64,7 +64,7 @@ dependencies intended for developing while the virtual environment is activated.
 
 ```sh
 source slm_controller_env/bin/activate
-# pip install -e .[dev] #TODO does not work, dev not found
+# pip install -e .[dev] #TODO Does not work, WARNING: slm-controller 0.0.2 does not provide the extra 'dev'
 pip install click black
 ```
 
@@ -91,7 +91,9 @@ next section, after having run the installation script above.
 In order to use the Holoeye LC 2012 SLM, you will need to manually download Holoeye's [SLM Display
 SDK](https://customers.holoeye.com/slm-display-sdk-v3-0-for-python-windows/) and
 install it. Unfortunately, `only Windows operating systems are currently supported by the SDK!` Just
-follow the installation instructions. At runtime of this project's code, the script `slm_controller/holoeye` automatically determines the specific path of your SDK installation. But note that this step is
+follow the installation instructions. At runtime of this project's code, a
+script inside `slm_controller/holoeye_sdk` automatically determines the specific path
+of your SDK installation. But note that this step is
 not a requirement for the other SLMs to work.
 
 ## Example scripts

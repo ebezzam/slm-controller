@@ -25,7 +25,8 @@
 # This way, code completion etc. might work better.
 
 
-import os, sys
+import os
+import sys
 from platform import system
 
 # Import the SLM Display SDK:
