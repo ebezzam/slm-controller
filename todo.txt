@@ -1,9 +1,0 @@
-Must-have
----------
-Code:
-- Remove and discuss todos
-
-Documentation:
-- Adapt to latest version
-
---> Merge PR

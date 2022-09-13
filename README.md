@@ -14,11 +14,13 @@ Note that our convention for dimension order is (channels, height, width).
     - [Nokia SLM](#nokia-slm)
     - [Holoeye SLM](#holoeye-slm)
   - [Adding a new SLM](#adding-a-new-slm)
+  - [Issues](#issues)
+  - [Future work](#future-work)
 
 The main goal of this repository is to provide a common API for different
 SLMs, allowing them to be used interchangeably for different applications.
 
-Generally speaking there are two different kinds of SLMs depending on the property of the wavefront that one wishes to modulator: amplitude and phase. Note that there do exist SLMs that are able to modulate both. Currently the
+Generally speaking there are two different kinds of SLMs depending on the property of the wavefront that one wishes to modulate: amplitude and phase. Note that there do exist SLMs that are able to modulate both. Currently the
 project supports three different SLM devices.
 
 Amplitude SLMs:
@@ -28,14 +30,15 @@ Amplitude SLMs:
 - [Adafruit 1.8" TFT LCD](https://learn.adafruit.com/1-8-tft-display/overview) (RGB)
 - [Nokia 5110 LCD](https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd) (Monochrome)
 
-<!-- TODO Holoeye actually can do both via polarization modulation and combination with polarizer/analyzer -->
-
 Phase SLMs:
 
 - [Holoeye LC 2012](https://holoeye.com/lc-2012-spatial-light-modulator/)
 
-Note that if anything goes wrong with the communication with those devices, the
-SLM pattern is simply plotted to the screen using `matplotlib` instead of being
+Generally speaking, phase SLMs can also be used to modulate amplitude when being
+used in conjunction with an appropriate polarizer/analyzer pair.
+
+For all of the above SLMs, note that if anything goes wrong with the communication with those devices, the
+SLM mask is simply plotted to the screen using `matplotlib` instead of being
 shown on the devices themselves.
 
 ## Installation
@@ -62,6 +65,8 @@ The script will:
 If you plan to use this code base more in depth you can install additional
 dependencies intended for developing while the virtual environment is activated.
 
+<!-- TODO This still doesn't work! -->
+
 ```sh
 source slm_controller_env/bin/activate
 # pip install -e .[dev] #TODO Does not work, WARNING: slm-controller 0.0.2 does not provide the extra 'dev'
@@ -81,8 +86,6 @@ The SDK needed for [Holoeye LC
 future we will check if Windows running inside a container on a Raspberry Pi is
 a possibility.
 
-<!-- TODO check windows in a container -->
-
 Additionally, you need to perform some manual installation steps, explained in the
 next section, after having run the installation script above.
 
@@ -90,11 +93,11 @@ next section, after having run the installation script above.
 
 In order to use the Holoeye LC 2012 SLM, you will need to manually download Holoeye's [SLM Display
 SDK](https://customers.holoeye.com/slm-display-sdk-v3-0-for-python-windows/) and
-install it. Unfortunately, `only Windows operating systems are currently supported by the SDK!` Just
+install it. Note that this step is
+not a requirement for the other SLMs to work. As a reminder, unfortunately, `only Windows operating systems are currently supported by the SLM Display SDK!` Just
 follow the installation instructions. At runtime of this project's code, a
 script inside `slm_controller/holoeye_sdk` automatically determines the specific path
-of your SDK installation. But note that this step is
-not a requirement for the other SLMs to work.
+of your SDK installation.
 
 ## Example scripts
 
@@ -114,19 +117,20 @@ You can exit the virtual environment by running `deactivate`.
 This script controls the SLM isolated from the [Adafruit 1.8" TFT
 LCD](https://learn.adafruit.com/1-8-tft-display/overview). It either allows
 to show an image specified by its path or a random mask. By default RGB is
-used but you can also use monochrome images instead. Another flag allows to
-define how the aspect ratio is handled.
+used but you can also use monochrome images instead. A flag allows to
+define how the aspect ratio is handled. Finally, a last flag gives the option to
+show a preview of the mask before it is sent to the SLM.
 
 ```sh
 $ python examples/adafruit_slm.py --help
 Usage: adafruit_slm.py [OPTIONS]
 
 Options:
-  --file_path TEXT      Path to image to display, create random mask if
-                        None.
+  --file_path TEXT      Path to image to display, create random mask if None.
   --monochrome          Show monochrome image, otherwise use RGB.
   --not_original_ratio  Reshape which can distort the image, otherwise scale
                         and crop to match original aspect ratio.
+  --show_preview        Show a preview of the mask on the screen.
   --help                Show this message and exit.
 ```
 
@@ -157,42 +161,44 @@ LCD](https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd) SLM. Like
 before, it either allows
 to show an image specified by its path or a random mask. Note that this SLM
 only supports monochrome values. A flag allows to
-define how the aspect ratio is handled.
+define how the aspect ratio is handled and another flag gives the option to
+show a preview of the mask before it is sent to the SLM.
 
 ```sh
 $ python examples/nokia_slm.py --help
 Usage: nokia_slm.py [OPTIONS]
 
 Options:
-  --file_path TEXT      Path to image to display, create random mask if
-                        None.
+  --file_path TEXT      Path to image to display, create random mask if None.
   --not_original_ratio  Reshape which can distort the image, otherwise scale
                         and crop to match original aspect ratio.
+  --show_preview        Show a preview of the mask on the screen.
   --help                Show this message and exit.
 ```
 
 ### Holoeye SLM
 
 This script controls the [Holoeye LC
-2012](https://holoeye.com/lc-2012-spatial-light-modulator/) SLM. Here too, it either
+2012](https://holoeye.com/lc-2012-spatial-light-modulator/) SLM. Again, it either
 allows to show an image specified by its path or a random mask. Note that only
 monochrome values are supported by this SLM. A flag allows to
 define how the aspect ratio is handled. Another float argument permits to set
-how long the mask is shown for.
-
-<!-- TODO needed for CITL, add to other SLMs too? -->
+how long the mask is shown for (which is useful in **Camera-In-The-Loop**
+applications for mask design). Finally, a last flag gives the option to
+show a preview of the mask before it is sent to the SLM.
 
 ```sh
-$ python examples/holoeye_slm.py --help
+$ $ python examples/holoeye_slm.py --help
 Usage: holoeye_slm.py [OPTIONS]
 
 Options:
-  --file_path TEXT      Path to image to display, create random mask if
-                        None.
+  --file_path TEXT      Path to image to display, create random mask if None.
   --not_original_ratio  Reshape which can distort the image, otherwise scale
                         and crop to match original aspect ratio.
-  --show_time FLOAT     Time to show the mask on the SLM, show indefinitely
-                        if None. In that case the user has to kill the script manually.
+  --show_time FLOAT     Time to show the mask on the SLM, show indefinitely if
+                        None. In that case the user has to kill the script
+                        manually.
+  --show_preview        Show a preview of the mask on the screen.
   --help                Show this message and exit.
 ```
 
@@ -205,3 +211,13 @@ that are accessible throughout the whole code base.
 1. Add SLM configuration in `slm_controller/hardware.py:slm_devices`.
 2. Define a new class in `slm_controller/slm.py` for interfacing with the new SLM component (set parameters, masks, etc.).
 3. Add to factory method `create` in `slm_controller/slm.py` for a conveniently one-liner to instantiate an object of the new SLM component.
+
+## Issues
+
+Currently, we aren't aware of any issues. If you should find any, please let us know.
+
+## Future work
+
+Here, we list features and directions we want to explore in future work.
+
+1. Check if Windows can be run in a container on a Raspberry Pi.
