@@ -26,5 +26,7 @@ setuptools.setup(
         "numpy",
         "matplotlib",
     ],
-    extra_requires={"dev": ["click", "black"],},
+    extra_requires={
+        "dev": ["click", "black"],
+    },
 )

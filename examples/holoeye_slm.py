@@ -27,7 +27,9 @@ from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
     help="Time to show the mask on the SLM, show indefinitely if None. In that case the user has to kill the script manually.",
 )
 @click.option(
-    "--show_preview", is_flag=True, help="Show a preview of the mask on the screen.",
+    "--show_preview",
+    is_flag=True,
+    help="Show a preview of the mask on the screen.",
 )
 def main(file_path, not_original_ratio, show_time, show_preview):
     # prepare image data
@@ -36,7 +38,10 @@ def main(file_path, not_original_ratio, show_time, show_preview):
     if file_path is not None:
         keep_aspect_ratio = not not_original_ratio
         image = utils.load_image(
-            file_path, output_shape=shape, keep_aspect_ratio=keep_aspect_ratio, grayscale=True,
+            file_path,
+            output_shape=shape,
+            keep_aspect_ratio=keep_aspect_ratio,
+            grayscale=True,
         )
 
         image = utils.quantize(image)
