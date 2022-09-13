@@ -180,7 +180,7 @@ applications for mask design). Finally, a last flag gives the option to
 show a preview of the mask before it is sent to the SLM.
 
 ```sh
-$ $ python examples/holoeye_slm.py --help
+$ python examples/holoeye_slm.py --help
 Usage: holoeye_slm.py [OPTIONS]
 
 Options:

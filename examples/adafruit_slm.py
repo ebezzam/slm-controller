@@ -14,8 +14,11 @@ from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
     type=str,
     default=None,
     help="Path to image to display, create random mask if None.",
+    show_default=True,
 )
-@click.option("--monochrome", is_flag=True, help="Show monochrome image, otherwise use RGB.")
+@click.option(
+    "--monochrome", is_flag=True, help="Show monochrome image, otherwise use RGB.",
+)
 @click.option(
     "--not_original_ratio",
     is_flag=True,
