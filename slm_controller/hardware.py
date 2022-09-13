@@ -40,7 +40,7 @@ slm_devices = {
         SLMParam.PIXEL_PITCH: (
             0.339e-3,
             0.396e-3,
-        ),  # TODO measured by "hand", check elsewhere, remove?
+        ),  # no official docs on this; deduced from specs
         SLMParam.SLM_SHAPE: (84, 48),
         SLMParam.MONOCHROME: True,
         SLMParam.TYPE: "Amplitude",

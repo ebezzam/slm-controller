@@ -23,7 +23,6 @@ def load_image(fname, output_shape=None, keep_aspect_ratio=True, grayscale=False
     """
     if fname.endswith(".npy"):
         return np.load(fname)
-        # TODO possible resizing, remove?
     else:
         I_p = Image.open(fname, mode="r")
 

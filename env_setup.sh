@@ -1,7 +1,9 @@
 #!/bin/bash
 # OS requirements
-sudo apt-get -y install libatlas-base-dev # TODO only on Raspberry Pi, two scripts?
-sudo apt-get -y install ttf-dejavu
+if cat /proc/device-tree/model | grep -q 'Raspberry'; then
+    sudo apt-get -y install libatlas-base-dev
+    sudo apt-get -y install ttf-dejavu
+fi
 
 # create Python 3 virtual environment
 python3 -m pip install --user virtualenv
