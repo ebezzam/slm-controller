@@ -5,27 +5,28 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="slm-controller",
-    version="0.0.1",
+    version="0.0.2",
     author="Eric Bezzam",
     author_email="ebezzam@gmail.com",
-    description="Package to control spatial light modulator with Raspberry Pi.",
+    description="Package to control spatial light modulators (SLMs).",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ebezzam/slm-controller",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Operating System :: OS Independent",
+        "Operating System :: OS independent for previewing. See README for which OS is supported for which device",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     install_requires=[
         "adafruit-circuitpython-rgb-display",
         "adafruit-circuitpython-sharpmemorydisplay",
         "adafruit-circuitpython-pcd8544",
         "Pillow",
         "numpy",
+        "matplotlib",
     ],
     extra_requires={
-        "dev": ["click", "matplotlib", "pytest"],
+        "dev": ["click", "black"],
     },
 )
