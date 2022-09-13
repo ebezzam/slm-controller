@@ -10,7 +10,7 @@ from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
 try:
     import slm_controller.holoeye_sdk.detect_heds_module_path
     from holoeye import slmdisplaysdk
-except ImportError:
+except:
     warnings.warn("Failed to import Holoeye SLM SDK.")
 
 
@@ -98,6 +98,7 @@ class SLM:
         preview = self._preview if self._slm else True
 
         if preview:
+            print("Plotting preview...")
             self._show_preview(I)
 
 
@@ -177,7 +178,6 @@ class AdafruitSLM(SLM):
             self._slm.image(I)
 
     def _show_preview(self, I):
-        print("Plot preview to screen.")
         _, ax = plt.subplots()
         if len(I.shape) == 3:
             # if RGB, put channel dim in right place
@@ -281,7 +281,6 @@ class NokiaSLM(SLM):
             self._slm.show()
 
     def _show_preview(self, I):
-        print("Plot preview to screen.")
         _, ax = plt.subplots()
         ax.imshow(I, cmap="gray")
         plt.show()
@@ -401,8 +400,6 @@ class HoloeyeSLM(SLM):
 
     def _show_preview(self, I):
         # Use a virtual device, plot
-        print("Plot preview to screen.")
-
         fig, ax = plt.subplots()
 
         if self._show_time is not None:

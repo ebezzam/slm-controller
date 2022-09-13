@@ -56,22 +56,13 @@ After cloning this repository, you can install the library and the necessary dep
 sudo apt-get -y install libatlas-base-dev
 sudo apt-get install fonts-dejavu    # previous name of package is `ttf-dejavu`
 
-# install in a virtual environment is recommended
-python3 -m venv slm_controller_env
+# installation in a virtual environment is recommended
+python3.9 -m venv slm_controller_env   # require >= 3.9
 source slm_controller_env/bin/activate
 pip install -e .
-```
 
-
-If you plan to use this code base more in depth you can install additional
-dependencies intended for developing while the virtual environment is activated.
-
-<!-- TODO This still doesn't work! -->
-
-```sh
-source slm_controller_env/bin/activate
-# pip install -e .[dev] #TODO Does not work, WARNING: slm-controller 0.0.2 does not provide the extra 'dev'
-pip install click black
+# to run examples
+pip install click
 ```
 
 ### No Raspberry Pi for the Adafruit and Nokia SLMs?

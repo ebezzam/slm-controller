@@ -15,7 +15,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Operating System :: Generally OS independent but the Holoeye SLM is only supported on Windows",
+        "Operating System :: OS independent for previewing. See README for which OS is supported for which device",
     ],
     python_requires=">=3.9",
     install_requires=[

@@ -19,7 +19,7 @@ class SLMParam:
     MONOCHROME = "monochrome"
     FILL_FACTOR = "fill_factor"
     FRAME_RATE = "frame_rate"
-    TYPE = "type"
+    AMPLITUDE = "amplitude_or_phase"
 
 
 # Actual values of those parameters for all the SLMs
@@ -30,7 +30,7 @@ slm_devices = {
         SLMParam.PIXEL_PITCH: (0.18e-3, 0.18e-3),
         SLMParam.SLM_SHAPE: (128, 160),
         SLMParam.MONOCHROME: False,
-        SLMParam.TYPE: "Amplitude",
+        SLMParam.AMPLITUDE: True,
     },
     # Graphic LCD 84x48 - Nokia 5110
     # https://www.sparkfun.com/products/10168
@@ -43,7 +43,7 @@ slm_devices = {
         ),  # no official docs on this; deduced from specs
         SLMParam.SLM_SHAPE: (84, 48),
         SLMParam.MONOCHROME: True,
-        SLMParam.TYPE: "Amplitude",
+        SLMParam.AMPLITUDE: True,
     },
     # Holoeye SLM - LC 2012
     # https://holoeye.com/lc-2012-spatial-light-modulator/
@@ -53,7 +53,7 @@ slm_devices = {
         SLMParam.PIXEL_PITCH: (0.36e-4, 0.36e-4,),  # Computed: 0.359375e-4, 0.3603515625e-4
         SLMParam.SLM_SHAPE: (768, 1024),
         SLMParam.MONOCHROME: True,
-        SLMParam.TYPE: "Phase",
+        SLMParam.AMPLITUDE: False,
         SLMParam.FILL_FACTOR: 0.58,
         SLMParam.FRAME_RATE: 60,
     },
