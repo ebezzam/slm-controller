@@ -62,7 +62,6 @@ source slm_controller_env/bin/activate
 pip install -e .
 ```
 
-
 If you plan to use this code base more in depth you can install additional
 dependencies intended for developing while the virtual environment is activated.
 
@@ -189,7 +188,7 @@ applications for mask design). Finally, a last flag gives the option to
 show a preview of the mask before it is sent to the SLM.
 
 ```sh
-$ $ python examples/holoeye_slm.py --help
+$ python examples/holoeye_slm.py --help
 Usage: holoeye_slm.py [OPTIONS]
 
 Options:

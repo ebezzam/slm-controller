@@ -14,6 +14,7 @@ from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
     type=str,
     default=None,
     help="Path to image to display, create random mask if None.",
+    show_default=True,
 )
 @click.option(
     "--not_original_ratio",
@@ -25,6 +26,7 @@ from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
     type=float,
     default=None,
     help="Time to show the mask on the SLM, show indefinitely if None. In that case the user has to kill the script manually.",
+    show_default=True,
 )
 @click.option(
     "--show_preview", is_flag=True, help="Show a preview of the mask on the screen.",
