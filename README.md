@@ -27,17 +27,17 @@ Amplitude SLMs:
 
 (Note that the amplitude SLMs below are obtained by isolating the LCD layer of off-the-shelf components.)
 
-- [Adafruit 1.8" TFT LCD](https://learn.adafruit.com/1-8-tft-display/overview) (RGB)
-- [Nokia 5110 LCD](https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd) (Monochrome)
+- [Adafruit 1.8" TFT LCD](https://learn.adafruit.com/1-8-tft-display/overview) (RGB): wiring instructions [here](https://learn.adafruit.com/1-8-tft-display/python-wiring-and-setup).
+- [Nokia 5110 LCD](https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd) (Monochrome): wiring instructions [here](https://learn.adafruit.com/nokia-5110-3310-monochrome-lcd/python-wiring).
 
 Phase SLMs:
 
-- [Holoeye LC 2012](https://holoeye.com/lc-2012-spatial-light-modulator/)
+- [Holoeye LC 2012](https://holoeye.com/lc-2012-spatial-light-modulator/): connected via HDMI as an external display. See provided manual.
 
 Generally speaking, phase SLMs can also be used to modulate amplitude when being
 used in conjunction with an appropriate polarizer/analyzer pair.
 
-For all of the above SLMs, note that if anything goes wrong with the communication with those devices, the
+For all of the above SLMs, if anything goes wrong with the communication with those devices, the
 SLM mask is simply plotted to the screen using `matplotlib` instead of being
 shown on the devices themselves.
 
@@ -49,18 +49,19 @@ The supported platforms for the different SLMs are summarized below:
 - Nokia 5110 LCD: Raspberry Pi
 - Holoeye LC 2012: Windows
 
-After cloning this repository, you can install the necessary dependencies by
-running the following script:
+After cloning this repository, you can install the library and the necessary dependencies with the following commands:
 
 ```sh
-./env_setup.sh
+# just for Raspberry Pi!
+sudo apt-get -y install libatlas-base-dev
+sudo apt-get install fonts-dejavu    # previous name of package is `ttf-dejavu`
+
+# install in a virtual environment is recommended
+python3 -m venv slm_controller_env
+source slm_controller_env/bin/activate
+pip install -e .
 ```
 
-The script will:
-
-1. Install OS dependencies.
-2. Create a Python3 virtual environment called `slm_controller_env`.
-3. Install Python dependencies in the virtual environment.
 
 If you plan to use this code base more in depth you can install additional
 dependencies intended for developing while the virtual environment is activated.
