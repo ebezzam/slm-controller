@@ -98,12 +98,7 @@ class SLM:
 
 class AdafruitSLM(SLM):
     def __init__(
-        self,
-        cs_pin=None,
-        dc_pin=None,
-        reset_pin=None,
-        rotation=90,
-        baudrate=24000000,
+        self, cs_pin=None, dc_pin=None, reset_pin=None, rotation=90, baudrate=24000000,
     ):
         """
         Object to display images on the Adafruit 1.8 inch TFT Display Breakout with a Raspberry Pi:
@@ -148,12 +143,7 @@ class AdafruitSLM(SLM):
 
             # Create interface with board
             self._slm = st7735.ST7735R(
-                spi,
-                rotation=rotation,
-                cs=cs_pin,
-                dc=dc_pin,
-                rst=reset_pin,
-                baudrate=baudrate,
+                spi, rotation=rotation, cs=cs_pin, dc=dc_pin, rst=reset_pin, baudrate=baudrate,
             )
 
             if self._slm.rotation % 180 == 90:
@@ -223,13 +213,7 @@ class AdafruitSLM(SLM):
 
 class NokiaSLM(SLM):
     def __init__(
-        self,
-        dc_pin=None,
-        cs_pin=None,
-        reset_pin=None,
-        contrast=80,
-        bias=4,
-        baudrate=1000000,
+        self, dc_pin=None, cs_pin=None, reset_pin=None, contrast=80, bias=4, baudrate=1000000,
     ):
         """
         Object to display images on the Nokia 5110 monochrome display with a Raspberry Pi:
@@ -335,7 +319,9 @@ class HoloeyeSLM(SLM):
         try:
             import slm_controller.holoeye_sdk.detect_heds_module_path
             from holoeye import slmdisplaysdk
-        except:
+
+            self._slmdisplaysdk = slmdisplaysdk
+        except Exception:
             warnings.warn("Failed to import Holoeye SLM SDK.")
 
         # Initialize parameters of the holoeye SLM display
@@ -347,12 +333,12 @@ class HoloeyeSLM(SLM):
 
         try:
             # Similar to: https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/slm_display_module.py#L19
-            self._show_flags = slmdisplaysdk.ShowFlags.PresentAutomatic
-            self._show_flags |= slmdisplaysdk.ShowFlags.PresentFitWithBars
+            self._show_flags = self._slmdisplaysdk.ShowFlags.PresentAutomatic
+            self._show_flags |= self._slmdisplaysdk.ShowFlags.PresentFitWithBars
 
             try:
                 # Initializes the SLM library
-                self._slm = slmdisplaysdk.SLMInstance()
+                self._slm = self._slmdisplaysdk.SLMInstance()
             except RuntimeError as ex:
                 # The library initialization failed so a virtual device is used instead
                 self._slm = None
@@ -373,7 +359,7 @@ class HoloeyeSLM(SLM):
             error = self._slm.open()
 
             # Check if the opening the window was successful
-            if error != slmdisplaysdk.ErrorCode.NoError:
+            if error != self._slmdisplaysdk.ErrorCode.NoError:
                 # Otherwise use again a virtual device
                 warnings.warn(
                     f"Failed to load SLM: {self._slm.errorString(error)}. Using virtual device..."
@@ -412,7 +398,7 @@ class HoloeyeSLM(SLM):
             error = self._slm.showBlankscreen(black)
 
             # And check that no error occurred
-            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
+            assert error == self._slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
 
     def _show_preview(self, I):
         # Use a virtual device, plot
@@ -457,7 +443,7 @@ class HoloeyeSLM(SLM):
             error = self._slm.showData(I, self._show_flags)
 
             # And check that no error occurred
-            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
+            assert error == self._slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
 
             print("Program mask onto the physical SLM.")
 
@@ -470,7 +456,7 @@ class HoloeyeSLM(SLM):
             else:
                 error = self._slm.utilsWaitForCheckedS(self._show_time)
 
-            assert error == slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
+            assert error == self._slmdisplaysdk.ErrorCode.NoError, self._slm.errorString(error)
 
 
 def create(device_key):

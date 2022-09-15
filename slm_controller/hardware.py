@@ -47,10 +47,7 @@ slm_devices = {
     # 1.8 inch diagonal, 36.9 x 27.6 mm
     # datasheet: same link
     SLMDevices.HOLOEYE_LC_2012.value: {
-        SLMParam.PIXEL_PITCH: (
-            0.36e-4,
-            0.36e-4,
-        ),  # Computed: 0.359375e-4, 0.3603515625e-4
+        SLMParam.PIXEL_PITCH: (0.36e-4, 0.36e-4,),  # Computed: 0.359375e-4, 0.3603515625e-4
         SLMParam.SLM_SHAPE: (768, 1024),
         SLMParam.MONOCHROME: True,
         SLMParam.AMPLITUDE: False,

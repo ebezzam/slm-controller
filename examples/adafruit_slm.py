@@ -25,9 +25,7 @@ from slm_controller.hardware import SLMDevices, SLMParam, slm_devices
     help="Reshape which can distort the image, otherwise scale and crop to match original aspect ratio.",
 )
 @click.option(
-    "--show_preview",
-    is_flag=True,
-    help="Show a preview of the mask on the screen.",
+    "--show_preview", is_flag=True, help="Show a preview of the mask on the screen.",
 )
 def main(file_path, monochrome, not_original_ratio, show_preview):
     # prepare image data
