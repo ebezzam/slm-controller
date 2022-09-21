@@ -55,18 +55,16 @@ if HEDSModulePath == "":
 
 if HEDSModulePath == "":
     if system() == "Windows":
-        print(
+        raise ModuleNotFoundError(
             "\033[91m"
             + "\nError: Could not find HOLOEYE SLM Display SDK installation path from environment variable. \n\nPlease relogin your Windows user account and try again. \nIf that does not help, please reinstall the SDK and then relogin your user account and try again. \nA simple restart of the computer might fix the problem, too."
             + "\033[0m"
         )
     else:
-        print(
+        raise ModuleNotFoundError(
             "\033[91m"
             + '\nError: Could not detect HOLOEYE SLM Display SDK installation path. \n\nPlease make sure it is present within the same folder or in "../../sdk".'
             + "\033[0m"
         )
-
-    sys.exit(1)
 
 sys.path.append(HEDSModulePath)
