@@ -322,7 +322,9 @@ class HoloeyeSLM(SLM):
 
             self._slmdisplaysdk = slmdisplaysdk
         except Exception:
-            warnings.warn("Failed to import Holoeye SLM SDK.")
+            self._slmdisplaysdk = None
+            self._slm = None
+            warnings.warn("Failed to import Holoeye SLM SDK. Using virtual device...")
 
         # Initialize parameters of the holoeye SLM display
         self._height, self._width = slm_devices[SLMDevices.HOLOEYE_LC_2012.value][
@@ -331,40 +333,40 @@ class HoloeyeSLM(SLM):
 
         self._show_time = None
 
-        try:
-            # Similar to: https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/slm_display_module.py#L19
-            self._show_flags = self._slmdisplaysdk.ShowFlags.PresentAutomatic
-            self._show_flags |= self._slmdisplaysdk.ShowFlags.PresentFitWithBars
-
+        if self._slmdisplaysdk:
             try:
-                # Initializes the SLM library
-                self._slm = self._slmdisplaysdk.SLMInstance()
-            except RuntimeError as ex:
-                # The library initialization failed so a virtual device is used instead
+                # Similar to: https://github.com/computational-imaging/neural-holography/blob/d2e399014aa80844edffd98bca34d2df80a69c84/utils/slm_display_module.py#L19
+                self._show_flags = self._slmdisplaysdk.ShowFlags.PresentAutomatic
+                self._show_flags |= self._slmdisplaysdk.ShowFlags.PresentFitWithBars
+
+                try:
+                    # Initializes the SLM library
+                    self._slm = self._slmdisplaysdk.SLMInstance()
+                except RuntimeError as ex:
+                    # The library initialization failed so a virtual device is used instead
+                    self._slm = None
+                    warnings.warn(f"Failed to load SLM: {ex.message}. Using virtual device...")
+            except Exception:
                 self._slm = None
-                warnings.warn(f"Failed to load SLM: {ex}. Using virtual device...")
-        except Exception:
-            self._slm = None
-            warnings.warn("Failed to load SLM. Using virtual device...")
+                warnings.warn("Failed to load SLM. Using virtual device...")
 
-        # Check that the holoeye sdk is up to date
-        if self._slm and not self._slm.requiresVersion(3):
-            self._slm = None
-            warnings.warn(
-                "Failed to load SLM because the LC 2012 requires version 3 of its SDK. Using virtual device..."
-            )
-
-        if self._slm:
-            # Detect SLMs and open a window on the selected SLM
-            error = self._slm.open()
-
-            # Check if the opening the window was successful
-            if error != self._slmdisplaysdk.ErrorCode.NoError:
-                # Otherwise use again a virtual device
+            # Check that the holoeye sdk is up to date
+            if self._slm and not self._slm.requiresVersion(3):
+                self._slm = None
                 warnings.warn(
-                    f"Failed to load SLM: {self._slm.errorString(error)}. Using virtual device..."
+                    "Failed to load SLM because the LC 2012 requires version 3 of its SDK. Using virtual device..."
                 )
-                self._slm = None
+
+            if self._slm:
+                # Detect SLMs and open a window on the selected SLM
+                error = self._slm.open()
+
+                # Check if the opening the window was successful
+                if error != self._slmdisplaysdk.ErrorCode.NoError:
+                    # Otherwise use again a virtual device
+                    message = self._slm.errorString(error).decode("utf-8").replace('"', "")
+                    warnings.warn(f"Failed to load SLM: {message} Using virtual device...")
+                    self._slm = None
 
     def __del__(self):
         """
