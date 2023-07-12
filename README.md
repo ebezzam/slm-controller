@@ -113,6 +113,8 @@ used but you can also use monochrome images instead. A flag allows to
 define how the aspect ratio is handled. Finally, a last flag gives the option to
 show a preview of the mask before it is sent to the SLM.
 
+Note that SPI needs to be [enabled on the Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/).
+
 ```sh
 $ python examples/adafruit_slm.py --help
 Usage: adafruit_slm.py [OPTIONS]
