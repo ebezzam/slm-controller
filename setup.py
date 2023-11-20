@@ -17,7 +17,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS independent for previewing. See README for which OS is supported for which device",
     ],
-    python_requires=">=3.9",
+    python_requires=">=3.8",
     install_requires=[
         "adafruit-circuitpython-rgb-display",
         "adafruit-circuitpython-sharpmemorydisplay",
